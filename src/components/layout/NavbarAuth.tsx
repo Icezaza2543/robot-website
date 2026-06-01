@@ -3,15 +3,27 @@
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useCart } from "@/providers/CartProvider";
-import { ShoppingCart, ClipboardList, Plug, Package, Trash2, ExternalLink, Settings, MonitorUp, History, LogOut } from "lucide-react";
+import { ShoppingCart, ClipboardList, Plug, Package, Trash2, ExternalLink, Settings, MonitorUp, History, LogOut, X } from "lucide-react";
 
 export default function NavbarAuth() {
   const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
-  const [isCartHovered, setIsCartHovered] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const { cartItems, cartCount, removeFromCart } = useCart();
+  const cartRef = useRef<HTMLDivElement>(null);
+
+  // Close cart popup when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (cartRef.current && !cartRef.current.contains(e.target as Node)) {
+        setIsCartOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   if (status === "loading") {
     return (
@@ -35,14 +47,13 @@ export default function NavbarAuth() {
 
   return (
     <div className="flex items-center gap-4 relative z-50">
-      {/* Premium Cart Button with Hover Preview Tab */}
+      {/* Cart Button with Click-Toggle Popup */}
       <div 
         className="relative"
-        onMouseEnter={() => setIsCartHovered(true)}
-        onMouseLeave={() => setIsCartHovered(false)}
+        ref={cartRef}
       >
-        <Link
-          href="/cart"
+        <button
+          onClick={() => setIsCartOpen(!isCartOpen)}
           className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200/80 bg-white shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 cursor-pointer active:scale-95 group"
           title="ตะกร้ายืมอุปกรณ์"
         >
@@ -52,16 +63,21 @@ export default function NavbarAuth() {
               {cartCount}
             </span>
           )}
-        </Link>
+        </button>
 
-        {/* Hover Dropdown Preview Tab */}
-        {isCartHovered && (
-          <div className="absolute right-0 mt-2.5 w-[calc(100vw-2rem)] max-w-sm md:w-80 origin-top-right rounded-3xl border border-gray-100 bg-white p-4 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+        {/* Click-Based Cart Dropdown Popup */}
+        {isCartOpen && (
+          <div className="absolute right-0 top-full mt-2.5 w-[calc(100vw-2rem)] max-w-sm md:w-80 origin-top-right rounded-3xl border border-gray-100 bg-white p-4 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 z-50">
             <h4 className="text-xs font-black text-gray-900 border-b border-gray-100 pb-2 mb-2.5 flex items-center justify-between">
               <span className="flex items-center gap-1.5"><ClipboardList className="w-4 h-4 text-orange-500" /> อุปกรณ์ในตะกร้า</span>
-              <span className="text-[10px] font-black bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-md">
-                {cartCount} รายการ
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-md">
+                  {cartCount} รายการ
+                </span>
+                <button onClick={() => setIsCartOpen(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </h4>
 
             {cartItems.length === 0 ? (
@@ -100,6 +116,7 @@ export default function NavbarAuth() {
                 <div className="mt-4 pt-3 border-t border-gray-100 flex flex-col gap-2">
                   <Link
                     href="/cart"
+                    onClick={() => setIsCartOpen(false)}
                     className="w-full rounded-2xl bg-gray-900 hover:bg-orange-500 text-white font-bold py-3 text-center text-xs transition-all duration-300 shadow-md shadow-gray-900/10 hover:shadow-orange-500/20 cursor-pointer active:scale-98 flex items-center justify-center gap-1.5"
                   >
                     <ExternalLink className="w-4 h-4" />
