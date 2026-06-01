@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/providers/CartProvider";
+import { PartyPopper, ShoppingCart, AlertTriangle, Plug, Package, MapPin, Minus, Plus, Trash2, FileText, Save } from "lucide-react";
 
 export default function CartPage() {
   const { data: session } = useSession();
@@ -83,8 +84,8 @@ export default function CartPage() {
     return (
       <div className="mx-auto w-full max-w-2xl px-4 py-20 sm:px-6 lg:px-8 text-center animate-in fade-in duration-300">
         <div className="rounded-3xl border border-green-100 bg-white p-8 md:p-12 shadow-xl shadow-gray-100/50 flex flex-col items-center">
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-green-50 text-3xl shadow-sm mb-6 animate-bounce">
-            🎉
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-green-50 shadow-sm mb-6 animate-bounce">
+            <PartyPopper className="w-8 h-8 text-green-500" />
           </div>
           <h2 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">
             ส่งคำขอยืมสำเร็จแล้ว!
@@ -137,7 +138,8 @@ export default function CartPage() {
       {/* Header */}
       <div className="border-b border-gray-100 pb-8 mb-8">
         <div className="flex items-center gap-2 text-xs font-bold text-orange-500 uppercase tracking-widest mb-1.5">
-          <span>🛒 ตะกร้าสะสมรายการคลังอุปกรณ์</span>
+          <ShoppingCart className="w-4 h-4" />
+          <span>ตะกร้าสะสมรายการคลังอุปกรณ์</span>
         </div>
         <h1 className="text-3xl font-black text-gray-900 tracking-tight sm:text-4xl">
           ตรวจสอบและยื่นคำขอยืม
@@ -149,23 +151,23 @@ export default function CartPage() {
 
       {errorMsg && (
         <div className="mb-6 rounded-2xl border border-red-100 bg-red-50/50 p-4 text-sm font-bold text-red-600 flex items-center gap-2 animate-shake">
-          <span>⚠️</span> {errorMsg}
+          <AlertTriangle className="w-4 h-4 shrink-0" /> {errorMsg}
         </div>
       )}
 
       {cartItems.length === 0 ? (
         // Empty Cart State
-        <div className="rounded-3xl border border-dashed border-gray-200 bg-white py-24 text-center">
-          <span className="text-4xl">🛒</span>
+        <div className="rounded-3xl border border-dashed border-gray-200 bg-white py-24 text-center flex flex-col items-center">
+          <ShoppingCart className="w-12 h-12 text-gray-300 mb-5" />
           <h3 className="text-xl font-bold text-gray-700 mt-5">ตะกร้ายืมอุปกรณ์ยังว่างอยู่</h3>
           <p className="text-sm text-gray-400 mt-2 max-w-xs mx-auto leading-relaxed font-semibold">
             คุณยังไม่ได้เลือกบอร์ดทดลองหรือโมดูลใดๆ เข้ารายการยื่นยืมคราวนี้เลยครับ
           </p>
           <Link
             href="/equipment"
-            className="inline-flex mt-8 rounded-2xl bg-orange-500 hover:bg-orange-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-500/20 transition-all duration-300 active:scale-95 cursor-pointer"
+            className="inline-flex mt-8 rounded-2xl bg-orange-500 hover:bg-orange-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-500/20 transition-all duration-300 active:scale-95 cursor-pointer items-center gap-2"
           >
-            🔌 ไปเปิดดูคลังวัสดุอุปกรณ์
+            <Plug className="w-4 h-4" /> ไปเปิดดูคลังวัสดุอุปกรณ์
           </Link>
         </div>
       ) : (
@@ -174,7 +176,7 @@ export default function CartPage() {
           {/* Left Column: Cart Items List */}
           <div className="lg:col-span-7 flex flex-col gap-4">
             <h3 className="text-lg font-extrabold text-gray-800 flex items-center gap-2 mb-1">
-              📦 รายการที่คุณเลือกไว้ ({cartItems.length} ชิ้น)
+              <Package className="w-5 h-5 text-gray-400" /> รายการที่คุณเลือกไว้ ({cartItems.length} ชิ้น)
             </h3>
 
             <div className="overflow-hidden rounded-3xl border border-gray-200/80 bg-white shadow-sm flex flex-col divide-y divide-gray-100">
@@ -197,8 +199,8 @@ export default function CartPage() {
                       <h4 className="text-base font-extrabold text-gray-800 tracking-tight leading-snug">
                         {item.name}
                       </h4>
-                      <p className="text-xs text-gray-400 font-bold mt-0.5">
-                        📍 จัดเก็บ: {item.location}
+                      <p className="text-xs text-gray-400 font-bold mt-0.5 flex items-center gap-1">
+                        <MapPin className="w-3 h-3 shrink-0" /> จัดเก็บ: {item.location}
                       </p>
                     </div>
 
@@ -210,9 +212,9 @@ export default function CartPage() {
                           type="button"
                           disabled={isMinStock}
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-[10px] font-black text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer active:scale-90"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer active:scale-90"
                         >
-                          ➖
+                          <Minus className="w-4 h-4" />
                         </button>
                         
                         <div className="w-10 text-center font-black text-gray-800 text-sm">
@@ -223,10 +225,10 @@ export default function CartPage() {
                           type="button"
                           disabled={isMaxStock}
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-[10px] font-black text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer active:scale-90"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:pointer-events-none transition cursor-pointer active:scale-90"
                           title={isMaxStock ? "เลือกยืมได้ไม่เกินจำนวนที่เหลืออยู่ในคลัง" : "เพิ่มชิ้น"}
                         >
-                          ➕
+                          <Plus className="w-4 h-4" />
                         </button>
                       </div>
 
@@ -234,10 +236,10 @@ export default function CartPage() {
                       <button
                         type="button"
                         onClick={() => removeFromCart(item.id)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 hover:rotate-6 active:scale-90 transition-all duration-200 cursor-pointer"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 active:scale-90 transition-all duration-200 cursor-pointer"
                         title="ลบสิ่งของออกจากตะกร้า"
                       >
-                        🗑️
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -249,7 +251,7 @@ export default function CartPage() {
           {/* Right Column: Submission Details Form */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             <h3 className="text-lg font-extrabold text-gray-800 flex items-center gap-2 mb-1">
-              📝 รายละเอียดและข้อมูลติดต่อผู้ยืม
+              <FileText className="w-5 h-5 text-gray-400" /> รายละเอียดและข้อมูลติดต่อผู้ยืม
             </h3>
 
             <div className="rounded-3xl border border-gray-200/80 bg-white p-6 shadow-xl shadow-gray-100/50 flex flex-col">
@@ -315,7 +317,7 @@ export default function CartPage() {
 
                 {/* Disclaimer */}
                 <div className="rounded-2xl bg-orange-50/50 border border-orange-100 p-3 text-[10px] font-semibold text-gray-500 leading-relaxed">
-                  ⚠️ **เงื่อนไขสำคัญ**: การส่งคำขอยืมนี้เป็นการแจ้งเรื่องบันทึกลงฐานข้อมูล Google Sheet เพื่อรอรับสิทธิ์ตรวจสอบและอนุมัติจากผู้รับผิดชอบคลังชมรม ขอให้ท่านตรวจสอบสิ่งของและดูแลรักษาให้อยู่ในสภาพดีเสมอครับ
+                  <AlertTriangle className="w-3 h-3 shrink-0 inline mr-1 text-orange-500" /> **เงื่อนไขสำคัญ**: การส่งคำขอยืมนี้เป็นการแจ้งเรื่องบันทึกลงฐานข้อมูล Google Sheet เพื่อรอรับสิทธิ์ตรวจสอบและอนุมัติจากผู้รับผิดชอบคลังชมรม ขอให้ท่านตรวจสอบสิ่งของและดูแลรักษาให้อยู่ในสภาพดีเสมอครับ
                 </div>
 
                 {/* Submit Button */}
@@ -331,7 +333,8 @@ export default function CartPage() {
                     </>
                   ) : (
                     <>
-                      <span>💾 ยืนยันส่งคำขอยืมอุปกรณ์</span>
+                      <Save className="w-5 h-5" />
+                      <span>ยืนยันส่งคำขอยืมอุปกรณ์</span>
                     </>
                   )}
                 </button>

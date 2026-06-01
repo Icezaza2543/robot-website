@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/providers/CartProvider";
+import { Plug, Settings, Search, MapPin, ShoppingCart, Check, X, AlertTriangle } from "lucide-react";
 
 interface EquipmentItem {
   id: string;
@@ -82,7 +83,8 @@ export default function EquipmentPage() {
       <div className="relative overflow-hidden rounded-3xl border border-gray-200/80 bg-white p-8 md:p-10 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold text-orange-500 uppercase tracking-widest mb-1.5">
-            <span>🔌 NU Robot Club Smart Inventory</span>
+            <Plug className="w-4 h-4" />
+            <span>NU Robot Club Smart Inventory</span>
           </div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight sm:text-4xl">
             คลังยืมอุปกรณ์อิเล็กทรอนิกส์ & IoT
@@ -95,9 +97,10 @@ export default function EquipmentPage() {
         {session?.user?.role === "admin" && (
           <button
             onClick={() => router.push("/admin/items")}
-            className="rounded-2xl border border-orange-200 bg-orange-50 hover:bg-orange-100 px-5 py-3.5 text-sm font-bold text-orange-600 shadow-sm transition active:scale-95 cursor-pointer"
+            className="flex items-center gap-2 rounded-2xl border border-orange-200 bg-orange-50 hover:bg-orange-100 px-5 py-3.5 text-sm font-bold text-orange-600 shadow-sm transition active:scale-95 cursor-pointer"
           >
-            ⚙️ จัดการคลังอุปกรณ์ (Admin)
+            <Settings className="w-4 h-4" />
+            จัดการคลังอุปกรณ์ (Admin)
           </button>
         )}
       </div>
@@ -106,7 +109,7 @@ export default function EquipmentPage() {
       <div className="mt-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between border-b border-gray-100 pb-6">
         <div className="relative flex-1 max-w-md">
           <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-            🔍
+            <Search className="w-4 h-4" />
           </span>
           <input
             type="text"
@@ -142,8 +145,8 @@ export default function EquipmentPage() {
           <span className="text-sm font-bold text-gray-400 animate-pulse">กำลังโหลดคลังวัสดุอุปกรณ์...</span>
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-gray-200 bg-white py-20 text-center animate-in fade-in duration-300">
-          <span className="text-4xl">🔌</span>
+        <div className="rounded-3xl border border-dashed border-gray-200 bg-white py-20 text-center animate-in fade-in duration-300 flex flex-col items-center">
+          <Plug className="w-12 h-12 text-gray-300 mb-4" />
           <h3 className="text-xl font-bold text-gray-700 mt-4">ไม่มีอุปกรณ์ในคลัง</h3>
           <p className="text-sm text-gray-400 mt-2 max-w-sm mx-auto leading-relaxed">
             ขณะนี้ยังไม่มีอุปกรณ์บันทึกอยู่ในระบบคลังสิ่งของอยู่ระหว่างการเชื่อมต่อฐานข้อมูลหรือลงทะเบียนอุปกรณ์เข้าระบบ
@@ -166,24 +169,30 @@ export default function EquipmentPage() {
                     <span className="inline-block text-xs font-bold bg-gray-50 border border-gray-200/40 text-gray-500 px-3 py-1 rounded-full">
                       {item.category}
                     </span>
-                    <span
-                      className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${isOutOfStock
+                    <div
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${isOutOfStock
                         ? "bg-red-50 text-red-600 border border-red-200/30"
                         : isLowStock
                           ? "bg-yellow-50 text-yellow-600 border border-yellow-200/30"
                           : "bg-green-50 text-green-600 border border-green-200/30"
                         }`}
                     >
-                      {isOutOfStock ? "❌ ของหมด" : isLowStock ? "⚠️ ใกล้หมด" : "✓ มีให้ยืม"}
-                    </span>
+                      {isOutOfStock ? (
+                        <><X className="w-3 h-3" /> ของหมด</>
+                      ) : isLowStock ? (
+                        <><AlertTriangle className="w-3 h-3" /> ใกล้หมด</>
+                      ) : (
+                        <><Check className="w-3 h-3" /> มีให้ยืม</>
+                      )}
+                    </div>
                   </div>
 
                   {/* Name and description */}
                   <h3 className="text-lg font-bold text-gray-800 leading-snug group-hover:text-orange-500 transition-colors duration-200">
                     {item.name}
                   </h3>
-                  <p className="text-xs text-gray-400 font-semibold mt-1">
-                    📍 ที่จัดเก็บ: {item.location}
+                  <p className="text-xs text-gray-400 font-semibold mt-1 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 shrink-0" /> ที่จัดเก็บ: {item.location}
                   </p>
                   <p className="text-sm text-gray-500 mt-3 leading-relaxed line-clamp-3">
                     {item.description || "ไม่มีรายละเอียดคอมโพเนนต์ชิ้นนี้ สมาชิกชมรมสามารถหยิบไปประกอบโปรเจกต์ได้เลย"}
@@ -203,7 +212,7 @@ export default function EquipmentPage() {
                       <button
                         disabled={isOutOfStock}
                         onClick={() => addToCart(item)}
-                        className={`rounded-2xl px-5 py-3 text-xs font-bold shadow-sm transition-all duration-300 active:scale-95 cursor-pointer ${
+                        className={`rounded-2xl px-5 py-3 text-xs font-bold shadow-sm transition-all duration-300 active:scale-95 cursor-pointer flex items-center justify-center gap-2 ${
                           isOutOfStock
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                             : isInCart
@@ -211,7 +220,7 @@ export default function EquipmentPage() {
                             : "bg-gray-900 hover:bg-orange-500 text-white hover:shadow-orange-500/10"
                         }`}
                       >
-                        {isOutOfStock ? "หมดชั่วคราว" : isInCart ? "✓ เลือกเพิ่มเติม" : "🛒 เลือกยืมสิ่งของ"}
+                        {isOutOfStock ? "หมดชั่วคราว" : isInCart ? <><Check className="w-4 h-4" /> เลือกเพิ่มเติม</> : <><ShoppingCart className="w-4 h-4" /> เลือกยืมสิ่งของ</>}
                       </button>
                     );
                   })()}

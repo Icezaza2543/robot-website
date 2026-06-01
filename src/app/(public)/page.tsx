@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { blogPosts, BlogPost } from "@/constants/news";
+import { Newspaper, Lightbulb, Inbox, Camera, PenLine, Calendar, Zap } from "lucide-react";
+import SponsorMarquee from "@/components/ui/SponsorMarquee";
 
 export default function HomePage() {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
@@ -28,22 +30,23 @@ export default function HomePage() {
           <div className="mt-10 flex flex-col sm:flex-row gap-4 items-center justify-center">
             <a
               href="#blog-posts"
-              className="w-full sm:w-auto rounded-2xl bg-gray-900 hover:bg-orange-500 px-8 py-4 text-lg font-bold text-white shadow-xl shadow-gray-900/10 hover:shadow-orange-500/20 transition-all duration-300 transform active:scale-98"
+              className="w-full sm:w-auto rounded bg-gray-900 hover:bg-orange-500 px-8 py-4 text-lg font-bold text-white shadow-sm transition-colors flex items-center justify-center gap-2"
             >
-              📰 อ่านบทความล่าสุด
+              <Newspaper className="w-5 h-5" />
+              อ่านบทความล่าสุด
             </a>
 
             <Link
               href="/about"
-              className="w-full sm:w-auto rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 px-8 py-4 text-lg font-bold text-gray-700 shadow-sm transition-all duration-300 transform active:scale-98"
+              className="w-full sm:w-auto rounded border border-gray-200 bg-white hover:bg-gray-50 px-8 py-4 text-lg font-bold text-gray-700 shadow-sm transition-colors flex items-center justify-center gap-2"
             >
-              💡 ทำความรู้จักกับชมรม
+              <Lightbulb className="w-5 h-5" />
+              ทำความรู้จักกับชมรม
             </Link>
           </div>
         </div>
 
-        {/* Decorative subtle layout accent */}
-        <div className="absolute top-0 left-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-orange-100/30 blur-3xl"></div>
+
       </section>
 
       {/* 2. Blog Posts & Announcements Section */}
@@ -51,8 +54,9 @@ export default function HomePage() {
         <div className="flex flex-col gap-10">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-gray-100 pb-6 gap-4">
             <div>
-              <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                📰 บทความ ข่าวสาร และกิจกรรมล่าสุด
+              <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                <Newspaper className="w-8 h-8 text-orange-500" />
+                บทความ ข่าวสาร และกิจกรรมล่าสุด
               </h2>
               <p className="text-gray-500 text-sm mt-2 font-medium">
                 ร่วมศึกษาองค์ความรู้เทคโนโลยีทางวิศวกรรม ติดตามกิจกรรมอบรมความรู้ และโปรเจกต์นวัตกรรมจากชมรม
@@ -65,8 +69,8 @@ export default function HomePage() {
 
           {/* Render Active News Grid dynamically imported from src/constants/news.ts */}
           {blogPosts.length === 0 ? (
-            <div className="rounded-[32px] border border-dashed border-gray-200 bg-white py-20 text-center animate-in fade-in duration-300 shadow-xs flex flex-col items-center">
-              <span className="text-4xl mb-4">📭</span>
+            <div className="rounded border border-dashed border-gray-200 bg-white py-20 text-center flex flex-col items-center">
+              <Inbox className="w-12 h-12 text-gray-300 mb-4" />
               <h3 className="text-lg font-bold text-gray-700">ขณะนี้ยังไม่มีบทความหรือข่าวสารประชาสัมพันธ์</h3>
               <p className="text-xs text-gray-400 mt-2 max-w-sm leading-relaxed font-semibold">
                 ติดตามข่าวคราว กิจกรรมอบรมเชิงปฏิบัติการ และความเคลื่อนไหวโปรเจกต์ IoT/Embedded นวัตกรรมของชมรมได้ที่นี่เร็ว ๆ นี้ครับ!
@@ -78,14 +82,14 @@ export default function HomePage() {
                 <div
                   key={post.id}
                   onClick={() => setSelectedPost(post)}
-                  className="flex flex-col justify-between rounded-3xl border border-gray-200 bg-white hover:border-orange-500/30 shadow-sm hover:shadow-md transition-all duration-300 group cursor-pointer overflow-hidden"
+                  className="flex flex-col justify-between rounded border border-gray-200 bg-white hover:border-gray-300 transition-colors cursor-pointer overflow-hidden"
                 >
                   {/* Post Banner Image */}
-                  <div className="relative h-48 w-full overflow-hidden bg-gray-50">
+                  <div className="relative h-48 w-full overflow-hidden bg-gray-50 border-b border-gray-100">
                     <img
                       src={post.image}
                       alt={post.title}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="h-full w-full object-cover"
                     />
                     <div className="absolute top-3 left-3">
                       <span className="inline-block text-[10px] font-black uppercase tracking-wider bg-white/90 backdrop-blur-xs border border-gray-200/50 text-orange-600 px-3 py-1.5 rounded-full shadow-xs">
@@ -95,7 +99,7 @@ export default function HomePage() {
                     {/* Floating Image Size Label */}
                     <div className="absolute bottom-3 right-3 z-10">
                       <span className="inline-flex items-center gap-1 text-[9px] font-extrabold bg-black/60 backdrop-blur-xs text-white px-2 py-1 rounded-md tracking-wider">
-                        📷 {post.imageSize}
+                        <Camera className="w-3 h-3" /> {post.imageSize}
                       </span>
                     </div>
                   </div>
@@ -113,8 +117,8 @@ export default function HomePage() {
                     </div>
 
                     <div className="border-t border-gray-50 pt-4 mt-6 flex items-center justify-between text-[11px] text-gray-400 font-bold">
-                      <div>✍️ โดย: <span className="text-gray-600">{post.author}</span></div>
-                      <div>🗓 {post.date}</div>
+                      <div className="flex items-center gap-1"><PenLine className="w-3 h-3" /> โดย: <span className="text-gray-600">{post.author}</span></div>
+                      <div className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {post.date}</div>
                     </div>
                   </div>
                 </div>
@@ -124,15 +128,18 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. Ultra-Premium News Article Reader Modal Popup */}
+      {/* 3. Sponsor Marquee Section */}
+      <SponsorMarquee />
+
+      {/* 4. Article Reader Modal Popup */}
       {selectedPost && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 backdrop-blur-md p-4 sm:p-6 animate-in fade-in duration-300">
-          <div className="w-full max-w-3xl max-h-[90vh] rounded-[32px] border border-white/20 bg-white/95 backdrop-blur-xl shadow-[0_20px_50px_rgba(249,115,22,0.12)] flex flex-col overflow-hidden relative transition-all duration-300 animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 sm:p-6 animate-in fade-in duration-200">
+          <div className="w-full max-w-3xl max-h-[90vh] rounded-lg border border-gray-200 bg-white shadow-xl flex flex-col overflow-hidden relative transition-all duration-200 animate-in zoom-in-95">
             
-            {/* Close Button with Glowing Orange Ring and Hover Rotate */}
+            {/* Close Button */}
             <button
               onClick={() => setSelectedPost(null)}
-              className="absolute top-5 right-5 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 border border-gray-100 text-gray-500 hover:text-orange-500 hover:border-orange-200 shadow-md transition-all duration-300 hover:rotate-90 hover:scale-110 cursor-pointer active:scale-95 text-xl font-bold"
+              className="absolute top-5 right-5 z-20 flex h-8 w-8 items-center justify-center rounded bg-white/90 border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer text-xl font-bold"
               title="ปิดหน้าต่างอ่านบทความ"
             >
               &times;
@@ -161,7 +168,7 @@ export default function HomePage() {
                 {/* Floating Image Size badge inside Modal */}
                 <div className="absolute bottom-5 right-6 sm:right-8">
                   <span className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-wider bg-black/60 backdrop-blur-xs text-white px-3.5 py-1.5 rounded-xl shadow-md border border-white/10">
-                    📷 ขนาดรูปภาพ: {selectedPost.imageSize}
+                    <Camera className="w-3 h-3" /> ขนาดรูปภาพ: {selectedPost.imageSize}
                   </span>
                 </div>
               </div>
@@ -181,19 +188,20 @@ export default function HomePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-6 text-[10px] font-bold text-gray-400">
-                    <span className="flex items-center gap-1.5">🗓 วันเผยแพร่: {selectedPost.date}</span>
+                    <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" /> วันเผยแพร่: {selectedPost.date}</span>
                   </div>
                 </div>
 
                 {/* Article Content Layout */}
                 <div className="space-y-5">
-                  <h3 className="text-2xl sm:text-3.5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gray-950 via-slate-900 to-orange-600 leading-snug tracking-tight">
+                  <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug tracking-tight">
                     {selectedPost.title}
                   </h3>
 
                   {/* Summary Callout Box */}
-                  <p className="text-xs text-orange-900 leading-relaxed font-bold border-l-4 border-orange-500 pl-4 bg-orange-50/40 p-4 rounded-r-2xl border-y border-r border-orange-100/20">
-                    💡 **บทสรุปสังเขป**: {selectedPost.summary}
+                  <p className="text-xs text-orange-900 leading-relaxed font-bold border-l-4 border-orange-500 pl-4 bg-orange-50/40 p-4 rounded-r-2xl border-y border-r border-orange-100/20 flex gap-2">
+                    <Lightbulb className="w-4 h-4 shrink-0 text-orange-500 mt-0.5" />
+                    <span>**บทสรุปสังเขป**: {selectedPost.summary}</span>
                   </p>
 
                   {/* Main Rich Text Content */}
@@ -212,7 +220,7 @@ export default function HomePage() {
                                 const cleanLi = li.replace("- ", "");
                                 return (
                                   <li key={idx} className="flex items-start gap-2 text-xs font-semibold text-gray-600">
-                                    <span className="text-orange-500 text-sm leading-none mt-0.5">⚡</span>
+                                    <Zap className="w-3 h-3 text-orange-500 mt-0.5 shrink-0" />
                                     <span className="leading-relaxed">{cleanLi}</span>
                                   </li>
                                 );

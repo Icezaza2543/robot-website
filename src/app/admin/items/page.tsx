@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Settings, X, Plus, Inbox, Save, Search, Package, MapPin, Minus, Trash2, Megaphone } from "lucide-react";
 
 interface EquipmentItem {
   id: string;
@@ -236,7 +237,8 @@ export default function AdminItemsPage() {
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between border-b border-gray-100 pb-8">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold text-orange-500 uppercase tracking-widest mb-1.5">
-            <span>⚙️ สำหรับผู้จัดการระบบ (Admin Panel)</span>
+            <Settings className="w-4 h-4" />
+            <span>สำหรับผู้จัดการระบบ (Admin Panel)</span>
           </div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight sm:text-4xl">
             จัดการอุปกรณ์อิเล็กทรอนิกส์ & IoT
@@ -246,23 +248,42 @@ export default function AdminItemsPage() {
           </p>
         </div>
 
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link
+            href="/admin/sponsors"
+            className="rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 px-5 py-3.5 text-sm font-bold text-gray-700 shadow-sm transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Megaphone className="w-4 h-4 text-orange-500" /> จัดการผู้สนับสนุน
+          </Link>
+          <Link
+            href="/admin/borrow"
+            className="rounded-2xl border border-orange-200 bg-orange-50 hover:bg-orange-100 px-5 py-3.5 text-sm font-bold text-orange-600 shadow-sm transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Settings className="w-4 h-4" /> จัดการอนุมัติการยืม
+          </Link>
+        </div>
+      </div>
+
+      <div className="flex justify-end mt-6">
+
         <button
           onClick={() => setShowAddForm(!showAddForm)}
           className="inline-flex items-center justify-center gap-2 rounded-2xl bg-orange-500 hover:bg-orange-600 px-6 py-4 text-base font-bold text-white shadow-lg shadow-orange-500/20 transition-all duration-300 active:scale-95 cursor-pointer"
         >
           {showAddForm ? (
-            <>❌ ปิดฟอร์มบันทึก</>
+            <><X className="w-4 h-4" /> ปิดฟอร์มบันทึก</>
           ) : (
-            <>➕ เพิ่มอุปกรณ์เข้าระบบ</>
+            <><Plus className="w-4 h-4" /> เพิ่มอุปกรณ์เข้าระบบ</>
           )}
         </button>
       </div>
 
       {/* Elegant Add Item Form Section */}
       {showAddForm && (
-        <div className="mt-8 rounded-3xl border border-orange-100 bg-orange-50/20 p-6 md:p-8 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="mt-8 rounded-3xl border border-gray-200/80 bg-white shadow-sm p-6 md:p-8 animate-in fade-in slide-in-from-top-4 duration-300">
           <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            📥 แบบฟอร์มเพิ่มรายการอุปกรณ์อิเล็กทรอนิกส์
+            <Inbox className="w-6 h-6 text-gray-400" />
+            แบบฟอร์มเพิ่มรายการอุปกรณ์อิเล็กทรอนิกส์
           </h3>
 
           <form onSubmit={handleAddItem} className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -339,9 +360,9 @@ export default function AdminItemsPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="rounded-xl bg-gray-900 hover:bg-orange-500 px-6 py-3 text-sm font-bold text-white transition disabled:opacity-70 active:scale-95 cursor-pointer"
+                className="rounded-xl bg-gray-900 hover:bg-orange-500 px-6 py-3 text-sm font-bold text-white transition disabled:opacity-70 active:scale-95 cursor-pointer flex items-center gap-2"
               >
-                {isSubmitting ? "กำลังบันทึก..." : "💾 บันทึกข้อมูล"}
+                {isSubmitting ? "กำลังบันทึก..." : <><Save className="w-4 h-4" /> บันทึกข้อมูล</>}
               </button>
             </div>
           </form>
@@ -353,7 +374,7 @@ export default function AdminItemsPage() {
         {/* Search */}
         <div className="relative flex-1 max-w-md">
           <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-            🔍
+            <Search className="w-4 h-4" />
           </span>
           <input
             type="text"
@@ -401,8 +422,8 @@ export default function AdminItemsPage() {
         /* Inventory Catalog list view */
         <div className="mt-8 flex flex-col gap-4">
           {filteredItems.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-gray-200 bg-white py-16 text-center">
-              <span className="text-3xl">📦</span>
+            <div className="rounded-3xl border border-dashed border-gray-200 bg-white py-16 text-center flex flex-col items-center">
+              <Package className="w-12 h-12 text-gray-300 mb-4" />
               <h3 className="text-lg font-bold text-gray-700 mt-4">ไม่พบรายการอุปกรณ์</h3>
               <p className="text-sm text-gray-400 mt-1.5 max-w-xs mx-auto">
                 ลองตรวจสอบตัวสะกดหรือเปลี่ยนตัวกรอง หรือคลิก "เพิ่มอุปกรณ์เข้าระบบ" เพื่อบันทึกข้อมูลชุดใหม่
@@ -410,8 +431,8 @@ export default function AdminItemsPage() {
             </div>
           ) : (
             <div className="overflow-hidden rounded-3xl border border-gray-200/80 bg-white shadow-xl shadow-gray-100/50 transition-all duration-300">
-              {/* Premium Top Gradient Accent Line */}
-              <div className="h-1.5 w-full bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-400" />
+              {/* Subtle Top Accent Line */}
+              <div className="h-1.5 w-full bg-gray-100" />
 
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse text-left">
@@ -430,17 +451,17 @@ export default function AdminItemsPage() {
                       const isLowStock = item.stock > 0 && item.stock <= 5;
 
                       // Dynamic Category Styling based on standard club item types
-                      let catStyles = "bg-gray-50 text-gray-600 border-gray-200/50";
+                      let catStyles = "bg-white text-gray-600 border-gray-200";
                       if (item.category === "Microcontroller") {
-                        catStyles = "bg-orange-50/80 text-orange-700 border-orange-100/80";
+                        catStyles = "bg-white text-orange-600 border-gray-200";
                       } else if (item.category === "Module") {
-                        catStyles = "bg-blue-50/80 text-blue-700 border-blue-100/80";
+                        catStyles = "bg-white text-blue-600 border-gray-200";
                       } else if (item.category === "Electronic Components") {
-                        catStyles = "bg-purple-50/80 text-purple-700 border-purple-100/80";
+                        catStyles = "bg-white text-purple-600 border-gray-200";
                       } else if (item.category === "Tools") {
-                        catStyles = "bg-emerald-50/80 text-emerald-700 border-emerald-100/80";
+                        catStyles = "bg-white text-emerald-600 border-gray-200";
                       } else if (item.category === "Mechanical") {
-                        catStyles = "bg-teal-50/80 text-teal-700 border-teal-100/80";
+                        catStyles = "bg-white text-teal-600 border-gray-200";
                       }
 
                       return (
@@ -461,7 +482,7 @@ export default function AdminItemsPage() {
                           </td>
                           <td className="px-6 py-5">
                             <span className="inline-flex items-center gap-1.5 text-gray-500 font-bold bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-xl text-xs">
-                              📍 {item.location}
+                              <MapPin className="w-3 h-3 shrink-0" /> {item.location}
                             </span>
                           </td>
                           <td className="px-6 py-5">
@@ -471,10 +492,10 @@ export default function AdminItemsPage() {
                                 type="button"
                                 onClick={() => handleUpdateStock(item.id, item.stock, -1)}
                                 disabled={item.stock === 0}
-                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-white text-[10px] font-extrabold text-gray-500 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-30 disabled:pointer-events-none active:scale-90 hover:text-orange-500 transition-all duration-200 cursor-pointer shadow-sm"
+                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-white text-gray-500 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-30 disabled:pointer-events-none active:scale-90 hover:text-orange-500 transition-all duration-200 cursor-pointer shadow-sm"
                                 title="ลดจำนวนอุปกรณ์ (ของเสีย/ชำรุด)"
                               >
-                                ➖
+                                <Minus className="w-4 h-4" />
                               </button>
 
                               {/* Interactive Stock Number Input */}
@@ -499,10 +520,10 @@ export default function AdminItemsPage() {
                               <button
                                 type="button"
                                 onClick={() => handleUpdateStock(item.id, item.stock, 1)}
-                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-white text-[10px] font-extrabold text-gray-500 hover:bg-gray-50 hover:border-gray-300 active:scale-90 hover:text-orange-500 transition-all duration-200 cursor-pointer shadow-sm"
+                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200/80 bg-white text-gray-500 hover:bg-gray-50 hover:border-gray-300 active:scale-90 hover:text-orange-500 transition-all duration-200 cursor-pointer shadow-sm"
                                 title="เพิ่มจำนวนอุปกรณ์ (รับของเพิ่ม)"
                               >
-                                ➕
+                                <Plus className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
@@ -510,10 +531,10 @@ export default function AdminItemsPage() {
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => handleDeleteItem(item.id, item.name)}
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 hover:rotate-6 active:scale-90 transition-all duration-200 cursor-pointer shadow-sm"
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 active:scale-90 transition-all duration-200 cursor-pointer shadow-sm"
                                 title="ลบอุปกรณ์ออกจากคลัง"
                               >
-                                🗑️
+                                <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           </td>

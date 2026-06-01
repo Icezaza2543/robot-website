@@ -34,19 +34,19 @@ export default function SessionGuard() {
       const isLoginInitiated = sessionStorage.getItem(LOGIN_INITIATED_KEY);
 
       if (isTabSessionActive) {
-        // ✅ Same tab session — user is navigating within the site, do nothing
+        // [SUCCESS] Same tab session — user is navigating within the site, do nothing
         return;
       }
 
       if (isLoginInitiated) {
-        // ✅ Fresh login — user just completed OAuth and returned
+        // [SUCCESS] Fresh login — user just completed OAuth and returned
         // Set the "session-active" flag and clean up the "login-initiated" flag
         sessionStorage.setItem(SESSION_KEY, "true");
         sessionStorage.removeItem(LOGIN_INITIATED_KEY);
         return;
       }
 
-      // ❌ No flags at all — this means the tab/browser was closed previously
+      // [ERROR] No flags at all — this means the tab/browser was closed previously
       // and the user reopened the site with a stale cookie → force sign-out
       signOut({ callbackUrl: "/login" });
       return;

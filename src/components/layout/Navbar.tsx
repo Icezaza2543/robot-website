@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import NavbarAuth from "./NavbarAuth";
 
 const navLinks = [
@@ -16,6 +17,12 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { data: session } = useSession();
+
+  const dynamicNavLinks = [...navLinks];
+  if (session?.user) {
+    dynamicNavLinks.push({ href: "/dashboard", label: "หน้าส่วนตัว" });
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200/60 bg-white/90 backdrop-blur-md shadow-sm">
@@ -46,7 +53,7 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-1">
-          {navLinks.map(({ href, label }) => {
+          {dynamicNavLinks.map(({ href, label }) => {
             const isActive =
               href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
@@ -105,7 +112,7 @@ export default function Navbar() {
         }`}
       >
         <nav className="flex flex-col gap-1 px-4 pb-4 pt-2 border-t border-gray-100">
-          {navLinks.map(({ href, label }) => {
+          {dynamicNavLinks.map(({ href, label }) => {
             const isActive =
               href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (

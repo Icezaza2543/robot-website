@@ -21,7 +21,7 @@ function getSheetsClient() {
   const sheetId = process.env.GOOGLE_SHEET_ID;
 
   if (!email || !privateKey || !sheetId) {
-    console.warn("⚠️ Google Sheets API credentials are not fully configured in environment variables.");
+    console.warn("[WARNING] Google Sheets API credentials are not fully configured in environment variables.");
     return null;
   }
 
@@ -37,7 +37,7 @@ function getSheetsClient() {
 
     return google.sheets({ version: "v4", auth });
   } catch (error) {
-    console.error("❌ Failed to initialize Google Sheets Auth Client:", error);
+    console.error("[ERROR] Failed to initialize Google Sheets Auth Client:", error);
     return null;
   }
 }
@@ -73,7 +73,7 @@ export async function getSheetUserByEmail(email: string): Promise<SheetUser | nu
     const rows = response.data.values;
 
     if (!rows || rows.length === 0) {
-      console.warn("ℹ️ No rows or users found in Google Sheets 'users' sheet.");
+      console.warn("[INFO] No rows or users found in Google Sheets 'users' sheet.");
       return null;
     }
 
@@ -100,7 +100,7 @@ export async function getSheetUserByEmail(email: string): Promise<SheetUser | nu
 
     return null;
   } catch (error) {
-    console.error(`❌ Error fetching user ${email} from Google Sheets:`, error);
+    console.error(`[ERROR] Error fetching user ${email} from Google Sheets:`, error);
     return null;
   }
 }
@@ -115,7 +115,7 @@ export async function appendSheetUser(user: SheetUser): Promise<boolean> {
   const sheetId = process.env.GOOGLE_SHEET_ID;
 
   if (!sheets || !sheetId) {
-    console.error("❌ Google Sheets client is not configured. Cannot append user.");
+    console.error("[ERROR] Google Sheets client is not configured. Cannot append user.");
     return false;
   }
 
@@ -128,10 +128,10 @@ export async function appendSheetUser(user: SheetUser): Promise<boolean> {
         values: [[user.email, user.name, user.role, user.status]],
       },
     });
-    console.log(`✅ Successfully appended user ${user.email} to Google Sheets.`);
+    console.log(`[SUCCESS] Successfully appended user ${user.email} to Google Sheets.`);
     return true;
   } catch (error) {
-    console.error(`❌ Failed to append user ${user.email} to Google Sheets:`, error);
+    console.error(`[ERROR] Failed to append user ${user.email} to Google Sheets:`, error);
     return false;
   }
 }
@@ -166,7 +166,7 @@ async function ensureSheetExists(sheets: any, sheetId: string, title: string, he
     );
 
     if (!sheetExists) {
-      console.log(`ℹ️ Sheet '${title}' does not exist. Creating...`);
+      console.log(`[INFO] Sheet '${title}' does not exist. Creating...`);
       const createResponse = await sheets.spreadsheets.batchUpdate({
         spreadsheetId: sheetId,
         requestBody: {
@@ -194,7 +194,7 @@ async function ensureSheetExists(sheets: any, sheetId: string, title: string, he
       });
 
       if (targetSheetId !== undefined && targetSheetId !== null) {
-        console.log(`ℹ️ Formatting newly created sheet '${title}' (ID: ${targetSheetId})...`);
+        console.log(`[INFO] Formatting newly created sheet '${title}' (ID: ${targetSheetId})...`);
         const requests: any[] = [
           // 1. Freeze the first row
           {
@@ -691,10 +691,10 @@ async function ensureSheetExists(sheets: any, sheetId: string, title: string, he
         });
       }
 
-      console.log(`✅ Sheet '${title}' created and formatted successfully with headers.`);
+      console.log(`[SUCCESS] Sheet '${title}' created and formatted successfully with headers.`);
     }
   } catch (error) {
-    console.error(`❌ Failed to ensure sheet '${title}' exists:`, error);
+    console.error(`[ERROR] Failed to ensure sheet '${title}' exists:`, error);
   }
 }
 
@@ -706,7 +706,7 @@ export async function getSheetItems(): Promise<EquipmentItem[]> {
   const sheetId = process.env.GOOGLE_SHEET_ID;
 
   if (!sheets || !sheetId) {
-    console.warn("⚠️ Google Sheets client is not configured. Returning empty items array.");
+    console.warn("[WARNING] Google Sheets client is not configured. Returning empty items array.");
     return [];
   }
 
@@ -733,7 +733,7 @@ export async function getSheetItems(): Promise<EquipmentItem[]> {
       description: String(row[5] || ""),
     })).filter(item => item.id !== ""); // Filter out empty rows if any
   } catch (error) {
-    console.error("❌ Failed to fetch items from Google Sheets:", error);
+    console.error("[ERROR] Failed to fetch items from Google Sheets:", error);
     return [];
   }
 }
@@ -746,7 +746,7 @@ export async function appendSheetItem(item: EquipmentItem): Promise<boolean> {
   const sheetId = process.env.GOOGLE_SHEET_ID;
 
   if (!sheets || !sheetId) {
-    console.error("❌ Google Sheets client is not configured. Cannot append item.");
+    console.error("[ERROR] Google Sheets client is not configured. Cannot append item.");
     return false;
   }
 
@@ -764,10 +764,10 @@ export async function appendSheetItem(item: EquipmentItem): Promise<boolean> {
       },
     });
 
-    console.log(`✅ Successfully appended item ${item.name} (${item.id}) to Google Sheets.`);
+    console.log(`[SUCCESS] Successfully appended item ${item.name} (${item.id}) to Google Sheets.`);
     return true;
   } catch (error) {
-    console.error(`❌ Failed to append item ${item.id} to Google Sheets:`, error);
+    console.error(`[ERROR] Failed to append item ${item.id} to Google Sheets:`, error);
     return false;
   }
 }
@@ -780,7 +780,7 @@ export async function updateSheetItemStock(id: string, stock: number): Promise<b
   const sheetId = process.env.GOOGLE_SHEET_ID;
 
   if (!sheets || !sheetId) {
-    console.error("❌ Google Sheets client is not configured. Cannot update item stock.");
+    console.error("[ERROR] Google Sheets client is not configured. Cannot update item stock.");
     return false;
   }
 
@@ -793,7 +793,7 @@ export async function updateSheetItemStock(id: string, stock: number): Promise<b
 
     const rows = response.data.values;
     if (!rows || rows.length === 0) {
-      console.warn("⚠️ No rows found in 'items' sheet. Cannot update stock.");
+      console.warn("[WARNING] No rows found in 'items' sheet. Cannot update stock.");
       return false;
     }
 
@@ -808,7 +808,7 @@ export async function updateSheetItemStock(id: string, stock: number): Promise<b
     }
 
     if (rowIndex === -1) {
-      console.error(`❌ Item with ID ${id} not found in Google Sheets.`);
+      console.error(`[ERROR] Item with ID ${id} not found in Google Sheets.`);
       return false;
     }
 
@@ -836,10 +836,10 @@ export async function updateSheetItemStock(id: string, stock: number): Promise<b
       },
     });
 
-    console.log(`✅ Successfully updated item ${id} stock to ${stock} in Google Sheets.`);
+    console.log(`[SUCCESS] Successfully updated item ${id} stock to ${stock} in Google Sheets.`);
     return true;
   } catch (error) {
-    console.error(`❌ Failed to update item ${id} stock in Google Sheets:`, error);
+    console.error(`[ERROR] Failed to update item ${id} stock in Google Sheets:`, error);
     return false;
   }
 }
@@ -852,7 +852,7 @@ export async function deleteSheetItem(id: string): Promise<boolean> {
   const sheetId = process.env.GOOGLE_SHEET_ID;
 
   if (!sheets || !sheetId) {
-    console.error("❌ Google Sheets client is not configured. Cannot delete item.");
+    console.error("[ERROR] Google Sheets client is not configured. Cannot delete item.");
     return false;
   }
 
@@ -865,7 +865,7 @@ export async function deleteSheetItem(id: string): Promise<boolean> {
 
     const rows = response.data.values;
     if (!rows || rows.length === 0) {
-      console.warn("⚠️ No rows found in 'items' sheet. Nothing to delete.");
+      console.warn("[WARNING] No rows found in 'items' sheet. Nothing to delete.");
       return false;
     }
 
@@ -873,7 +873,7 @@ export async function deleteSheetItem(id: string): Promise<boolean> {
     const filteredRows = rows.filter((row) => String(row[0] || "").trim() !== normalizedId);
 
     if (rows.length === filteredRows.length) {
-      console.warn(`⚠️ Item with ID ${id} not found in Google Sheets for deletion.`);
+      console.warn(`[WARNING] Item with ID ${id} not found in Google Sheets for deletion.`);
       return false;
     }
 
@@ -895,10 +895,10 @@ export async function deleteSheetItem(id: string): Promise<boolean> {
       });
     }
 
-    console.log(`✅ Successfully deleted item ${id} from Google Sheets.`);
+    console.log(`[SUCCESS] Successfully deleted item ${id} from Google Sheets.`);
     return true;
   } catch (error) {
-    console.error(`❌ Failed to delete item ${id} from Google Sheets:`, error);
+    console.error(`[ERROR] Failed to delete item ${id} from Google Sheets:`, error);
     return false;
   }
 }
@@ -929,7 +929,7 @@ export async function appendBorrowRequest(request: BorrowRequest): Promise<boole
   const sheetId = process.env.GOOGLE_SHEET_ID;
 
   if (!sheets || !sheetId) {
-    console.error("❌ Google Sheets client is not configured. Cannot append borrow request.");
+    console.error("[ERROR] Google Sheets client is not configured. Cannot append borrow request.");
     return false;
   }
 
@@ -981,10 +981,10 @@ export async function appendBorrowRequest(request: BorrowRequest): Promise<boole
       },
     });
 
-    console.log(`✅ Successfully appended borrow request ${request.id} to Google Sheets.`);
+    console.log(`[SUCCESS] Successfully appended borrow request ${request.id} to Google Sheets.`);
     return true;
   } catch (error) {
-    console.error(`❌ Failed to append borrow request ${request.id} to Google Sheets:`, error);
+    console.error(`[ERROR] Failed to append borrow request ${request.id} to Google Sheets:`, error);
     return false;
   }
 }
@@ -997,7 +997,7 @@ export async function getSheetBorrowRequestsByUser(email: string): Promise<Borro
   const sheetId = process.env.GOOGLE_SHEET_ID;
 
   if (!sheets || !sheetId) {
-    console.warn("⚠️ Google Sheets client is not configured. Returning empty requests.");
+    console.warn("[WARNING] Google Sheets client is not configured. Returning empty requests.");
     return [];
   }
 
@@ -1054,7 +1054,7 @@ export async function getSheetBorrowRequestsByUser(email: string): Promise<Borro
       }))
       .filter((req) => req.id !== "" && req.userEmail.trim().toLowerCase() === normalizedEmail);
   } catch (error) {
-    console.error(`❌ Failed to fetch borrow requests for user ${email} from Google Sheets:`, error);
+    console.error(`[ERROR] Failed to fetch borrow requests for user ${email} from Google Sheets:`, error);
     return [];
   }
 }
@@ -1067,7 +1067,7 @@ export async function getAllSheetBorrowRequests(): Promise<BorrowRequest[]> {
   const sheetId = process.env.GOOGLE_SHEET_ID;
 
   if (!sheets || !sheetId) {
-    console.warn("⚠️ Google Sheets client is not configured. Returning empty requests.");
+    console.warn("[WARNING] Google Sheets client is not configured. Returning empty requests.");
     return [];
   }
 
@@ -1122,7 +1122,7 @@ export async function getAllSheetBorrowRequests(): Promise<BorrowRequest[]> {
       .filter((req) => req.id !== "")
       .reverse(); // Newest first
   } catch (error) {
-    console.error("❌ Failed to fetch all borrow requests from Google Sheets:", error);
+    console.error("[ERROR] Failed to fetch all borrow requests from Google Sheets:", error);
     return [];
   }
 }
@@ -1140,7 +1140,7 @@ export async function updateSheetBorrowRequestStatus(
   const sheetId = process.env.GOOGLE_SHEET_ID;
 
   if (!sheets || !sheetId) {
-    console.error("❌ Google Sheets client is not configured. Cannot update borrow request.");
+    console.error("[ERROR] Google Sheets client is not configured. Cannot update borrow request.");
     return false;
   }
 
@@ -1153,7 +1153,7 @@ export async function updateSheetBorrowRequestStatus(
 
     const rows = response.data.values;
     if (!rows || rows.length === 0) {
-      console.warn("⚠️ No rows found in 'borrow_requests' sheet. Cannot update.");
+      console.warn("[WARNING] No rows found in 'borrow_requests' sheet. Cannot update.");
       return false;
     }
 
@@ -1168,7 +1168,7 @@ export async function updateSheetBorrowRequestStatus(
     }
 
     if (rowIndex === -1) {
-      console.error(`❌ Borrow request with ID ${id} not found in Google Sheets.`);
+      console.error(`[ERROR] Borrow request with ID ${id} not found in Google Sheets.`);
       return false;
     }
 
@@ -1219,13 +1219,126 @@ export async function updateSheetBorrowRequestStatus(
       },
     });
 
-    console.log(`✅ Successfully updated borrow request ${id} to status ${status} in Google Sheets.`);
+    console.log(`[SUCCESS] Successfully updated borrow request ${id} to status ${status} in Google Sheets.`);
     return true;
   } catch (error) {
-    console.error(`❌ Failed to update borrow request ${id} status in Google Sheets:`, error);
+    console.error(`[ERROR] Failed to update borrow request ${id} status in Google Sheets:`, error);
     return false;
   }
 }
 
+// ----------------------------------------------------------------------
+// 6. Sponsors Database Logic (Sheet: 'sponsors')
+// ----------------------------------------------------------------------
 
+export interface Sponsor {
+  id: string;
+  url: string;
+  status: string; // active | deleted
+  createdAt: string;
+}
 
+/**
+ * Fetches all active sponsors from 'sponsors' tab.
+ */
+export async function getSponsors(): Promise<Sponsor[]> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return [];
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "sponsors!A2:D1000",
+    });
+
+    const rows = response.data.values;
+    if (!rows || rows.length === 0) return [];
+
+    const sponsors: Sponsor[] = rows.map((row) => ({
+      id: String(row[0] || "").trim(),
+      url: String(row[1] || "").trim(),
+      status: String(row[2] || "active").trim().toLowerCase(),
+      createdAt: String(row[3] || "").trim(),
+    }));
+
+    return sponsors.filter((s) => s.status === "active" && s.id && s.url);
+  } catch (error) {
+    console.error("[ERROR] Failed to fetch sponsors:", error);
+    return [];
+  }
+}
+
+/**
+ * Adds a new sponsor to the 'sponsors' tab.
+ */
+export async function addSponsor(url: string): Promise<Sponsor | null> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return null;
+
+  try {
+    const id = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    const createdAt = new Date().toISOString();
+    const newRow = [id, url, "active", createdAt];
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: "sponsors!A:D",
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [newRow],
+      },
+    });
+
+    console.log(`[SUCCESS] Added sponsor ${id}`);
+    return { id, url, status: "active", createdAt };
+  } catch (error) {
+    console.error("[ERROR] Failed to add sponsor:", error);
+    return null;
+  }
+}
+
+/**
+ * Marks a sponsor as deleted in the 'sponsors' tab.
+ */
+export async function deleteSponsor(id: string): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "sponsors!A2:A1000",
+    });
+
+    const rows = response.data.values;
+    if (!rows || rows.length === 0) return false;
+
+    // Find the row index (0-indexed in array + 2 for actual row number in sheet)
+    const rowIndex = rows.findIndex((row) => String(row[0] || "").trim() === id);
+
+    if (rowIndex === -1) {
+      console.warn(`[WARNING] Sponsor ${id} not found for deletion.`);
+      return false;
+    }
+
+    const actualRowNum = rowIndex + 2;
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `sponsors!C${actualRowNum}`, // Status column
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [["deleted"]],
+      },
+    });
+
+    console.log(`[SUCCESS] Deleted sponsor ${id}`);
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to delete sponsor:", error);
+    return false;
+  }
+}

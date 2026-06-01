@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function NewsArticle1() {
   const post = {
-    title: "🚀 เริ่มต้นพัฒนา IoT ด้วย ESP32 และ MicroPython สำหรับผู้เริ่มต้น",
+    title: "เริ่มต้นพัฒนา IoT ด้วย ESP32 และ MicroPython สำหรับผู้เริ่มต้น",
     date: "27 พฤษภาคม 2026",
     summary: "เรียนรู้วิธีการติดตั้งตัวแปลภาษา MicroPython ลงบนบอร์ดควบคุมสุดฮิตอย่าง ESP32 พร้อมเขียนโค้ดสั้นๆ ควบคุมไฟ LED และอ่านค่าโมดูลวัดอุณหภูมิความชื้นง่ายๆ ใน 5 นาที",
     content: "บอร์ด ESP32 เป็นไมโครคอนโทรลเลอร์ขนาดจิ๋วที่มี Wi-Fi และ Bluetooth ในตัว ทำให้เหมาะสมอย่างยิ่งสำหรับงานประมวลผล IoT\n\nในบทความนี้ CPE Tech Team ขอเสนอแนวทางการเริ่มต้นใช้ภาษา Python แทนการเขียน C++ แบบเดิม ผ่านชุดแปลภาษา MicroPython ซึ่งช่วยให้อ่านโค้ดง่ายและพัฒนาโปรเจกต์เสร็จได้อย่างรวดเร็ว\n\nขั้นตอนหลักๆ ในการเริ่มต้น:\n- **ขั้นตอนที่ 1**: ทำการดาวน์โหลดเฟิร์มแวร์ MicroPython สำหรับ ESP32\n- **ขั้นตอนที่ 2**: ติดตั้งเครื่องมือ esptool.py ผ่าน Terminal เพื่อล้างหน่วยความจำและแฟลชไฟล์เฟิร์มแวร์ (.bin) ลงบอร์ด\n- **ขั้นตอนที่ 3**: ดาวน์โหลด Thonny IDE และเชื่อมต่อเข้ากับพอร์ตสื่อสารของบอร์ด\n- **ขั้นตอนที่ 4**: ทดลองสั่งให้บอร์ดกระพริบไฟ LED ออนบอร์ด (Pin 2) ด้วยคำสั่งสั้นๆ เพียงไม่กี่บรรทัด\n\nนอกจากนี้ เรายังสามารถต่อคอมโพเนนต์ย่อย เช่น เซนเซอร์วัดอุณหภูมิและความชื้นสัมพัทธ์ DHT22 เพื่ออ่านข้อมูลมาปริ้นต์แสดงผลเรียลไทม์ได้อีกด้วย สำหรับนิสิตที่สนใจอุปกรณ์ในคลาสนี้ สามารถลงทะเบียนขอยืมบอร์ด ESP32 และ DHT22 ผ่านระบบยืมของเว็บบล็อกได้ฟรีเลยครับ!",
@@ -22,7 +22,7 @@ export default function NewsArticle1() {
           href="/"
           className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 px-4 py-2.5 text-xs font-bold text-gray-500 transition shadow-xs cursor-pointer active:scale-95"
         >
-          ⬅️ กลับหน้าหลัก
+          กลับหน้าหลัก
         </Link>
         <span className="text-[10px] font-black uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-200 px-3 py-1 rounded-full">
           {post.category}
@@ -43,7 +43,7 @@ export default function NewsArticle1() {
           {/* Floating Size Tag */}
           <div className="absolute bottom-5 right-6 sm:right-8">
             <span className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-wider bg-black/60 backdrop-blur-xs text-white px-3 py-1.5 rounded-xl border border-white/10 shadow-md">
-              📷 ขนาดแนะนำ: {post.imageSize}
+              ขนาดแนะนำ: {post.imageSize}
             </span>
           </div>
         </div>
@@ -62,7 +62,7 @@ export default function NewsArticle1() {
               </div>
             </div>
             <div className="text-[10px] font-bold text-gray-400">
-              🗓 เผยแพร่เมื่อ: {post.date}
+              เผยแพร่เมื่อ: {post.date}
             </div>
           </div>
 
@@ -74,7 +74,7 @@ export default function NewsArticle1() {
 
             {/* Editorial summary box */}
             <p className="text-xs text-orange-900 leading-relaxed font-bold border-l-4 border-orange-500 pl-4 bg-orange-50/40 p-4 rounded-r-2xl border-y border-r border-orange-100/20">
-              💡 **บทสรุปสังเขป**: {post.summary}
+              **บทสรุปสังเขป**: {post.summary}
             </p>
 
             {/* Structured paragraph rendering */}
@@ -92,7 +92,7 @@ export default function NewsArticle1() {
                           const cleanLi = li.replace("- ", "");
                           return (
                             <li key={idx} className="flex items-start gap-2 text-xs font-semibold text-gray-600">
-                              <span className="text-orange-500 text-sm leading-none mt-0.5">⚡</span>
+                              <span className="text-orange-500 text-sm leading-none mt-0.5"></span>
                               <span className="leading-relaxed">{cleanLi}</span>
                             </li>
                           );

@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { Users, UserCheck, MapPin, Map, Image as ImageIcon, Lightbulb, DoorOpen, MessageCircle } from "lucide-react"
 
 export default function AboutPage() {
   // Clean Data Array for 10 Route Steps (ง่ายต่อการแก้ไขและดูแลรักษา)
@@ -124,7 +125,7 @@ export default function AboutPage() {
       <section className="flex flex-col items-center gap-10 border-t border-gray-100 pt-16">
         <div className="text-center">
           <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl">
-            👨‍🏫 คณะอาจารย์ที่ปรึกษาชมรม
+            <Users className="inline-block w-8 h-8 mr-2 text-gray-900" /> คณะอาจารย์ที่ปรึกษาชมรม
           </h2>
           <p className="text-sm text-gray-400 font-semibold mt-1">
             โปสเตอร์รวมทำเนียบอาจารย์ผู้ดูแลและให้การสนับสนุนทางวิชาการ
@@ -140,14 +141,14 @@ export default function AboutPage() {
             </svg>
 
             <div className="flex flex-col gap-1.5">
-              <span className="text-base md:text-lg text-gray-700">🖼️ โปสเตอร์คณะอาจารย์ที่ปรึกษาชมรม</span>
+              <span className="text-base md:text-lg text-gray-700 flex items-center justify-center gap-1.5"><ImageIcon className="w-5 h-5" /> โปสเตอร์คณะอาจารย์ที่ปรึกษาชมรม</span>
               <span className="text-xs text-gray-400 font-semibold leading-relaxed">
                 (คณาจารย์ผู้ดูแลชมรมโรบอท คณะวิศวกรรมศาสตร์)
               </span>
             </div>
 
-            <span className="bg-gray-200/70 text-gray-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm">
-              💡 ขนาดแนะนำ: อัตราส่วนแนวนอน 4:3 (เช่น 1200 x 900 px) หรือสัดส่วน 16:9
+            <span className="bg-gray-200/70 text-gray-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5">
+              <Lightbulb className="w-4 h-4 shrink-0" /> ขนาดแนะนำ: อัตราส่วนแนวนอน 4:3 (เช่น 1200 x 900 px) หรือสัดส่วน 16:9
             </span>
           </div>
         </div>
@@ -157,7 +158,7 @@ export default function AboutPage() {
       <section className="flex flex-col items-center gap-10 border-t border-gray-100 pt-16">
         <div className="text-center">
           <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl">
-            👥 ทีมบริหารชมรม
+            <UserCheck className="inline-block w-8 h-8 mr-2 text-gray-900" /> ทีมบริหารชมรม
           </h2>
           <p className="text-sm text-gray-400 font-semibold mt-1">
             โปสเตอร์ผังโครงสร้างคณะทำงานหลักและฝ่ายปฏิบัติการของนิสิตชมรม
@@ -172,14 +173,14 @@ export default function AboutPage() {
             </svg>
 
             <div className="flex flex-col gap-1.5">
-              <span className="text-base md:text-lg text-gray-700">🖼️ โปสเตอร์ผังโครงสร้างคณะกรรมการบริหารชมรม</span>
+              <span className="text-base md:text-lg text-gray-700 flex items-center justify-center gap-1.5"><ImageIcon className="w-5 h-5" /> โปสเตอร์ผังโครงสร้างคณะกรรมการบริหารชมรม</span>
               <span className="text-xs text-gray-400 font-semibold leading-relaxed">
                 (ฝ่ายบริหาร ฝ่ายวิชาการ ฝ่ายพัสดุ ฝ่ายประชาสัมพันธ์ และทีมงานนิสิต)
               </span>
             </div>
 
-            <span className="bg-gray-200/70 text-gray-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm">
-              💡 ขนาดแนะนำ: อัตราส่วน A4 แนวตั้ง (1 : 1.414) หรือสัดส่วน 3:4 (เช่น 1200 x 1700 px)
+            <span className="bg-gray-200/70 text-gray-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5">
+              <Lightbulb className="w-4 h-4 shrink-0" /> ขนาดแนะนำ: อัตราส่วน A4 แนวตั้ง (1 : 1.414) หรือสัดส่วน 3:4 (เช่น 1200 x 1700 px)
             </span>
           </div>
         </div>
@@ -191,7 +192,7 @@ export default function AboutPage() {
         {/* Section Heading */}
         <div className="text-center">
           <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl">
-            📍 สถานที่ตั้งห้องชมรม NU Robot Club
+            <MapPin className="inline-block w-8 h-8 mr-2 text-gray-900" /> สถานที่ตั้งห้องชมรม NU Robot Club
           </h2>
           <p className="text-sm text-gray-400 font-semibold mt-1">
             แวะเข้ามาพบปะ แลกเปลี่ยนไอเดียต่อวงจร หรือปรึกษาโปรเจกต์ได้ที่ห้องชมรมของพวกเรา
@@ -210,7 +211,7 @@ export default function AboutPage() {
               ห้องชมรม NU Robot Club
             </h3>
             <p className="text-base text-gray-600 font-medium leading-relaxed mt-2">
-              🚪 ชั้น 7 ห้อง EE701 อาคารวิศกรรมไฟฟ้าและคอมพิวเตอร์ คณะวิศวกรรมศาสตร์ <br />
+              <DoorOpen className="inline w-4 h-4 text-gray-400 mr-1" /> ชั้น 7 ห้อง EE701 อาคารวิศกรรมไฟฟ้าและคอมพิวเตอร์ คณะวิศวกรรมศาสตร์ <br />
               มหาวิทยาลัยนเรศวร ต.ท่าโพธิ์ อ.เมือง จ.พิษณุโลก 65000
             </p>
           </div>
@@ -218,7 +219,7 @@ export default function AboutPage() {
           {/* Right Block: Contacts & Social buttons */}
           <div className="flex flex-col gap-4 md:border-l md:border-gray-100 md:pl-8">
             <div className="text-gray-700 font-bold text-sm">
-              💬 ช่องทางการติดต่อชมรม:
+              <MessageCircle className="inline w-4 h-4 text-gray-400 mr-1" /> ช่องทางการติดต่อชมรม:
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -258,7 +259,7 @@ export default function AboutPage() {
         <div className="flex flex-col gap-8">
           <div className="border-b border-gray-100 pb-4">
             <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              🗺️ คู่มือการเดินทางไปห้องชมรมทีละขั้นตอน
+              <Map className="w-6 h-6 text-gray-900" /> คู่มือการเดินทางไปห้องชมรมทีละขั้นตอน
             </h3>
             <p className="text-sm text-gray-400 font-semibold mt-1">
               คำแนะนำพร้อมภาพประกอบสำหรับการเดินทางมายังห้อง EE701 ชั้น 7 (ทั้งหมด 10 ขั้นตอน)

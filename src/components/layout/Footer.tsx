@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
+import { MapPin, Heart } from "lucide-react"
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -104,7 +105,7 @@ export default function Footer() {
             <div className="flex flex-col gap-4">
               {/* Premium Styled Location Card */}
               <div className="flex items-start gap-3 rounded-2xl border border-gray-200/60 bg-white p-4 text-xs md:text-sm font-medium text-gray-500 shadow-sm leading-relaxed max-w-sm">
-                <span className="text-lg leading-none mt-0.5">📍</span>
+                <MapPin className="w-5 h-5 text-gray-400 mt-0.5 shrink-0" />
                 <div>
                   <strong className="text-gray-900 block mb-1 font-bold text-sm">ห้องชมรม NU Robot Club</strong>
                   <span className="block text-gray-500">
@@ -119,7 +120,7 @@ export default function Footer() {
                 href="/about#location"
                 className="flex items-center gap-3 rounded-2xl border border-gray-200/60 bg-white p-4 text-xs md:text-sm font-bold text-orange-500 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-orange-50/30 active:translate-y-0 active:scale-[0.98] max-w-sm hover:border-orange-500/20 group"
               >
-                <span className="text-lg leading-none group-hover:scale-110 transition-transform">📍</span>
+                <MapPin className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 <span>คลิกดูที่ตั้งห้องชมรม</span>
               </Link>
 
@@ -133,8 +134,8 @@ export default function Footer() {
           <p>
             &copy; {currentYear} NU Robot Club. All rights reserved.
           </p>
-          <p className="flex items-center gap-1">
-            Handcrafted with 🧡 by <span className="font-semibold text-gray-600">NU Robot Club Dev Team</span>
+          <p className="flex items-center gap-1.5">
+            Handcrafted with <Heart className="w-3.5 h-3.5 text-orange-500 fill-orange-500" /> by <span className="font-semibold text-gray-600">NU Robot Club Dev Team</span>
           </p>
         </div>
       </div>

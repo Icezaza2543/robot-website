@@ -30,7 +30,7 @@ function getTransporter() {
 async function dispatchEmail(subject: string, htmlContent: string) {
   const adminEmails = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL;
   if (!adminEmails) {
-    console.warn("⚠️ Warning: ADMIN_EMAILS environment variable is not configured. Email will be logged to console.");
+    console.warn("[WARNING] ADMIN_EMAILS environment variable is not configured. Email will be logged to console.");
   }
 
   const recipient = adminEmails || "admin-receiver@robot-club.nu.ac.th";
@@ -40,7 +40,7 @@ async function dispatchEmail(subject: string, htmlContent: string) {
     // Elegant Developer Logging Fallback
     console.log(`
 ┌────────────────────────────────────────────────────────────────────────┐
-│ 📧 [DEVELOPER MOCK EMAIL LOG]                                          │
+│ [EMAIL] DEVELOPER MOCK EMAIL LOG                                       │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Subject:   ${subject.padEnd(60)}│
 │ Recipient: ${recipient.padEnd(60)}│
@@ -62,10 +62,10 @@ ${htmlContent.split("\n").map(line => `│ ${line.slice(0, 70).padEnd(70)} │`)
       subject,
       html: htmlContent,
     });
-    console.log(`✅ Success: Email notification sent successfully to ${recipient} [Subject: ${subject}]`);
+    console.log(`[SUCCESS] Email notification sent successfully to ${recipient} [Subject: ${subject}]`);
     return true;
   } catch (error) {
-    console.error("❌ Failed to dispatch email notification via SMTP:", error);
+    console.error("[ERROR] Failed to dispatch email notification via SMTP:", error);
     return false;
   }
 }
@@ -73,14 +73,13 @@ ${htmlContent.split("\n").map(line => `│ ${line.slice(0, 70).padEnd(70)} │`)
 /**
  * HTML Template Helper for Premium Branding styling
  */
-function getEmailBaseTemplate(title: string, icon: string, bodyHtml: string) {
+function getEmailBaseTemplate(title: string, bodyHtml: string) {
   return `
     <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #F8FAFC; padding: 40px 20px; color: #1E293B;">
       <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #FFFFFF; border-radius: 24px; border: 1px solid #E2E8F0; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);">
         <!-- Header -->
         <tr>
           <td style="background-color: #0F172A; padding: 40px 30px; text-align: center; border-bottom: 4px solid #F97316;">
-            <div style="font-size: 40px; margin-bottom: 10px;">${icon}</div>
             <h1 style="color: #FFFFFF; font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin: 0;">NU Robot Club</h1>
             <p style="color: #94A3B8; font-size: 12px; font-weight: 600; margin: 5px 0 0 0; text-transform: uppercase;">Smart Notifications Layer</p>
           </td>
@@ -148,7 +147,7 @@ function formatEmailItems(itemsJson: string): string {
  * 1. Event: New borrow request submitted
  */
 export async function sendNewBorrowNotification(request: BorrowRequest) {
-  const subject = `⚠️ [คำขอยืมใหม่] รหัสอ้างอิง: ${request.id} - โดย ${request.borrowerName}`;
+  const subject = `[คำขอยืมใหม่] รหัสอ้างอิง: ${request.id} - โดย ${request.borrowerName}`;
   const bodyHtml = `
     <div style="font-size: 14px; line-height: 1.6; color: #334155;">
       <p style="margin-top: 0;">เรียน ผู้ดูแลระบบคลังชมรมโรบอท,</p>
@@ -156,7 +155,7 @@ export async function sendNewBorrowNotification(request: BorrowRequest) {
       
       <!-- Borrower Details -->
       <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 16px; padding: 20px; margin: 25px 0;">
-        <h3 style="font-size: 14px; font-weight: 800; color: #0F172A; margin-top: 0; margin-bottom: 12px; text-transform: uppercase; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">👤 ข้อมูลผู้ทำเรื่องขอยืม</h3>
+        <h3 style="font-size: 14px; font-weight: 800; color: #0F172A; margin-top: 0; margin-bottom: 12px; text-transform: uppercase; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px;">ข้อมูลผู้ทำเรื่องขอยืม</h3>
         <table width="100%" style="font-size: 13px; font-weight: 600; color: #475569;">
           <tr>
             <td width="35%" style="color: #94A3B8; padding: 4px 0;">รหัสคำขอ:</td>
@@ -182,13 +181,13 @@ export async function sendNewBorrowNotification(request: BorrowRequest) {
       </div>
 
       <!-- Items Section -->
-      <h3 style="font-size: 14px; font-weight: 800; color: #0F172A; margin-bottom: 5px; text-transform: uppercase;">📦 รายการสิ่งของอุปกรณ์ที่ขอยืม</h3>
+      <h3 style="font-size: 14px; font-weight: 800; color: #0F172A; margin-bottom: 5px; text-transform: uppercase;">รายการสิ่งของอุปกรณ์ที่ขอยืม</h3>
       ${formatEmailItems(request.items)}
 
       <!-- Note Section -->
       ${request.note ? `
         <div style="margin-top: 25px; font-size: 13px;">
-          <h4 style="font-size: 13px; font-weight: 800; color: #0F172A; margin: 0 0 8px 0; text-transform: uppercase;">📝 จุดประสงค์ของการขอยืม:</h4>
+          <h4 style="font-size: 13px; font-weight: 800; color: #0F172A; margin: 0 0 8px 0; text-transform: uppercase;">จุดประสงค์ของการขอยืม:</h4>
           <blockquote style="margin: 0; padding: 12px 16px; background-color: #FFF7ED; border-left: 4px solid #F97316; border-radius: 0 12px 12px 0; color: #7C2D12; font-style: italic; font-weight: bold;">
             "${request.note}"
           </blockquote>
@@ -197,20 +196,20 @@ export async function sendNewBorrowNotification(request: BorrowRequest) {
 
       <div style="margin-top: 35px; text-align: center;">
         <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/admin/borrow" style="display: inline-block; background-color: #F97316; color: #FFFFFF; font-weight: bold; font-size: 14px; text-decoration: none; padding: 14px 28px; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2);">
-          ⚙️ เปิดหน้าจออนุมัติคลังระบบหลังบ้าน
+          เปิดหน้าจออนุมัติคลังระบบหลังบ้าน
         </a>
       </div>
     </div>
   `;
 
-  return dispatchEmail(subject, getEmailBaseTemplate("คำขอยืมวัสดุอุปกรณ์ใหม่", "⏳", bodyHtml));
+  return dispatchEmail(subject, getEmailBaseTemplate("คำขอยืมวัสดุอุปกรณ์ใหม่", bodyHtml));
 }
 
 /**
  * 2. Event: Member requests a return
  */
 export async function sendReturnRequestNotification(request: BorrowRequest) {
-  const subject = `🔄 [ยื่นส่งคืนของ] รหัสใบยืม: ${request.id} - รอตรวจรับโดย ${request.borrowerName}`;
+  const subject = `[ยื่นส่งคืนของ] รหัสใบยืม: ${request.id} - รอตรวจรับโดย ${request.borrowerName}`;
   const bodyHtml = `
     <div style="font-size: 14px; line-height: 1.6; color: #334155;">
       <p style="margin-top: 0;">เรียน ผู้ดูแลระบบคลังชมรมโรบอท,</p>
@@ -235,25 +234,25 @@ export async function sendReturnRequestNotification(request: BorrowRequest) {
       </div>
 
       <!-- Items Section -->
-      <h3 style="font-size: 14px; font-weight: 800; color: #0F172A; margin-bottom: 5px; text-transform: uppercase;">📦 รายการสิ่งของอุปกรณ์ที่จะส่งคืน</h3>
+      <h3 style="font-size: 14px; font-weight: 800; color: #0F172A; margin-bottom: 5px; text-transform: uppercase;">รายการสิ่งของอุปกรณ์ที่จะส่งคืน</h3>
       ${formatEmailItems(request.items)}
 
       <div style="margin-top: 35px; text-align: center;">
         <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/admin/borrow" style="display: inline-block; background-color: #0D9488; color: #FFFFFF; font-weight: bold; font-size: 14px; text-decoration: none; padding: 14px 28px; border-radius: 14px; box-shadow: 0 4px 6px -1px rgba(13, 148, 136, 0.2);">
-          🔄 เปิดระบบอนุมัติเพื่อกดยืนยันรับของคืน
+          เปิดระบบอนุมัติเพื่อกดยืนยันรับของคืน
         </a>
       </div>
     </div>
   `;
 
-  return dispatchEmail(subject, getEmailBaseTemplate("สมาชิกส่งคำขอคืนอุปกรณ์", "🔄", bodyHtml));
+  return dispatchEmail(subject, getEmailBaseTemplate("สมาชิกส่งคำขอคืนอุปกรณ์", bodyHtml));
 }
 
 /**
  * 3. Event: Return confirmed by Admin
  */
 export async function sendReturnConfirmedNotification(request: BorrowRequest) {
-  const subject = `📦 [เสร็จสิ้น] ยืนยันรับคืนอุปกรณ์สำเร็จ รหัสใบยืม: ${request.id}`;
+  const subject = `[เสร็จสิ้น] ยืนยันรับคืนอุปกรณ์สำเร็จ รหัสใบยืม: ${request.id}`;
   const bodyHtml = `
     <div style="font-size: 14px; line-height: 1.6; color: #334155;">
       <p style="margin-top: 0;">เรียน ผู้ดูแลระบบคลังชมรมโรบอท,</p>
@@ -278,12 +277,12 @@ export async function sendReturnConfirmedNotification(request: BorrowRequest) {
       </div>
 
       <!-- Items Section -->
-      <h3 style="font-size: 14px; font-weight: 800; color: #0F172A; margin-bottom: 5px; text-transform: uppercase;">📦 รายการสิ่งของอุปกรณ์ที่เก็บคืนสำเร็จ</h3>
+      <h3 style="font-size: 14px; font-weight: 800; color: #0F172A; margin-bottom: 5px; text-transform: uppercase;">รายการสิ่งของอุปกรณ์ที่เก็บคืนสำเร็จ</h3>
       ${formatEmailItems(request.items)}
     </div>
   `;
 
-  return dispatchEmail(subject, getEmailBaseTemplate("ดำเนินการตรวจรับคืนของสำเร็จ", "📦", bodyHtml));
+  return dispatchEmail(subject, getEmailBaseTemplate("ดำเนินการตรวจรับคืนของสำเร็จ", bodyHtml));
 }
 
 /**
@@ -291,7 +290,7 @@ export async function sendReturnConfirmedNotification(request: BorrowRequest) {
  */
 export async function sendLowStockNotification(item: any, remaining: number) {
   const isOutOfStock = remaining === 0;
-  const severityTag = isOutOfStock ? "❌ [สินค้าหมดคลัง!]" : "⚠️ [วัสดุใกล้หมดคลัง]";
+  const severityTag = isOutOfStock ? "[สินค้าหมดคลัง!]" : "[วัสดุใกล้หมดคลัง]";
   const subject = `${severityTag} อุปกรณ์รหัส ${item.id} (${item.name}) เหลือ ${remaining} ชิ้น`;
   
   const bodyHtml = `
@@ -316,12 +315,12 @@ export async function sendLowStockNotification(item: any, remaining: number) {
           </tr>
           <tr>
             <td style="color: #94A3B8; padding: 4px 0;">สถานที่จัดเก็บพัสดุ:</td>
-            <td style="color: #475569;">📍 ${item.location || 'ไม่ได้ระบุ'}</td>
+            <td style="color: #475569;">${item.location || 'ไม่ได้ระบุ'}</td>
           </tr>
           <tr>
             <td style="color: #94A3B8; padding: 4px 0;">สถานะยอดคงคลัง:</td>
             <td style="color: ${isOutOfStock ? '#EF4444' : '#D97706'}; font-weight: 900; font-size: 15px;">
-              ${isOutOfStock ? '⚠️ หมดคลังสต็อก (0 ชิ้น)' : `⚠️ ใกล้หมดคลัง (คงเหลือ ${remaining} ชิ้น)`}
+              ${isOutOfStock ? 'หมดคลังสต็อก (0 ชิ้น)' : `ใกล้หมดคลัง (คงเหลือ ${remaining} ชิ้น)`}
             </td>
           </tr>
         </table>
@@ -333,24 +332,24 @@ export async function sendLowStockNotification(item: any, remaining: number) {
 
       <div style="margin-top: 30px; text-align: center;">
         <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/admin/items" style="display: inline-block; background-color: #0F172A; color: #FFFFFF; font-weight: bold; font-size: 13px; text-decoration: none; padding: 12px 24px; border-radius: 12px;">
-          📦 เปิดหน้าจอตรวจยอดสต็อกหลังบ้าน
+          เปิดหน้าจอตรวจยอดสต็อกหลังบ้าน
         </a>
       </div>
     </div>
   `;
 
-  return dispatchEmail(subject, getEmailBaseTemplate(isOutOfStock ? "อุปกรณ์หมดสต็อกในคลังพัสดุ" : "อุปกรณ์ยอดคงคลังต่ำกว่าเกณฑ์", "⚠️", bodyHtml));
+  return dispatchEmail(subject, getEmailBaseTemplate(isOutOfStock ? "อุปกรณ์หมดสต็อกในคลังพัสดุ" : "อุปกรณ์ยอดคงคลังต่ำกว่าเกณฑ์", bodyHtml));
 }
 
 /**
  * 5. Event: Overdue borrow request alert
  */
 export async function sendOverdueNotification(request: BorrowRequest) {
-  const subject = `🚨 [เกินกำหนดส่งคืน!] รหัสใบยืม: ${request.id} - ค้างคืนโดย ${request.borrowerName}`;
+  const subject = `[เกินกำหนดส่งคืน!] รหัสใบยืม: ${request.id} - ค้างคืนโดย ${request.borrowerName}`;
   const bodyHtml = `
     <div style="font-size: 14px; line-height: 1.6; color: #334155;">
       <p style="margin-top: 0;">เรียน ผู้ดูแลระบบคลังชมรมโรบอท,</p>
-      <p style="color: #EF4444; font-weight: bold;">🚨 ระบบแจ้งเตือนอัตโนมัติพบการยืมสิ่งของวัสดุ **"เกินกำหนดส่งคืนส่งกลับ"** (Overdue)!</p>
+      <p style="color: #EF4444; font-weight: bold;">[ALERT] ระบบแจ้งเตือนอัตโนมัติพบการยืมสิ่งของวัสดุ **"เกินกำหนดส่งคืนส่งกลับ"** (Overdue)!</p>
       <p>ใบคำขอขอยืมนี้พ้นเกณฑ์กำหนดส่งคืนที่สมาชิกกรอกจองไว้แล้ว และยังไม่มีการกดยืนยันขอคืนของเข้ามา โปรดดำเนินการเร่งรัดและประสานงานติดต่อกลับนิสิต:</p>
       
       <!-- Overdue details -->
@@ -366,7 +365,7 @@ export async function sendOverdueNotification(request: BorrowRequest) {
           </tr>
           <tr>
             <td style="color: #E53E3E; padding: 4px 0;">เบอร์โทรศัพท์นิสิต:</td>
-            <td style="color: #0F172A; font-weight: bold;">📞 ${request.borrowerPhone}</td>
+            <td style="color: #0F172A; font-weight: bold;">${request.borrowerPhone}</td>
           </tr>
           <tr>
             <td style="color: #E53E3E; padding: 4px 0;">อีเมลสมาชิก:</td>
@@ -374,13 +373,13 @@ export async function sendOverdueNotification(request: BorrowRequest) {
           </tr>
           <tr>
             <td style="color: #E53E3E; padding: 4px 0;">วันที่กำหนดคืนเดิม:</td>
-            <td style="color: #C53030; font-weight: 900;">⚠️ ${request.dueDate}</td>
+            <td style="color: #C53030; font-weight: 900;">${request.dueDate}</td>
           </tr>
         </table>
       </div>
 
       <!-- Items Section -->
-      <h3 style="font-size: 14px; font-weight: 800; color: #0F172A; margin-bottom: 5px; text-transform: uppercase;">📦 รายการสิ่งของอุปกรณ์ค้างส่งคืน</h3>
+      <h3 style="font-size: 14px; font-weight: 800; color: #0F172A; margin-bottom: 5px; text-transform: uppercase;">รายการสิ่งของอุปกรณ์ค้างส่งคืน</h3>
       ${formatEmailItems(request.items)}
 
       <p style="font-size: 12px; color: #718096; font-weight: 500; line-height: 1.5; margin-top: 25px;">
@@ -389,11 +388,11 @@ export async function sendOverdueNotification(request: BorrowRequest) {
 
       <div style="margin-top: 30px; text-align: center;">
         <a href="mailto:${request.userEmail}?subject=ติดตามคืนอุปกรณ์ค้างส่งชมรม%20NU%20Robot%20(ใบยืม%20${request.id})" style="display: inline-block; background-color: #E53E3E; color: #FFFFFF; font-weight: bold; font-size: 13px; text-decoration: none; padding: 12px 24px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(229, 62, 62, 0.2);">
-          ✉️ ส่งอีเมลแจ้งเตือนนิสิตผู้ยืมโดยตรง
+          ส่งอีเมลแจ้งเตือนนิสิตผู้ยืมโดยตรง
         </a>
       </div>
     </div>
   `;
 
-  return dispatchEmail(subject, getEmailBaseTemplate("พบวัสดุค้างส่งคืนเกินกำหนดส่ง", "🚨", bodyHtml));
+  return dispatchEmail(subject, getEmailBaseTemplate("พบวัสดุค้างส่งคืนเกินกำหนดส่ง", bodyHtml));
 }

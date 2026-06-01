@@ -36,11 +36,11 @@ export async function resolveUserRole(
     const sheetUser = await getSheetUserByEmail(email);
 
     if (sheetUser) {
-      console.log(`ℹ️ User ${email} found in Google Sheets. Role resolved to: ${sheetUser.role}`);
+      console.log(`[INFO] User ${email} found in Google Sheets. Role resolved to: ${sheetUser.role}`);
       return sheetUser.role;
     }
   } catch (error) {
-    console.error("⚠️ Failed to resolve role from Google Sheets, attempting .env fallback:", error);
+    console.error("[WARNING] Failed to resolve role from Google Sheets, attempting .env fallback:", error);
   }
 
   // ── 2. Determine Role for fallback / auto-registration ──
@@ -49,14 +49,14 @@ export async function resolveUserRole(
   if (adminEmailsEnv) {
     const adminList = adminEmailsEnv.split(",").map(e => e.trim().toLowerCase());
     if (adminList.includes(normalizedEmail)) {
-      console.log(`ℹ️ User ${email} matched in .env ADMIN_EMAILS.`);
+      console.log(`[INFO] User ${email} matched in .env ADMIN_EMAILS.`);
       resolvedRole = "admin";
     }
   }
 
   // ── 3. Auto-Register User on First Login ──
   if (name) {
-    console.log(`ℹ️ User ${email} not found in Google Sheets. Attempting auto-registration...`);
+    console.log(`[INFO] User ${email} not found in Google Sheets. Attempting auto-registration...`);
     try {
       await appendSheetUser({
         email: normalizedEmail,
@@ -65,7 +65,7 @@ export async function resolveUserRole(
         status: "active",
       });
     } catch (e) {
-      console.error("⚠️ Failed to auto-register user to Google Sheets:", e);
+      console.error("[WARNING] Failed to auto-register user to Google Sheets:", e);
     }
   }
 

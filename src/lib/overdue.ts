@@ -35,7 +35,7 @@ export async function checkAndUpdateOverdueRequests(): Promise<void> {
 
         // If current time is past the due time, transition to 'overdue'
         if (now.getTime() > dueTime.getTime()) {
-          console.warn(`🚨 Overdue Detected: Request ID ${request.id} for borrower ${request.borrowerName} has passed its due date (${request.dueDate}).`);
+          console.warn(`[ALERT] Overdue Detected: Request ID ${request.id} for borrower ${request.borrowerName} has passed its due date (${request.dueDate}).`);
 
           // 1. Update status in Google Sheets
           const success = await updateSheetBorrowRequestStatus(request.id, "overdue");
@@ -43,14 +43,14 @@ export async function checkAndUpdateOverdueRequests(): Promise<void> {
             // 2. Dispatch Email Notification to Admin
             const updatedRequest: BorrowRequest = { ...request, status: "overdue" };
             await sendOverdueNotification(updatedRequest);
-            console.log(`✅ Success: Automatically transitioned request ${request.id} to overdue status.`);
+            console.log(`[SUCCESS] Success: Automatically transitioned request ${request.id} to overdue status.`);
           }
         }
       } catch (dateError) {
-        console.error(`❌ Failed to parse or check due date for request ${request.id}:`, dateError);
+        console.error(`[ERROR] Failed to parse or check due date for request ${request.id}:`, dateError);
       }
     }
   } catch (error) {
-    console.error("❌ Failed to run background overdue checks:", error);
+    console.error("[ERROR] Failed to run background overdue checks:", error);
   }
 }

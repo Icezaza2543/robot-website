@@ -22,7 +22,7 @@ export default function NewsArticle3() {
           href="/"
           className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 px-4 py-2.5 text-xs font-bold text-gray-500 transition shadow-xs cursor-pointer active:scale-95"
         >
-          ⬅️ กลับหน้าหลัก
+          กลับหน้าหลัก
         </Link>
         <span className="text-[10px] font-black uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-200 px-3 py-1 rounded-full">
           {post.category}
@@ -43,7 +43,7 @@ export default function NewsArticle3() {
           {/* Floating Size Tag */}
           <div className="absolute bottom-5 right-6 sm:right-8">
             <span className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-wider bg-black/60 backdrop-blur-xs text-white px-3 py-1.5 rounded-xl border border-white/10 shadow-md">
-              📷 ขนาดแนะนำ: {post.imageSize}
+              ขนาดแนะนำ: {post.imageSize}
             </span>
           </div>
         </div>
@@ -62,7 +62,7 @@ export default function NewsArticle3() {
               </div>
             </div>
             <div className="text-[10px] font-bold text-gray-400">
-              🗓 เผยแพร่เมื่อ: {post.date}
+              เผยแพร่เมื่อ: {post.date}
             </div>
           </div>
 
@@ -74,7 +74,7 @@ export default function NewsArticle3() {
 
             {/* Editorial summary box */}
             <p className="text-xs text-orange-900 leading-relaxed font-bold border-l-4 border-orange-500 pl-4 bg-orange-50/40 p-4 rounded-r-2xl border-y border-r border-orange-100/20">
-              💡 **บทสรุปสังเขป**: {post.summary}
+              **บทสรุปสังเขป**: {post.summary}
             </p>
 
             {/* Structured paragraph rendering */}
@@ -92,7 +92,7 @@ export default function NewsArticle3() {
                           const cleanLi = li.replace("- ", "");
                           return (
                             <li key={idx} className="flex items-start gap-2 text-xs font-semibold text-gray-600">
-                              <span className="text-orange-500 text-sm leading-none mt-0.5">⚡</span>
+                              <span className="text-orange-500 text-sm leading-none mt-0.5"></span>
                               <span className="leading-relaxed">{cleanLi}</span>
                             </li>
                           );

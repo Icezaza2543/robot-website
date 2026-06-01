@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { useCart } from "@/providers/CartProvider";
+import { ShoppingCart, ClipboardList, Plug, Package, Trash2, ExternalLink, Settings, MonitorUp, History, LogOut } from "lucide-react";
 
 export default function NavbarAuth() {
   const { data: session, status } = useSession();
@@ -45,7 +46,7 @@ export default function NavbarAuth() {
           className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200/80 bg-white shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 cursor-pointer active:scale-95 group"
           title="ตะกร้ายืมอุปกรณ์"
         >
-          <span className="text-xl leading-none">🛒</span>
+          <ShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-orange-500 transition-colors" />
           {cartCount > 0 && (
             <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-[10px] font-black text-white shadow-md shadow-orange-500/30 animate-pulse">
               {cartCount}
@@ -55,9 +56,9 @@ export default function NavbarAuth() {
 
         {/* Hover Dropdown Preview Tab */}
         {isCartHovered && (
-          <div className="absolute right-0 mt-2.5 w-80 origin-top-right rounded-3xl border border-gray-100 bg-white p-4 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+          <div className="absolute right-0 mt-2.5 w-[calc(100vw-2rem)] max-w-sm md:w-80 origin-top-right rounded-3xl border border-gray-100 bg-white p-4 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 z-50">
             <h4 className="text-xs font-black text-gray-900 border-b border-gray-100 pb-2 mb-2.5 flex items-center justify-between">
-              <span className="flex items-center gap-1">📋 อุปกรณ์ในตะกร้า</span>
+              <span className="flex items-center gap-1.5"><ClipboardList className="w-4 h-4 text-orange-500" /> อุปกรณ์ในตะกร้า</span>
               <span className="text-[10px] font-black bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-md">
                 {cartCount} รายการ
               </span>
@@ -65,7 +66,8 @@ export default function NavbarAuth() {
 
             {cartItems.length === 0 ? (
               <div className="py-8 text-center text-xs font-bold text-gray-400 flex flex-col items-center gap-1.5">
-                <span>🔌 ตะกร้าว่างเปล่า</span>
+                <Plug className="w-8 h-8 text-gray-200 mb-1" />
+                <span>ตะกร้าว่างเปล่า</span>
                 <span className="text-[10px] font-medium text-gray-300">เลือกของเพื่อสะสมขอยืม</span>
               </div>
             ) : (
@@ -80,16 +82,16 @@ export default function NavbarAuth() {
                         <h5 className="text-xs font-bold text-gray-800 truncate" title={item.name}>
                           {item.name}
                         </h5>
-                        <div className="flex items-center justify-between text-[10px] text-gray-400 font-bold mt-0.5">
-                          <span>📦 จำนวน: {item.quantity} ชิ้น</span>
+                        <div className="flex items-center gap-1 text-[10px] text-gray-400 font-bold mt-0.5">
+                          <Package className="w-3 h-3" /> <span>จำนวน: {item.quantity} ชิ้น</span>
                         </div>
                       </div>
                       <button
                         onClick={() => removeFromCart(item.id)}
-                        className="text-xs text-gray-300 hover:text-red-500 hover:scale-110 transition-all duration-200 cursor-pointer active:scale-90 p-1"
+                        className="text-gray-300 hover:text-red-500 hover:scale-110 transition-all duration-200 cursor-pointer active:scale-90 p-1"
                         title="ลบสิ่งของออกจากตะกร้า"
                       >
-                        🗑️
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
@@ -100,7 +102,8 @@ export default function NavbarAuth() {
                     href="/cart"
                     className="w-full rounded-2xl bg-gray-900 hover:bg-orange-500 text-white font-bold py-3 text-center text-xs transition-all duration-300 shadow-md shadow-gray-900/10 hover:shadow-orange-500/20 cursor-pointer active:scale-98 flex items-center justify-center gap-1.5"
                   >
-                    <span>🔗 ไปยังหน้าตะกร้ายืมอุปกรณ์</span>
+                    <ExternalLink className="w-4 h-4" />
+                    <span>ไปยังหน้าตะกร้ายืมอุปกรณ์</span>
                   </Link>
                 </div>
               </>
@@ -172,20 +175,26 @@ export default function NavbarAuth() {
                   href="/admin"
                   className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold text-orange-600 hover:bg-orange-50 transition-colors"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
+                  <Settings className="w-4 h-4" />
                   แผงผู้ดูแลระบบ
                 </Link>
               )}
 
               <Link
-                href="/equipment"
+                href="/dashboard"
                 className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
+                แผงควบคุม (Dashboard)
+              </Link>
+
+              <Link
+                href="/equipment"
+                className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <MonitorUp className="w-4 h-4" />
                 ยืมอุปกรณ์อิเล็กทรอนิกส์
               </Link>
 
@@ -193,9 +202,7 @@ export default function NavbarAuth() {
                 href="/borrow/history"
                 className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <History className="w-4 h-4" />
                 ประวัติการยืม-คืน
               </Link>
             </div>
@@ -206,9 +213,7 @@ export default function NavbarAuth() {
                 onClick={() => signOut({ callbackUrl: "/" })}
                 className="w-full flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors text-left cursor-pointer"
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
+                <LogOut className="w-4 h-4" />
                 ออกจากระบบ
               </button>
             </div>

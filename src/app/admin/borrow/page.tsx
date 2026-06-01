@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Lock, Timer, CheckCircle2, RefreshCw, XCircle, Package, AlertTriangle, FileText, Settings, ClipboardList, Search, PartyPopper, Inbox, MapPin, User, Megaphone } from "lucide-react";
 
 interface RequestItem {
   id: string;
@@ -89,7 +90,7 @@ export default function AdminBorrowPage() {
   if (status === "unauthenticated" || session?.user?.role !== "admin") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-50 text-center px-4">
-        <span className="text-5xl">🔒</span>
+        <Lock className="w-16 h-16 text-gray-300 mb-2" />
         <h1 className="text-2xl font-black text-rose-500">ปฏิเสธการเข้าใช้งาน</h1>
         <p className="text-gray-500 max-w-sm">เฉพาะผู้ควบคุมระบบชมรม (Admin) เท่านั้นที่สามารถจัดการคำขออนุมัติยืมได้</p>
         <Link
@@ -119,49 +120,49 @@ export default function AdminBorrowPage() {
           bg: "bg-amber-50 border-amber-200 text-amber-700",
           dot: "bg-amber-500",
           text: "รอดำเนินการอนุมัติ",
-          icon: "⏳",
+          icon: <Timer className="w-3.5 h-3.5" />,
         };
       case "approved":
         return {
           bg: "bg-emerald-50 border-emerald-200 text-emerald-700",
           dot: "bg-emerald-500",
           text: "อนุมัติแล้ว (กำลังยืม)",
-          icon: "✅",
+          icon: <CheckCircle2 className="w-3.5 h-3.5" />,
         };
       case "return_pending":
         return {
           bg: "bg-teal-50 border-teal-200 text-teal-700",
           dot: "bg-teal-500",
           text: "สมาชิกขอคืนอุปกรณ์",
-          icon: "🔄",
+          icon: <RefreshCw className="w-3.5 h-3.5" />,
         };
       case "rejected":
         return {
           bg: "bg-rose-50 border-rose-200 text-rose-700",
           dot: "bg-rose-500",
           text: "ปฏิเสธการขอยืม",
-          icon: "❌",
+          icon: <XCircle className="w-3.5 h-3.5" />,
         };
       case "returned":
         return {
           bg: "bg-blue-50 border-blue-200 text-blue-700",
           dot: "bg-blue-500",
           text: "ส่งคืนแล้ว (เสร็จสิ้น)",
-          icon: "📦",
+          icon: <Package className="w-3.5 h-3.5" />,
         };
       case "overdue":
         return {
           bg: "bg-purple-50 border-purple-200 text-purple-700",
           dot: "bg-purple-500",
           text: "เกินกำหนดส่งคืน",
-          icon: "⚠️",
+          icon: <AlertTriangle className="w-3.5 h-3.5" />,
         };
       default:
         return {
           bg: "bg-gray-50 border-gray-200 text-gray-700",
           dot: "bg-gray-500",
           text: statusName,
-          icon: "📝",
+          icon: <FileText className="w-3.5 h-3.5" />,
         };
     }
   };
@@ -273,7 +274,8 @@ export default function AdminBorrowPage() {
       <div className="relative overflow-hidden rounded-3xl border border-gray-200/80 bg-white p-8 md:p-10 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold text-orange-500 uppercase tracking-widest mb-1.5">
-            <span>⚙️ NU Robot Club Administrator Portal</span>
+            <Settings className="w-4 h-4" />
+            <span>NU Robot Club Administrator Portal</span>
           </div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight sm:text-4xl">
             ระบบอนุมัติและจัดการคำขอยืมอุปกรณ์
@@ -283,12 +285,20 @@ export default function AdminBorrowPage() {
           </p>
         </div>
 
-        <Link
-          href="/admin/items"
-          className="rounded-2xl border border-orange-200 bg-orange-50 hover:bg-orange-100 px-5 py-3.5 text-sm font-bold text-orange-600 shadow-sm transition active:scale-95 cursor-pointer flex items-center gap-2"
-        >
-          <span>📦</span> จัดการรายการอุปกรณ์ในคลัง
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link
+            href="/admin/sponsors"
+            className="rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 px-5 py-3.5 text-sm font-bold text-gray-700 shadow-sm transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Megaphone className="w-4 h-4 text-orange-500" /> จัดการผู้สนับสนุน
+          </Link>
+          <Link
+            href="/admin/items"
+            className="rounded-2xl border border-orange-200 bg-orange-50 hover:bg-orange-100 px-5 py-3.5 text-sm font-bold text-orange-600 shadow-sm transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Package className="w-4 h-4" /> จัดการรายการอุปกรณ์
+          </Link>
+        </div>
       </div>
 
       {/* Admin Quick Dashboard Counters */}
@@ -297,7 +307,7 @@ export default function AdminBorrowPage() {
         <div className="rounded-2xl border border-gray-200/60 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between text-gray-400">
             <span className="text-xs font-bold uppercase tracking-wider">ใบคำขอทั้งหมด</span>
-            <span className="text-lg">📋</span>
+            <ClipboardList className="w-5 h-5" />
           </div>
           <div className="mt-3 flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-gray-900">{totalCount}</span>
@@ -309,7 +319,7 @@ export default function AdminBorrowPage() {
         <div className="rounded-2xl border border-amber-200 bg-amber-50/20 p-5 shadow-sm">
           <div className="flex items-center justify-between text-amber-500">
             <span className="text-xs font-bold uppercase tracking-wider">รอดำเนินการ</span>
-            <span className="text-lg animate-pulse">⏳</span>
+            <Timer className="w-5 h-5 animate-pulse" />
           </div>
           <div className="mt-3 flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-amber-600">{pendingCount}</span>
@@ -321,7 +331,7 @@ export default function AdminBorrowPage() {
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50/20 p-5 shadow-sm">
           <div className="flex items-center justify-between text-emerald-500">
             <span className="text-xs font-bold uppercase tracking-wider">กำลังยืมถือครอง</span>
-            <span className="text-lg">✅</span>
+            <CheckCircle2 className="w-5 h-5" />
           </div>
           <div className="mt-3 flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-emerald-600">{approvedCount}</span>
@@ -333,7 +343,7 @@ export default function AdminBorrowPage() {
         <div className="rounded-2xl border border-teal-200 bg-teal-50/20 p-5 shadow-sm">
           <div className="flex items-center justify-between text-teal-500">
             <span className="text-xs font-bold uppercase tracking-wider">รอรับคืนของ</span>
-            <span className={`text-lg ${returnPendingCount > 0 ? "animate-pulse" : ""}`}>🔄</span>
+            <RefreshCw className={`w-5 h-5 ${returnPendingCount > 0 ? "animate-spin-slow" : ""}`} />
           </div>
           <div className="mt-3 flex items-baseline gap-1.5">
             <span className={`text-3xl font-black ${returnPendingCount > 0 ? "text-teal-600" : "text-gray-700"}`}>{returnPendingCount}</span>
@@ -345,7 +355,7 @@ export default function AdminBorrowPage() {
         <div className="rounded-2xl border border-purple-200 bg-purple-50/20 p-5 shadow-sm">
           <div className="flex items-center justify-between text-purple-500">
             <span className="text-xs font-bold uppercase tracking-wider">เกินกำหนดส่งคืน</span>
-            <span className="text-lg">⚠️</span>
+            <AlertTriangle className="w-5 h-5" />
           </div>
           <div className="mt-3 flex items-baseline gap-1.5">
             <span className={`text-3xl font-black ${overdueCount > 0 ? "text-purple-600 animate-pulse" : "text-gray-700"}`}>
@@ -359,7 +369,7 @@ export default function AdminBorrowPage() {
         <div className="rounded-2xl border border-blue-200 bg-blue-50/20 p-5 shadow-sm">
           <div className="flex items-center justify-between text-blue-500">
             <span className="text-xs font-bold uppercase tracking-wider">ส่งคืนแล้ว</span>
-            <span className="text-lg">📦</span>
+            <Package className="w-5 h-5" />
           </div>
           <div className="mt-3 flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-blue-600">{returnedCount}</span>
@@ -373,7 +383,7 @@ export default function AdminBorrowPage() {
         {/* Search */}
         <div className="relative flex-1 max-w-md">
           <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-            🔍
+            <Search className="w-4 h-4" />
           </span>
           <input
             type="text"
@@ -389,12 +399,12 @@ export default function AdminBorrowPage() {
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mr-2">สถานะ:</span>
           {[
             { id: "All", label: "ทั้งหมด" },
-            { id: "pending", label: "⏳ รอดำเนินการ" },
-            { id: "approved", label: "✅ อนุมัติแล้ว" },
-            { id: "return_pending", label: "🔄 รอรับคืน" },
-            { id: "rejected", label: "❌ ปฏิเสธ" },
-            { id: "returned", label: "📦 คืนแล้ว" },
-            { id: "overdue", label: "⚠️ เกินกำหนด" },
+            { id: "pending", label: "รอดำเนินการ" },
+            { id: "approved", label: "อนุมัติแล้ว" },
+            { id: "return_pending", label: "รอรับคืน" },
+            { id: "rejected", label: "ปฏิเสธ" },
+            { id: "returned", label: "คืนแล้ว" },
+            { id: "overdue", label: "เกินกำหนด" },
           ].map((statusBtn) => (
             <button
               key={statusBtn.id}
@@ -417,9 +427,9 @@ export default function AdminBorrowPage() {
           <div className="w-full max-w-lg rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <h3 className="text-lg font-black text-gray-950 flex items-center gap-2">
-                {actionType === "approve" && <span className="text-emerald-500">✅ ยืนยันอนุมัติใบยืมอุปกรณ์</span>}
-                {actionType === "reject" && <span className="text-rose-500">❌ ยืนยันการปฏิเสธคำขอยืม</span>}
-                {actionType === "return" && <span className="text-blue-500">📦 บันทึกยืนยันคืนสิ่งของอุปกรณ์</span>}
+                {actionType === "approve" && <span className="text-emerald-500 flex items-center gap-1.5"><CheckCircle2 className="w-5 h-5" /> ยืนยันอนุมัติใบยืมอุปกรณ์</span>}
+                {actionType === "reject" && <span className="text-rose-500 flex items-center gap-1.5"><XCircle className="w-5 h-5" /> ยืนยันการปฏิเสธคำขอยืม</span>}
+                {actionType === "return" && <span className="text-blue-500 flex items-center gap-1.5"><Package className="w-5 h-5" /> บันทึกยืนยันคืนสิ่งของอุปกรณ์</span>}
                 <span className="text-xs bg-gray-100 border border-gray-200 px-2 py-1 rounded-md text-gray-600">
                   {actioningRequestId}
                 </span>
@@ -436,8 +446,8 @@ export default function AdminBorrowPage() {
               {/* Warnings and Details */}
               <div className="text-xs leading-relaxed p-3.5 rounded-2xl bg-gray-50 border border-gray-100 text-gray-600 font-medium">
                 {actionType === "approve" && (
-                  <p className="text-emerald-700 font-semibold">
-                    ⚠️ การอนุมัติจะทำการ **หักลดจำนวนอุปกรณ์ (Stock)** ที่ถูกจองออกจากระบบคลังใน Google Sheets ทันที กรุณาตรวจสอบให้แน่ใจว่าอุปกรณ์พร้อมจ่ายแจกจริง
+                  <p className="text-emerald-700 font-semibold flex gap-1.5">
+                    <AlertTriangle className="w-4 h-4 shrink-0 inline mt-0.5" /> <span>การอนุมัติจะทำการ **หักลดจำนวนอุปกรณ์ (Stock)** ที่ถูกจองออกจากระบบคลังใน Google Sheets ทันที กรุณาตรวจสอบให้แน่ใจว่าอุปกรณ์พร้อมจ่ายแจกจริง</span>
                   </p>
                 )}
                 {actionType === "reject" && (
@@ -473,15 +483,15 @@ export default function AdminBorrowPage() {
 
               {/* Error Notification Alert Banner */}
               {errorMessage && (
-                <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 leading-relaxed animate-pulse">
-                  ❌ {errorMessage}
+                <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 leading-relaxed animate-pulse flex items-start gap-1.5">
+                  <XCircle className="w-4 h-4 shrink-0 mt-0.5" /> <span>{errorMessage}</span>
                 </div>
               )}
 
               {/* Success Notification */}
               {successMessage && (
-                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700 leading-relaxed">
-                  🎉 {successMessage}
+                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700 leading-relaxed flex items-start gap-1.5">
+                  <PartyPopper className="w-4 h-4 shrink-0 mt-0.5" /> <span>{successMessage}</span>
                 </div>
               )}
 
@@ -526,8 +536,8 @@ export default function AdminBorrowPage() {
           <span className="text-sm font-bold text-gray-400 animate-pulse">กำลังโหลดคำขอทั้งหมดจากคลัง Google Sheets...</span>
         </div>
       ) : filteredRequests.length === 0 ? (
-        <div className="mt-8 rounded-3xl border border-dashed border-gray-200 bg-white py-20 text-center animate-in fade-in duration-300">
-          <span className="text-4xl">📭</span>
+        <div className="mt-8 rounded-3xl border border-dashed border-gray-200 bg-white py-20 text-center animate-in fade-in duration-300 flex flex-col items-center">
+          <Inbox className="w-12 h-12 text-gray-300 mb-4" />
           <h3 className="text-xl font-bold text-gray-700 mt-4">ไม่พบรายการใบขอยืมอุปกรณ์</h3>
           <p className="text-sm text-gray-400 mt-2 max-w-sm mx-auto leading-relaxed">
             {search || statusFilter !== "All"
@@ -644,7 +654,7 @@ export default function AdminBorrowPage() {
                       {/* Left Side: Items table layout */}
                       <div className="lg:col-span-2 space-y-4">
                         <h4 className="text-sm font-black text-gray-900 flex items-center gap-1.5">
-                          <span>📦</span> รายการสิ่งของขอออกยืม ({parsedItems.length} ชิ้น)
+                          <Package className="w-4 h-4 text-gray-400" /> รายการสิ่งของขอออกยืม ({parsedItems.length} ชิ้น)
                         </h4>
 
                         <div className="overflow-hidden rounded-2xl border border-gray-200/70 bg-white shadow-xs">
@@ -668,7 +678,7 @@ export default function AdminBorrowPage() {
                                   <td className="px-4 py-3 text-xs">
                                     <div className="font-bold text-gray-800">{item.name}</div>
                                     <div className="text-[10px] text-gray-400 flex items-center gap-1 mt-0.5">
-                                      <span>📍 ที่เก็บสิ่งของ:</span>
+                                      <MapPin className="w-3 h-3 shrink-0" /><span>ที่เก็บสิ่งของ:</span>
                                       <span className="font-semibold text-gray-500">{item.location || "ไม่ได้ระบุ"}</span>
                                     </div>
                                   </td>
@@ -689,8 +699,8 @@ export default function AdminBorrowPage() {
                       <div className="space-y-5">
                         {/* Submitter Info Card */}
                         <div className="rounded-2xl border border-gray-200/60 bg-white p-5 shadow-xs space-y-3">
-                          <h4 className="text-xs font-black text-gray-950 border-b border-gray-50 pb-2">
-                            👤 ข้อมูลสมาชิกที่ทำรายการ
+                          <h4 className="text-xs font-black text-gray-950 border-b border-gray-50 pb-2 flex items-center gap-1.5">
+                            <User className="w-4 h-4" /> ข้อมูลสมาชิกที่ทำรายการ
                           </h4>
                           <div className="space-y-2 text-xs">
                             <div className="flex justify-between">
@@ -710,8 +720,8 @@ export default function AdminBorrowPage() {
 
                         {/* Note/Reason Column */}
                         <div className="rounded-2xl border border-gray-200/60 bg-white p-5 shadow-xs space-y-2">
-                          <h4 className="text-xs font-black text-gray-950">
-                            📝 จุดประสงค์การขอยืมของสมาชิก
+                          <h4 className="text-xs font-black text-gray-950 flex items-center gap-1.5">
+                            <FileText className="w-4 h-4" /> จุดประสงค์การขอยืมของสมาชิก
                           </h4>
                           <p className="text-xs text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100 whitespace-pre-wrap font-medium">
                             {request.note || "ไม่มีระบุจุดประสงค์เพิ่มเติม"}
@@ -721,8 +731,8 @@ export default function AdminBorrowPage() {
                         {/* Admin Notes Feedbacks */}
                         {request.adminNote && (
                           <div className="rounded-2xl border border-orange-200 bg-orange-50/10 p-5 shadow-xs space-y-2">
-                            <h4 className="text-xs font-black text-orange-950">
-                              📢 บันทึกของแอดมินก่อนหน้านี้
+                            <h4 className="text-xs font-black text-orange-950 flex items-center gap-1.5">
+                              <Megaphone className="w-4 h-4" /> บันทึกของแอดมินก่อนหน้านี้
                             </h4>
                             <p className="text-xs text-orange-900 leading-relaxed bg-white p-3 rounded-xl border border-orange-100/50 whitespace-pre-wrap font-medium">
                               {request.adminNote}
@@ -732,8 +742,8 @@ export default function AdminBorrowPage() {
 
                         {/* Admin Control Actions Buttons Panel */}
                         <div className="pt-2 border-t border-gray-100 space-y-2.5">
-                          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                            ⚙️ การจัดการควบคุมคำขออนุมัติ:
+                          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <Settings className="w-3 h-3" /> การจัดการควบคุมคำขออนุมัติ:
                           </h4>
 
                           {request.status.toLowerCase() === "pending" && (
@@ -743,7 +753,7 @@ export default function AdminBorrowPage() {
                                 onClick={() => openActionForm(request.id, "approve")}
                                 className="flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 text-xs transition shadow-sm hover:shadow-md cursor-pointer text-center active:scale-98"
                               >
-                                ✅ อนุมัติยืม
+                                <CheckCircle2 className="w-4 h-4" /> อนุมัติยืม
                               </button>
 
                               {/* Reject Button */}
@@ -751,7 +761,7 @@ export default function AdminBorrowPage() {
                                 onClick={() => openActionForm(request.id, "reject")}
                                 className="flex-1 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 font-bold py-2.5 px-4 text-xs transition cursor-pointer text-center active:scale-98"
                               >
-                                ❌ ปฏิเสธขอยืม
+                                <XCircle className="w-4 h-4" /> ปฏิเสธขอยืม
                               </button>
                             </div>
                           )}
@@ -761,28 +771,28 @@ export default function AdminBorrowPage() {
                               onClick={() => openActionForm(request.id, "return")}
                               className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 text-xs transition shadow-sm hover:shadow-md cursor-pointer text-center active:scale-98 flex items-center justify-center gap-1.5"
                             >
-                              📦 ยืนยันรับคืนอุปกรณ์กลับเข้าคลัง {request.status.toLowerCase() === "overdue" && "(เกินกำหนด)"}
+                              <Package className="w-4 h-4" /> ยืนยันรับคืนอุปกรณ์กลับเข้าคลัง {request.status.toLowerCase() === "overdue" && "(เกินกำหนด)"}
                             </button>
                           )}
 
                           {request.status.toLowerCase() === "return_pending" && (
                             <div className="space-y-2">
-                              <div className="rounded-xl bg-teal-50 border border-teal-200 p-2.5 text-center text-xs font-bold text-teal-700">
-                                🔄 สมาชิกได้ยื่นคำขอคืนอุปกรณ์แล้ว
+                              <div className="rounded-xl bg-teal-50 border border-teal-200 p-2.5 text-center text-xs font-bold text-teal-700 flex items-center justify-center gap-1.5">
+                                <RefreshCw className="w-4 h-4" /> สมาชิกได้ยื่นคำขอคืนอุปกรณ์แล้ว
                               </div>
                               <button
                                 onClick={() => openActionForm(request.id, "return")}
                                 className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 text-xs transition shadow-sm hover:shadow-md cursor-pointer text-center active:scale-98 flex items-center justify-center gap-1.5"
                               >
-                                ✅ ตรวจรับและยืนยันรับคืนอุปกรณ์เข้าคลัง
+                                <CheckCircle2 className="w-4 h-4" /> ตรวจรับและยืนยันรับคืนอุปกรณ์เข้าคลัง
                               </button>
                             </div>
                           )}
 
                           {["rejected", "returned"].includes(request.status.toLowerCase()) && (
-                            <div className="text-center rounded-xl bg-gray-100 border border-gray-200/50 p-2.5 text-xs text-gray-500 font-bold">
-                              {request.status.toLowerCase() === "returned" && "✅ ทำรายการคืนเข้าสต็อกเรียบร้อยแล้ว"}
-                              {request.status.toLowerCase() === "rejected" && "❌ ปฏิเสธคำขอนี้แล้ว"}
+                            <div className="text-center rounded-xl bg-gray-100 border border-gray-200/50 p-2.5 text-xs text-gray-500 font-bold flex items-center justify-center gap-1.5">
+                              {request.status.toLowerCase() === "returned" && <><CheckCircle2 className="w-4 h-4" /> ทำรายการคืนเข้าสต็อกเรียบร้อยแล้ว</>}
+                              {request.status.toLowerCase() === "rejected" && <><XCircle className="w-4 h-4" /> ปฏิเสธคำขอนี้แล้ว</>}
                             </div>
                           )}
                         </div>
@@ -800,7 +810,7 @@ export default function AdminBorrowPage() {
 
                       {request.returnDate && (
                         <div className="flex items-center gap-1 text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg">
-                          <span>📦 คืนสิ่งของเมื่อ:</span>
+                          <Package className="w-4 h-4" /> คืนสิ่งของเมื่อ:
                           <span className="font-bold">{formatDateString(request.returnDate)}</span>
                         </div>
                       )}

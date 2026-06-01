@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Timer, CheckCircle2, RefreshCw, XCircle, Package, AlertTriangle, FileText, Settings, BarChart3, Plug, ClipboardList, Search, PartyPopper, Inbox, MapPin, User, Megaphone, Clock } from "lucide-react";
 
 interface RequestItem {
   id: string;
@@ -109,49 +110,49 @@ export default function BorrowHistoryPage() {
           bg: "bg-amber-50 border-amber-200/80 text-amber-700",
           dot: "bg-amber-500",
           text: "รอดำเนินการอนุมัติ",
-          icon: "⏳",
+          icon: <Timer className="w-3.5 h-3.5" />,
         };
       case "approved":
         return {
           bg: "bg-emerald-50 border-emerald-200/80 text-emerald-700",
           dot: "bg-emerald-500",
           text: "อนุมัติแล้ว (กำลังยืม)",
-          icon: "✅",
+          icon: <CheckCircle2 className="w-3.5 h-3.5" />,
         };
       case "return_pending":
         return {
           bg: "bg-teal-50 border-teal-200/80 text-teal-700",
           dot: "bg-teal-500",
           text: "รอแอดมินยืนยันรับคืน",
-          icon: "🔄",
+          icon: <RefreshCw className="w-3.5 h-3.5" />,
         };
       case "rejected":
         return {
           bg: "bg-rose-50 border-rose-200/80 text-rose-700",
           dot: "bg-rose-500",
           text: "ปฏิเสธการขอยืม",
-          icon: "❌",
+          icon: <XCircle className="w-3.5 h-3.5" />,
         };
       case "returned":
         return {
           bg: "bg-blue-50 border-blue-200/80 text-blue-700",
           dot: "bg-blue-500",
           text: "ส่งคืนแล้ว (เสร็จสิ้น)",
-          icon: "📦",
+          icon: <Package className="w-3.5 h-3.5" />,
         };
       case "overdue":
         return {
           bg: "bg-purple-50 border-purple-200/80 text-purple-700",
           dot: "bg-purple-500",
           text: "เกินกำหนดส่งคืน",
-          icon: "⚠️",
+          icon: <AlertTriangle className="w-3.5 h-3.5" />,
         };
       default:
         return {
           bg: "bg-gray-50 border-gray-200/80 text-gray-700",
           dot: "bg-gray-500",
           text: statusName,
-          icon: "📝",
+          icon: <FileText className="w-3.5 h-3.5" />,
         };
     }
   };
@@ -205,7 +206,7 @@ export default function BorrowHistoryPage() {
           days: diffDays,
           text: diffDays === 1 ? "เหลือเวลาอีก 1 วัน" : `เหลือเวลาอีก ${diffDays} วัน`,
           badgeStyle: "bg-emerald-50 border-emerald-200 text-emerald-700",
-          buttonLabel: "🔄 คืนอุปกรณ์ก่อนกำหนด",
+          buttonLabel: "คืนอุปกรณ์ก่อนกำหนด",
         };
       } else {
         const overdueDays = Math.abs(diffDays);
@@ -214,7 +215,7 @@ export default function BorrowHistoryPage() {
           days: overdueDays,
           text: overdueDays === 0 ? "เกินกำหนดวันนี้" : `เกินกำหนดมา ${overdueDays} วัน`,
           badgeStyle: "bg-rose-50 border-rose-200 text-rose-700 animate-pulse",
-          buttonLabel: "🔄 ส่งคำขอคืน (เกินกำหนด)",
+          buttonLabel: "ส่งคำขอคืน (เกินกำหนด)",
         };
       }
     } catch (e) {
@@ -245,7 +246,8 @@ export default function BorrowHistoryPage() {
       <div className="relative overflow-hidden rounded-3xl border border-gray-200/80 bg-white p-8 md:p-10 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold text-orange-500 uppercase tracking-widest mb-1.5">
-            <span>📊 NU Robot Club Smart Service</span>
+            <BarChart3 className="w-4 h-4" />
+            <span>NU Robot Club Smart Service</span>
           </div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight sm:text-4xl">
             ประวัติการยืมสิ่งของและอุปกรณ์
@@ -259,7 +261,7 @@ export default function BorrowHistoryPage() {
           href="/equipment"
           className="rounded-2xl bg-gray-900 hover:bg-orange-500 px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-gray-900/10 transition-all duration-300 hover:shadow-orange-500/20 active:scale-95 cursor-pointer flex items-center gap-2"
         >
-          <span>🔌</span> ยืมอุปกรณ์เพิ่มเติม
+          <Plug className="w-4 h-4" /> ยืมอุปกรณ์เพิ่มเติม
         </Link>
       </div>
 
@@ -269,7 +271,7 @@ export default function BorrowHistoryPage() {
         <div className="rounded-2xl border border-gray-200/60 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold text-gray-400">คำขอทั้งหมด</span>
-            <span className="text-xl">📋</span>
+            <ClipboardList className="w-5 h-5 text-gray-400" />
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className="text-3xl font-black text-gray-900">{totalCount}</span>
@@ -281,7 +283,7 @@ export default function BorrowHistoryPage() {
         <div className="rounded-2xl border border-gray-200/60 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold text-gray-400">รอดำเนินการ</span>
-            <span className="text-xl">⏳</span>
+            <Timer className="w-5 h-5 text-amber-500" />
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className="text-3xl font-black text-amber-600">{pendingCount}</span>
@@ -293,7 +295,7 @@ export default function BorrowHistoryPage() {
         <div className="rounded-2xl border border-gray-200/60 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold text-gray-400">กำลังยืมอยู่</span>
-            <span className="text-xl">✅</span>
+            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className="text-3xl font-black text-emerald-600">{approvedCount}</span>
@@ -305,7 +307,7 @@ export default function BorrowHistoryPage() {
         <div className="rounded-2xl border border-gray-200/60 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold text-gray-400">เกินกำหนดส่ง</span>
-            <span className="text-xl">⚠️</span>
+            <AlertTriangle className="w-5 h-5 text-purple-500" />
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className={`text-3xl font-black ${overdueCount > 0 ? "text-purple-600 animate-pulse" : "text-gray-900"}`}>
@@ -321,7 +323,7 @@ export default function BorrowHistoryPage() {
         {/* Search Bar */}
         <div className="relative flex-1 max-w-md">
           <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-            🔍
+            <Search className="w-4 h-4" />
           </span>
           <input
             type="text"
@@ -337,12 +339,12 @@ export default function BorrowHistoryPage() {
           <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mr-2">สถานะ:</span>
           {[
             { id: "All", label: "ทั้งหมด" },
-            { id: "pending", label: "⏳ รอดำเนินการ" },
-            { id: "approved", label: "✅ อนุมัติแล้ว" },
-            { id: "return_pending", label: "🔄 รอรับคืน" },
-            { id: "rejected", label: "❌ ปฏิเสธ" },
-            { id: "returned", label: "📦 คืนแล้ว" },
-            { id: "overdue", label: "⚠️ เกินกำหนด" },
+            { id: "pending", label: "รอดำเนินการ" },
+            { id: "approved", label: "อนุมัติแล้ว" },
+            { id: "return_pending", label: "รอรับคืน" },
+            { id: "rejected", label: "ปฏิเสธ" },
+            { id: "returned", label: "คืนแล้ว" },
+            { id: "overdue", label: "เกินกำหนด" },
           ].map((statusBtn) => (
             <button
               key={statusBtn.id}
@@ -365,7 +367,7 @@ export default function BorrowHistoryPage() {
           <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <h3 className="text-lg font-black text-teal-700 flex items-center gap-2">
-                <span>🔄</span> ยืนยันส่งคำขอคืนอุปกรณ์
+                <RefreshCw className="w-5 h-5" /> ยืนยันส่งคำขอคืนอุปกรณ์
                 <span className="text-xs bg-gray-100 border border-gray-200 px-2 py-1 rounded-md text-gray-600">
                   {returningRequestId}
                 </span>
@@ -387,14 +389,14 @@ export default function BorrowHistoryPage() {
             </div>
 
             {returnError && (
-              <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 leading-relaxed animate-pulse">
-                ❌ {returnError}
+              <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 leading-relaxed animate-pulse flex items-start gap-1.5">
+                <XCircle className="w-4 h-4 shrink-0 mt-0.5" /> <span>{returnError}</span>
               </div>
             )}
 
             {returnSuccess && (
-              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700 leading-relaxed">
-                🎉 {returnSuccess}
+              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700 leading-relaxed flex items-start gap-1.5">
+                <PartyPopper className="w-4 h-4 shrink-0 mt-0.5" /> <span>{returnSuccess}</span>
               </div>
             )}
 
@@ -452,7 +454,7 @@ export default function BorrowHistoryPage() {
                     กำลังดำเนินการ...
                   </>
                 ) : (
-                  "🔄 ยืนยันส่งคำขอคืน"
+                  <><RefreshCw className="w-4 h-4" /> ยืนยันส่งคำขอคืน</>
                 )}
               </button>
             </div>
@@ -466,7 +468,7 @@ export default function BorrowHistoryPage() {
           <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <h3 className="text-lg font-black text-rose-700 flex items-center gap-2">
-                <span>🚫</span> ยืนยันยกเลิกคำขอยืมอุปกรณ์
+                <XCircle className="w-5 h-5" /> ยืนยันยกเลิกคำขอยืมอุปกรณ์
                 <span className="text-xs bg-gray-100 border border-gray-200 px-2 py-1 rounded-md text-gray-600">
                   {cancellingRequestId}
                 </span>
@@ -488,14 +490,14 @@ export default function BorrowHistoryPage() {
             </div>
 
             {cancelError && (
-              <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 leading-relaxed animate-pulse">
-                ❌ {cancelError}
+              <div className="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 leading-relaxed animate-pulse flex items-start gap-1.5">
+                <XCircle className="w-4 h-4 shrink-0 mt-0.5" /> <span>{cancelError}</span>
               </div>
             )}
 
             {cancelSuccess && (
-              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700 leading-relaxed">
-                🎉 {cancelSuccess}
+              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-700 leading-relaxed flex items-start gap-1.5">
+                <PartyPopper className="w-4 h-4 shrink-0 mt-0.5" /> <span>{cancelSuccess}</span>
               </div>
             )}
 
@@ -553,7 +555,7 @@ export default function BorrowHistoryPage() {
                     กำลังยกเลิก...
                   </>
                 ) : (
-                  "🚫 ยืนยันยกเลิกคำขอ"
+                  <><XCircle className="w-4 h-4" /> ยืนยันยกเลิกคำขอ</>
                 )}
               </button>
             </div>
@@ -568,8 +570,8 @@ export default function BorrowHistoryPage() {
           <span className="text-sm font-bold text-gray-400 animate-pulse">กำลังดึงข้อมูลใบคำขอยืมจาก Google Sheets...</span>
         </div>
       ) : filteredRequests.length === 0 ? (
-        <div className="mt-8 rounded-3xl border border-dashed border-gray-200 bg-white py-20 text-center animate-in fade-in duration-300">
-          <span className="text-4xl">📭</span>
+        <div className="mt-8 rounded-3xl border border-dashed border-gray-200 bg-white py-20 text-center animate-in fade-in duration-300 flex flex-col items-center">
+          <Inbox className="w-12 h-12 text-gray-300 mb-4" />
           <h3 className="text-xl font-bold text-gray-700 mt-4">ไม่พบประวัติการยืมอุปกรณ์</h3>
           <p className="text-sm text-gray-400 mt-2 max-w-sm mx-auto leading-relaxed">
             {search || statusFilter !== "All"
@@ -659,7 +661,7 @@ export default function BorrowHistoryPage() {
                     {timeInfo && (
                       <div className="flex items-center col-span-2 md:col-auto">
                         <div className={`flex items-center gap-1 border rounded-full px-3 py-1.5 text-xs font-black ${timeInfo.badgeStyle}`}>
-                          <span>⏰</span>
+                          <Clock className="w-3.5 h-3.5" />
                           <span>{timeInfo.text}</span>
                         </div>
                       </div>
@@ -676,7 +678,7 @@ export default function BorrowHistoryPage() {
                         }}
                         className="col-span-2 md:col-auto rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-3.5 text-xs transition shadow-sm hover:shadow-md active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
                       >
-                        {timeInfo?.buttonLabel || "🔄 คืนอุปกรณ์"}
+                        <><RefreshCw className="w-4 h-4" /> {timeInfo?.buttonLabel || "คืนอุปกรณ์"}</>
                       </button>
                     )}
 
@@ -691,7 +693,7 @@ export default function BorrowHistoryPage() {
                         }}
                         className="col-span-2 md:col-auto rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 font-bold py-2 px-3.5 text-xs transition shadow-sm hover:shadow-md active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
                       >
-                        🚫 ยกเลิกคำขอ
+                        <XCircle className="w-4 h-4" /> ยกเลิกคำขอ
                       </button>
                     )}
                   </div>
@@ -719,7 +721,7 @@ export default function BorrowHistoryPage() {
                       {/* Left: Items List */}
                       <div className="lg:col-span-2 space-y-4">
                         <h4 className="text-base font-black text-gray-900 flex items-center gap-2">
-                          <span>📦</span> รายการสิ่งของที่ยืม ({parsedItems.length} ชิ้น)
+                          <Package className="w-4 h-4 text-gray-400" /> รายการสิ่งของที่ยืม ({parsedItems.length} ชิ้น)
                         </h4>
 
                         <div className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm">
@@ -743,7 +745,7 @@ export default function BorrowHistoryPage() {
                                   <td className="px-4 py-3 text-sm">
                                     <div className="font-bold text-gray-800">{item.name}</div>
                                     <div className="text-[11px] text-gray-400 flex items-center gap-1 mt-0.5">
-                                      <span>📍 ที่เก็บ:</span>
+                                      <MapPin className="w-3 h-3 shrink-0" /><span>ที่เก็บ:</span>
                                       <span className="font-semibold text-gray-500">{item.location || "ไม่ได้ระบุ"}</span>
                                     </div>
                                   </td>
@@ -764,8 +766,8 @@ export default function BorrowHistoryPage() {
                       <div className="space-y-5">
                         {/* Borrower Details */}
                         <div className="rounded-2xl border border-gray-200/70 bg-white p-5 shadow-sm space-y-3">
-                          <h4 className="text-sm font-black text-gray-900 border-b border-gray-100 pb-2">
-                            👤 ข้อมูลผู้ทำรายการ
+                          <h4 className="text-sm font-black text-gray-900 border-b border-gray-100 pb-2 flex items-center gap-1.5">
+                            <User className="w-4 h-4" /> ข้อมูลผู้ทำรายการ
                           </h4>
                           <div className="space-y-2 text-xs">
                             <div className="flex justify-between">
@@ -785,8 +787,8 @@ export default function BorrowHistoryPage() {
 
                         {/* Note/Reason of Borrow */}
                         <div className="rounded-2xl border border-gray-200/70 bg-white p-5 shadow-sm space-y-2">
-                          <h4 className="text-sm font-black text-gray-900">
-                            📝 จุดประสงค์การขอยืม
+                          <h4 className="text-sm font-black text-gray-900 flex items-center gap-1.5">
+                            <FileText className="w-4 h-4" /> จุดประสงค์การขอยืม
                           </h4>
                           <p className="text-xs text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100 whitespace-pre-wrap font-medium">
                             {request.note || "ไม่มีบันทึกจุดประสงค์เพิ่มเติม"}
@@ -801,7 +803,7 @@ export default function BorrowHistoryPage() {
                               : "bg-emerald-50/30 border-emerald-200/80 text-emerald-800"
                           }`}>
                             <h4 className="text-sm font-black flex items-center gap-1.5">
-                              <span>📢</span> บันทึกจากผู้ดูแลระบบ
+                              <Megaphone className="w-4 h-4" /> บันทึกจากผู้ดูแลระบบ
                             </h4>
                             <p className="text-xs leading-relaxed bg-white p-3 rounded-xl border border-gray-100 whitespace-pre-wrap font-medium text-gray-700">
                               {request.adminNote || "กรุณาติดต่อผู้ดูแลระบบชมรมเพื่อตรวจสอบเหตุผลในการดำเนินการ"}
@@ -813,9 +815,9 @@ export default function BorrowHistoryPage() {
                         {(request.status.toLowerCase() === "approved" || request.status.toLowerCase() === "overdue") && (
                           <div className="space-y-2 mt-2">
                             {timeInfo && (
-                              <div className={`p-3 rounded-xl border text-xs font-bold text-center ${timeInfo.badgeStyle}`}>
-                                ⏰ {timeInfo.text}
-                              </div>
+                                <div className={`p-3 rounded-xl border text-xs font-bold text-center flex items-center justify-center gap-1.5 ${timeInfo.badgeStyle}`}>
+                                  <Clock className="w-3.5 h-3.5" /> {timeInfo.text}
+                                </div>
                             )}
                             <button
                               onClick={() => {
@@ -825,7 +827,7 @@ export default function BorrowHistoryPage() {
                               }}
                               className="w-full rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-4 text-xs transition shadow-sm hover:shadow-md cursor-pointer text-center active:scale-98 flex items-center justify-center gap-1.5"
                             >
-                              {timeInfo?.buttonLabel || "🔄 ส่งคำขอคืนอุปกรณ์ให้แอดมินตรวจรับ"}
+                              <><RefreshCw className="w-4 h-4" /> {timeInfo?.buttonLabel || "ส่งคำขอคืนอุปกรณ์ให้แอดมินตรวจรับ"}</>
                             </button>
                           </div>
                         )}
@@ -841,14 +843,14 @@ export default function BorrowHistoryPage() {
                               }}
                               className="w-full rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 font-bold py-3 px-4 text-xs transition shadow-sm hover:shadow-md cursor-pointer text-center active:scale-98 flex items-center justify-center gap-1.5"
                             >
-                              🚫 ยกเลิกการส่งคำขอยืมนี้
+                              <XCircle className="w-4 h-4" /> ยกเลิกการส่งคำขอยืมนี้
                             </button>
                           </div>
                         )}
 
                         {request.status.toLowerCase() === "return_pending" && (
-                          <div className="rounded-xl bg-teal-50 border border-teal-200 p-3 text-center text-xs font-bold text-teal-700 mt-2">
-                            🔄 ส่งคำขอคืนแล้ว กำลังรอผู้ดูแลระบบตรวจรับของคืนเข้าคลัง...
+                          <div className="rounded-xl bg-teal-50 border border-teal-200 p-3 text-center text-xs font-bold text-teal-700 mt-2 flex items-center justify-center gap-1.5">
+                            <RefreshCw className="w-4 h-4" /> ส่งคำขอคืนแล้ว กำลังรอผู้ดูแลระบบตรวจรับของคืนเข้าคลัง...
                           </div>
                         )}
                       </div>
@@ -864,7 +866,7 @@ export default function BorrowHistoryPage() {
                       </div>
                       {request.returnDate && (
                         <div className="flex items-center gap-1 text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg">
-                          <span>📦 คืนสิ่งของเมื่อ:</span>
+                          <Package className="w-4 h-4" /> คืนสิ่งของเมื่อ:
                           <span className="font-bold">{formatDateString(request.returnDate)}</span>
                         </div>
                       )}
