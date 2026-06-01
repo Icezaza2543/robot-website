@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/Robot.png",
   },
+  verification: {
+    google: "Ka6GIGmqo2vH4uCSUOzT03GouosLxSl1iiBAp_23JQA",
+  },
 };
 
 export default function RootLayout({
