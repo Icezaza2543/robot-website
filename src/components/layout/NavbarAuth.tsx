@@ -67,7 +67,7 @@ export default function NavbarAuth() {
 
         {/* Click-Based Cart Dropdown Popup */}
         {isCartOpen && (
-          <div className="absolute right-0 top-full mt-2.5 w-[calc(100vw-2rem)] max-w-sm md:w-80 origin-top-right rounded-3xl border border-gray-100 bg-white p-4 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+          <div className="fixed right-4 left-4 top-20 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2.5 sm:w-80 w-auto origin-top-right rounded-3xl border border-gray-100 bg-white p-4 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 z-[999]">
             <h4 className="text-xs font-black text-gray-900 border-b border-gray-100 pb-2 mb-2.5 flex items-center justify-between">
               <span className="flex items-center gap-1.5"><ClipboardList className="w-4 h-4 text-orange-500" /> อุปกรณ์ในตะกร้า</span>
               <div className="flex items-center gap-2">

@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Settings, X, Plus, Inbox, Save, Search, Package, MapPin, Minus, Trash2, Megaphone } from "lucide-react";
+import { Settings, X, Plus, Inbox, Save, Search, Package, MapPin, Minus, Trash2, Megaphone, FileUp, Download, Edit2 } from "lucide-react";
+import * as XLSX from "xlsx";
 
 interface EquipmentItem {
   id: string;
@@ -41,6 +42,68 @@ export default function AdminItemsPage() {
   const [formLocation, setFormLocation] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Edit Item Form State
+  const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
+
+  // Excel Import handlers
+  const handleDownloadTemplate = () => {
+    const ws = XLSX.utils.json_to_sheet([
+      { name: "Arduino Uno R3", category: "Microcontroller", stock: 10, location: "Shelf A1", description: "Main board" }
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Template");
+    XLSX.writeFile(wb, "equipment_template.xlsx");
+  };
+
+  const handleImportExcel = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const bstr = evt.target?.result;
+        const wb = XLSX.read(bstr, { type: "binary" });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const data = XLSX.utils.sheet_to_json<any>(ws);
+
+        if (data.length === 0) {
+          alert("ไม่พบข้อมูลในไฟล์ Excel");
+          return;
+        }
+
+        setIsLoading(true);
+        let successCount = 0;
+        for (const row of data) {
+          if (!row.name || !row.category) continue;
+          const res = await fetch("/api/items", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: row.name,
+              category: row.category,
+              stock: Number(row.stock || 0),
+              location: row.location || "",
+              description: row.description || "",
+            })
+          });
+          if (res.ok) successCount++;
+        }
+        
+        alert(`นำเข้าสำเร็จ ${successCount} รายการ`);
+        fetchItems();
+      } catch (err) {
+        console.error(err);
+        alert("เกิดข้อผิดพลาดในการนำเข้าไฟล์ Excel");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    reader.readAsBinaryString(file);
+    e.target.value = ""; // clear input
+  };
 
   // Load items from API
   const fetchItems = async () => {
@@ -215,6 +278,33 @@ export default function AdminItemsPage() {
       console.error(err);
       alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
       await fetchItems();
+    }
+  };
+
+  // Handle Save Edit
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingItem) return;
+
+    try {
+      setIsSubmitting(true);
+      const res = await fetch("/api/items", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingItem),
+      });
+
+      if (res.ok) {
+        setEditingItem(null);
+        fetchItems();
+      } else {
+        alert("เกิดข้อผิดพลาดในการบันทึก");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -530,6 +620,13 @@ export default function AdminItemsPage() {
                           <td className="px-6 py-5 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <button
+                                onClick={() => setEditingItem(item)}
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-600 hover:text-orange-700 active:scale-90 transition-all duration-200 cursor-pointer shadow-sm"
+                                title="แก้ไขข้อมูลอุปกรณ์"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
                                 onClick={() => handleDeleteItem(item.id, item.name)}
                                 className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 active:scale-90 transition-all duration-200 cursor-pointer shadow-sm"
                                 title="ลบอุปกรณ์ออกจากคลัง"
@@ -546,6 +643,90 @@ export default function AdminItemsPage() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Edit Item Modal */}
+      {editingItem && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-gray-900/40 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+              <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
+                <Edit2 className="w-6 h-6 text-orange-500" /> แก้ไขข้อมูลอุปกรณ์
+              </h3>
+              <button
+                onClick={() => setEditingItem(null)}
+                className="rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="flex flex-col gap-5">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">ชื่ออุปกรณ์ *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingItem.name}
+                  onChange={(e) => setEditingItem({ ...editingItem, name: e.target.value })}
+                  className="rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition"
+                />
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-5">
+                <div className="flex flex-col gap-1.5 flex-1">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">หมวดหมู่ *</label>
+                  <select
+                    value={editingItem.category}
+                    onChange={(e) => setEditingItem({ ...editingItem, category: e.target.value })}
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition"
+                  >
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5 flex-1">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">ตำแหน่งจัดเก็บ</label>
+                  <input
+                    type="text"
+                    value={editingItem.location}
+                    onChange={(e) => setEditingItem({ ...editingItem, location: e.target.value })}
+                    placeholder="เช่น ตู้ A ชั้น 2"
+                    className="rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-medium text-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">รายละเอียดเพิ่มเติม</label>
+                <textarea
+                  value={editingItem.description}
+                  onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
+                  rows={2}
+                  className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition resize-none"
+                />
+              </div>
+
+              <div className="mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingItem(null)}
+                  className="rounded-xl px-5 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 transition"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="rounded-xl bg-orange-500 hover:bg-orange-600 px-6 py-3 text-sm font-bold text-white shadow-md shadow-orange-500/20 transition disabled:opacity-70 active:scale-95"
+                >
+                  {isSubmitting ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

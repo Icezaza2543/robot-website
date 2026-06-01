@@ -845,6 +845,80 @@ export async function updateSheetItemStock(id: string, stock: number): Promise<b
 }
 
 /**
+ * Updates full details of an equipment item in the 'items' sheet.
+ */
+export async function updateSheetItem(id: string, data: Partial<EquipmentItem>): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "items!A2:A1000",
+    });
+
+    const rows = response.data.values;
+    if (!rows) return false;
+
+    const normalizedId = id.trim();
+    let rowIndex = -1;
+    for (let i = 0; i < rows.length; i++) {
+      if (String(rows[i][0] || "").trim() === normalizedId) {
+        rowIndex = i;
+        break;
+      }
+    }
+
+    if (rowIndex === -1) return false;
+
+    const rowNum = rowIndex + 2;
+    const now = getShortTimestamp();
+
+    // Determine what to update
+    // Columns: A=ID, B=Name, C=Category, D=Stock, E=Location, F=Description, G=CreatedAt, H=UpdatedAt
+    // Update B to F
+    if (data.name !== undefined || data.category !== undefined || data.stock !== undefined || data.location !== undefined || data.description !== undefined) {
+      // Since we need to update a contiguous range B:F or just individual cells,
+      // it's easier to fetch the original row first to preserve missing fields, or just assume data contains all fields if it's a full edit.
+      // To be safe, fetch the row first:
+      const rowResp = await sheets.spreadsheets.values.get({
+        spreadsheetId: sheetId,
+        range: `items!B${rowNum}:F${rowNum}`
+      });
+      
+      const existing = rowResp.data.values?.[0] || ["", "", "0", "", ""];
+      const newName = data.name !== undefined ? data.name : existing[0];
+      const newCategory = data.category !== undefined ? data.category : existing[1];
+      const newStock = data.stock !== undefined ? data.stock : existing[2];
+      const newLocation = data.location !== undefined ? data.location : existing[3];
+      const newDesc = data.description !== undefined ? data.description : existing[4];
+
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: sheetId,
+        range: `items!B${rowNum}:F${rowNum}`,
+        valueInputOption: "RAW",
+        requestBody: { values: [[newName, newCategory, newStock, newLocation, newDesc]] }
+      });
+    }
+
+    // Update timestamp
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `items!H${rowNum}`,
+      valueInputOption: "RAW",
+      requestBody: { values: [[now]] }
+    });
+
+    return true;
+  } catch (error) {
+    console.error(`[ERROR] Failed to update item ${id}:`, error);
+    return false;
+  }
+}
+
+/**
  * Deletes an equipment item by ID by clearing and rewriting the table (excluding deleted item).
  */
 export async function deleteSheetItem(id: string): Promise<boolean> {

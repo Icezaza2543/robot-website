@@ -4,6 +4,7 @@ import {
   getSheetItems, 
   appendSheetItem, 
   updateSheetItemStock, 
+  updateSheetItem,
   deleteSheetItem,
   EquipmentItem 
 } from "@/lib/googleSheets";
@@ -125,25 +126,41 @@ export async function PATCH(request: Request) {
 
   try {
     const data = await request.json();
-    const { id, stock } = data;
+    const { id, stock, name, category, location, description } = data;
 
-    if (!id || stock === undefined) {
+    if (!id) {
       return NextResponse.json(
-        { error: "Item ID and stock are required" },
+        { error: "Item ID is required" },
         { status: 400 }
       );
     }
 
-    // Clamp stock level to positive numbers
-    const updatedStock = Math.max(0, Number(stock));
+    // Determine if it's a full update or just stock update
+    if (name !== undefined || category !== undefined || location !== undefined || description !== undefined) {
+      // Full update
+      const updateData: Partial<EquipmentItem> = {};
+      if (name !== undefined) updateData.name = String(name).trim();
+      if (category !== undefined) updateData.category = String(category).trim();
+      if (stock !== undefined) updateData.stock = Math.max(0, Number(stock));
+      if (location !== undefined) updateData.location = String(location).trim();
+      if (description !== undefined) updateData.description = String(description).trim();
 
-    const success = await updateSheetItemStock(id, updatedStock);
-    if (!success) {
-      return NextResponse.json({ error: "Failed to update item stock" }, { status: 500 });
+      const success = await updateSheetItem(id, updateData);
+      if (!success) {
+        return NextResponse.json({ error: "Failed to update item details" }, { status: 500 });
+      }
+      return NextResponse.json({ id, ...updateData });
+    } else if (stock !== undefined) {
+      // Just stock update (backward compatibility)
+      const updatedStock = Math.max(0, Number(stock));
+      const success = await updateSheetItemStock(id, updatedStock);
+      if (!success) {
+        return NextResponse.json({ error: "Failed to update item stock" }, { status: 500 });
+      }
+      return NextResponse.json({ id, stock: updatedStock });
+    } else {
+      return NextResponse.json({ error: "No fields to update" }, { status: 400 });
     }
-
-    // Return the updated state
-    return NextResponse.json({ id, stock: updatedStock });
   } catch (error) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
