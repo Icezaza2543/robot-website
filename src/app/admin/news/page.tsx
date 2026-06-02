@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Settings, X, Plus, Inbox, Save, Search, Trash2, Edit2, UploadCloud, Newspaper, Settings2, ShieldCheck, List } from "lucide-react";
+import ImageCropperModal from "@/components/ui/ImageCropperModal";
 
 interface NewsItem {
   id: string;
@@ -40,6 +41,10 @@ export default function AdminNewsPage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [editingItem, setEditingItem] = useState<NewsItem | null>(null);
+
+  const [cropperFileSrc, setCropperFileSrc] = useState<string | null>(null);
+  const [cropperCallback, setCropperCallback] = useState<((url: string) => void) | null>(null);
+  const [cropperAspect, setCropperAspect] = useState<number>(16 / 9);
 
   const fetchItems = async () => {
     try {
@@ -83,17 +88,27 @@ export default function AdminNewsPage() {
     );
   }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setUrl: (url: string) => void) => {
-    const file = e.target.files?.[0];
+  const handleImageUploadSelect = (e: React.ChangeEvent<HTMLInputElement>, setUrl: (url: string) => void, aspect: number = 16 / 9) => {
+    const target = e.target;
+    const file = target.files?.[0];
     if (!file) return;
-    
-    // Clear the input so the same file can be selected again
-    e.target.value = '';
 
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      setCropperFileSrc(reader.result?.toString() || null);
+      setCropperCallback(() => setUrl);
+      setCropperAspect(aspect);
+      target.value = '';
+    });
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = async (croppedFile: File) => {
     try {
       setIsUploadingImage(true);
+      setCropperFileSrc(null);
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", croppedFile);
 
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -102,7 +117,7 @@ export default function AdminNewsPage() {
 
       if (res.ok) {
         const data = await res.json();
-        setUrl(data.url);
+        if (cropperCallback) cropperCallback(data.url);
       } else {
         alert("อัปโหลดรูปภาพล้มเหลว");
       }
@@ -111,6 +126,7 @@ export default function AdminNewsPage() {
       alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setIsUploadingImage(false);
+      setCropperCallback(null);
     }
   };
 
@@ -266,7 +282,7 @@ export default function AdminNewsPage() {
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">วันที่แสดงผล</label>
-              <input type="text" placeholder="เช่น 29 พฤษภาคม 2026" value={formDate} onChange={e => setFormDate(e.target.value)} className="rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-orange-500 outline-none" />
+              <input type="date" value={formDate} onChange={e => setFormDate(e.target.value)} className="rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-orange-500 outline-none" />
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">ผู้เขียน</label>
@@ -292,7 +308,7 @@ export default function AdminNewsPage() {
                 <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl px-4 py-4 cursor-pointer hover:bg-gray-50 hover:border-orange-400 transition">
                   <UploadCloud className="w-5 h-5 text-gray-400 mb-1" />
                   <span className="text-sm text-gray-500">{isUploadingImage ? "กำลังอัปโหลด..." : "อัปโหลดภาพ (Google Drive)"}</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, setFormImageUrl)} disabled={isUploadingImage} />
+                  <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUploadSelect(e, setFormImageUrl, 16 / 9)} disabled={isUploadingImage} />
                 </label>
               </div>
             </div>
@@ -371,7 +387,7 @@ export default function AdminNewsPage() {
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-gray-400">วันที่แสดงผล</label>
-                <input type="text" value={editingItem.date} onChange={e => setEditingItem(prev => prev ? { ...prev, date: e.target.value } : null)} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
+                <input type="date" value={editingItem.date} onChange={e => setEditingItem(prev => prev ? { ...prev, date: e.target.value } : null)} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-gray-400">หมวดหมู่</label>
@@ -399,7 +415,7 @@ export default function AdminNewsPage() {
                   {editingItem.imageUrl && <img src={editingItem.imageUrl} className="w-16 h-16 object-cover rounded-xl border" />}
                   <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-4 cursor-pointer hover:bg-gray-50">
                     <span className="text-xs text-gray-500">{isUploadingImage ? "กำลังอัปโหลด..." : "อัปโหลดภาพใหม่"}</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, url => setEditingItem(prev => prev ? { ...prev, imageUrl: url } : null))} disabled={isUploadingImage} />
+                    <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUploadSelect(e, url => setEditingItem(prev => prev ? { ...prev, imageUrl: url } : null), 16 / 9)} disabled={isUploadingImage} />
                   </label>
                 </div>
               </div>
@@ -413,6 +429,15 @@ export default function AdminNewsPage() {
         </div>
       )}
 
+      {/* Image Cropper Modal */}
+      {cropperFileSrc && (
+        <ImageCropperModal
+          imageSrc={cropperFileSrc}
+          aspect={cropperAspect}
+          onCancel={() => { setCropperFileSrc(null); setCropperCallback(null); }}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 }

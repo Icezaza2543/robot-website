@@ -196,21 +196,37 @@ export default function AboutPage() {
         </div>
 
         {advisors.length > 0 ? (
-          <div className="relative w-full max-w-sm md:max-w-md mx-auto group">
-            <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl shadow-gray-100 p-8 flex flex-col items-center text-center transition-all duration-300 transform group-hover:-translate-y-1">
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gray-50 border-4 border-gray-100 overflow-hidden mb-6 shadow-sm">
+          <div className="relative w-full max-w-4xl mx-auto group">
+            <div className="overflow-hidden rounded-[2.5rem] border border-gray-200 bg-white shadow-xl shadow-gray-100 flex flex-col-reverse md:flex-row items-center transition-all duration-300 transform group-hover:-translate-y-1">
+              
+              {/* Text Section */}
+              <div className="w-full md:w-1/2 p-10 md:p-16 flex flex-col justify-center items-center md:items-start text-center md:text-left min-h-[300px]">
+                <span className="inline-block px-5 py-2 bg-green-100 text-green-700 font-bold text-xs rounded-full uppercase tracking-widest mb-6">
+                  {advisors[currentAdvisorIndex]?.role}
+                </span>
+                <h3 className="text-3xl md:text-5xl lg:text-[54px] font-black text-gray-900 leading-[1.15] tracking-tight">
+                  {advisors[currentAdvisorIndex]?.name}
+                </h3>
+              </div>
+
+              {/* Image Section (Vertical / Portrait) */}
+              <div className="w-full md:w-1/2 h-[350px] md:h-[500px] bg-gradient-to-br from-[#10b981] to-[#047857] relative flex items-end justify-center overflow-hidden shrink-0">
+                {/* Decorative background circles */}
+                <div className="absolute top-10 right-10 w-48 h-48 bg-white/20 rounded-full blur-2xl"></div>
+                <div className="absolute bottom-10 left-10 w-32 h-32 bg-[#34d399]/40 rounded-full blur-xl"></div>
+                
                 {advisors[currentAdvisorIndex]?.imageUrl ? (
-                  <img src={advisors[currentAdvisorIndex].imageUrl} alt="Advisor" className="w-full h-full object-cover" />
+                  <img 
+                    src={advisors[currentAdvisorIndex].imageUrl} 
+                    alt="Advisor" 
+                    className="w-full h-full object-cover md:object-contain object-bottom relative z-10" 
+                  />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                    <UserCheck className="w-12 h-12 text-gray-300" />
+                  <div className="w-full h-full flex items-center justify-center relative z-10">
+                    <UserCheck className="w-32 h-32 text-white/30" />
                   </div>
                 )}
               </div>
-              <h3 className="text-xl md:text-2xl font-black text-gray-900">{advisors[currentAdvisorIndex]?.name}</h3>
-              <span className="inline-block mt-2 px-4 py-1.5 bg-orange-100 text-orange-700 font-bold text-xs rounded-full uppercase tracking-wider">
-                {advisors[currentAdvisorIndex]?.role}
-              </span>
             </div>
 
             {/* Carousel Controls */}

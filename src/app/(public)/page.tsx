@@ -111,9 +111,9 @@ export default function HomePage() {
                   className="flex flex-col justify-between rounded border border-gray-200 bg-white hover:border-gray-300 transition-colors cursor-pointer overflow-hidden"
                 >
                   {/* Post Banner Image */}
-                  <div className="relative h-48 w-full overflow-hidden bg-gray-50 border-b border-gray-100">
+                  <div className="relative h-48 w-full overflow-hidden bg-gray-100 border-b border-gray-100">
                     {post.imageUrl ? (
-                      <img src={post.imageUrl} alt={post.title} className="h-full w-full object-cover" />
+                      <img src={post.imageUrl} alt={post.title} className="h-full w-full object-contain" />
                     ) : post.igLink ? (
                       <div className="w-full h-full bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center">
                          <div className="bg-white/20 p-4 rounded-full backdrop-blur-sm shadow-lg">
@@ -177,9 +177,9 @@ export default function HomePage() {
             <div className="overflow-y-auto flex-1 scrollbar-thin">
               
               {/* Image Banner Header with soft fading blend */}
-              <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-gray-50 shrink-0">
+              <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-gray-100 shrink-0">
                 {selectedPost.imageUrl ? (
-                  <img src={selectedPost.imageUrl} alt={selectedPost.title} className="h-full w-full object-cover" />
+                  <img src={selectedPost.imageUrl} alt={selectedPost.title} className="h-full w-full object-contain" />
                 ) : selectedPost.igLink ? (
                   <div className="w-full h-full bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] flex flex-col items-center justify-center gap-4">
                      <div className="bg-white/20 p-5 rounded-full backdrop-blur-sm shadow-xl">

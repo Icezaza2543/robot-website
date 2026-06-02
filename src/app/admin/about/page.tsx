@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Settings, Save, Users, Settings2, Trash2, Edit2, UploadCloud, Plus, X, Newspaper } from "lucide-react";
+import ImageCropperModal from "@/components/ui/ImageCropperModal";
 
 interface AboutInfo {
   history: string;
@@ -36,6 +37,10 @@ export default function AdminAboutPage() {
   const [advRole, setAdvRole] = useState("");
   const [advImage, setAdvImage] = useState("");
   const [isAddingAdv, setIsAddingAdv] = useState(false);
+
+  const [cropperFileSrc, setCropperFileSrc] = useState<string | null>(null);
+  const [cropperCallback, setCropperCallback] = useState<((url: string) => void) | null>(null);
+  const [cropperAspect, setCropperAspect] = useState<number>(3 / 4);
 
   const fetchData = async () => {
     try {
@@ -95,25 +100,40 @@ export default function AdminAboutPage() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setUrl: (url: string) => void) => {
-    const file = e.target.files?.[0];
+  const handleImageUploadSelect = (e: React.ChangeEvent<HTMLInputElement>, setUrl: (url: string) => void, aspect: number = 3 / 4) => {
+    const target = e.target;
+    const file = target.files?.[0];
     if (!file) return;
-    
-    e.target.value = '';
 
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      setCropperFileSrc(reader.result?.toString() || null);
+      setCropperCallback(() => setUrl);
+      setCropperAspect(aspect);
+      target.value = '';
+    });
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = async (croppedFile: File) => {
     try {
       setIsUploadingImage(true);
+      setCropperFileSrc(null);
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", croppedFile);
+
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       if (res.ok) {
         const data = await res.json();
-        setUrl(data.url);
-      } else alert("อัปโหลดรูปภาพล้มเหลว");
+        if (cropperCallback) cropperCallback(data.url);
+      } else {
+        alert("อัปโหลดรูปภาพล้มเหลว");
+      }
     } catch (error) {
       alert("เกิดข้อผิดพลาดในการอัปโหลด");
     } finally {
       setIsUploadingImage(false);
+      setCropperCallback(null);
     }
   };
 
@@ -230,7 +250,7 @@ export default function AdminAboutPage() {
                     {advImage && <img src={advImage} className="w-12 h-12 object-cover rounded-full border shadow-sm" />}
                     <label className="flex-1 border-2 border-dashed rounded-xl px-3 py-2 cursor-pointer hover:bg-white text-center">
                       <span className="text-xs text-gray-500">{isUploadingImage ? "กำลังอัปโหลด..." : "อัปโหลดรูปภาพใหม่จากคอม"}</span>
-                      <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, setAdvImage)} disabled={isUploadingImage} />
+                      <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUploadSelect(e, setAdvImage, 3 / 4)} disabled={isUploadingImage} />
                     </label>
                   </div>
                 </div>
@@ -267,6 +287,16 @@ export default function AdminAboutPage() {
           </div>
         </div>
       </div>
+
+      {/* Image Cropper Modal */}
+      {cropperFileSrc && (
+        <ImageCropperModal
+          imageSrc={cropperFileSrc}
+          aspect={cropperAspect}
+          onCancel={() => { setCropperFileSrc(null); setCropperCallback(null); }}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 }
