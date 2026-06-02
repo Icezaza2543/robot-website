@@ -210,7 +210,7 @@ export default function AboutPage() {
               </div>
 
               {/* Image Section (Vertical / Portrait) */}
-              <div className="w-full md:w-1/2 h-[280px] sm:h-[350px] md:h-[500px] bg-white relative flex items-end justify-center overflow-hidden shrink-0 border-b md:border-b-0 md:border-l border-gray-100">
+              <div className="w-full md:w-1/2 h-[340px] sm:h-[400px] md:h-[500px] bg-white relative flex items-end justify-center overflow-hidden shrink-0 border-b md:border-b-0 md:border-l border-gray-100">
                 {/* Decorative background circles */}
                 <div className="absolute top-10 right-10 w-48 h-48 bg-gray-50 rounded-full blur-2xl"></div>
                 <div className="absolute bottom-10 left-10 w-32 h-32 bg-orange-50/50 rounded-full blur-xl"></div>
@@ -219,7 +219,7 @@ export default function AboutPage() {
                   <img 
                     src={advisors[currentAdvisorIndex].imageUrl} 
                     alt="Advisor" 
-                    className="w-full h-full object-cover md:object-contain object-bottom relative z-10" 
+                    className="w-full h-full object-cover md:object-contain object-[center_20%] md:object-bottom relative z-10" 
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center relative z-10 bg-gray-50">
