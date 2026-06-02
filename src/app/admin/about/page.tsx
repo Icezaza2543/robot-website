@@ -11,6 +11,12 @@ interface AboutInfo {
   history: string;
   vision: string;
   contact: string;
+  showHistory?: boolean;
+  showVision?: boolean;
+  presidentName?: string;
+  presidentImage?: string;
+  presidentMessage?: string;
+  presidentPrefix?: string;
 }
 
 interface Advisor {
@@ -24,7 +30,7 @@ export default function AdminAboutPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const [aboutInfo, setAboutInfo] = useState<AboutInfo>({ history: "", vision: "", contact: "" });
+  const [aboutInfo, setAboutInfo] = useState<AboutInfo>({ history: "", vision: "", contact: "", showHistory: true, showVision: true });
   const [advisors, setAdvisors] = useState<Advisor[]>([]);
   
   const [isLoading, setIsLoading] = useState(true);
@@ -198,18 +204,63 @@ export default function AdminAboutPage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">ประวัติชมรม</label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">ประวัติชมรม</label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={aboutInfo.showHistory !== false} onChange={e => setAboutInfo({...aboutInfo, showHistory: e.target.checked})} className="rounded text-orange-500 focus:ring-orange-500 w-4 h-4 cursor-pointer" />
+                <span className="text-xs font-bold text-gray-600">แสดงผลบนเว็บไซต์</span>
+              </label>
+            </div>
             <textarea rows={4} value={aboutInfo.history} onChange={e => setAboutInfo({...aboutInfo, history: e.target.value})} className="rounded-xl border px-4 py-3 text-sm focus:border-orange-500 outline-none resize-none" placeholder="บอกเล่าเรื่องราวของชมรม..." />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">วิสัยทัศน์ / เป้าหมาย</label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">วิสัยทัศน์ / เป้าหมาย</label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={aboutInfo.showVision !== false} onChange={e => setAboutInfo({...aboutInfo, showVision: e.target.checked})} className="rounded text-orange-500 focus:ring-orange-500 w-4 h-4 cursor-pointer" />
+                <span className="text-xs font-bold text-gray-600">แสดงผลบนเว็บไซต์</span>
+              </label>
+            </div>
             <textarea rows={3} value={aboutInfo.vision} onChange={e => setAboutInfo({...aboutInfo, vision: e.target.value})} className="rounded-xl border px-4 py-3 text-sm focus:border-orange-500 outline-none resize-none" />
           </div>
 
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">ที่อยู่และช่องทางติดต่อ</label>
             <textarea rows={3} value={aboutInfo.contact} onChange={e => setAboutInfo({...aboutInfo, contact: e.target.value})} className="rounded-xl border px-4 py-3 text-sm focus:border-orange-500 outline-none resize-none" />
+          </div>
+
+          <div className="border-t border-gray-100 pt-4 mt-2">
+            <h3 className="text-sm font-bold text-gray-800 mb-3">ข้อมูลประธานชมรม (ปัจจุบัน)</h3>
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2 md:col-span-2">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">คำนำหน้า (ไม่บังคับ)</label>
+                  <input type="text" value={aboutInfo.presidentPrefix || ""} onChange={e => setAboutInfo({...aboutInfo, presidentPrefix: e.target.value})} className="rounded-xl border px-4 py-3 text-sm focus:border-orange-500 outline-none" placeholder="เช่น นาย, นางสาว" />
+                </div>
+                <div className="flex flex-col gap-2 md:col-span-2">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">ชื่อ - นามสกุล</label>
+                  <input type="text" value={aboutInfo.presidentName || ""} onChange={e => setAboutInfo({...aboutInfo, presidentName: e.target.value})} className="rounded-xl border px-4 py-3 text-sm focus:border-orange-500 outline-none" placeholder="เช่น สมชาย ใจดี" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">ข้อความจากประธานชมรม</label>
+                <textarea rows={2} value={aboutInfo.presidentMessage || ""} onChange={e => setAboutInfo({...aboutInfo, presidentMessage: e.target.value})} className="rounded-xl border px-4 py-3 text-sm focus:border-orange-500 outline-none resize-none" placeholder="วิสัยทัศน์หรือข้อความสั้นๆ..." />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">รูปภาพ (URL หรืออัปโหลด)</label>
+                <div className="flex flex-col gap-2">
+                  <input type="url" placeholder="วางลิงก์รูปภาพ..." value={aboutInfo.presidentImage || ""} onChange={e => setAboutInfo({...aboutInfo, presidentImage: e.target.value})} className="rounded-xl border px-4 py-3 text-sm focus:border-orange-500 outline-none w-full" />
+                  <div className="flex items-center gap-3">
+                    {aboutInfo.presidentImage && <img src={aboutInfo.presidentImage} className="w-12 h-12 object-cover rounded-full border shadow-sm" />}
+                    <label className="flex-1 border-2 border-dashed rounded-xl px-3 py-2 cursor-pointer hover:bg-gray-50 text-center">
+                      <span className="text-xs text-gray-500">{isUploadingImage ? "กำลังอัปโหลด..." : "อัปโหลดรูปภาพใหม่จากคอม"}</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUploadSelect(e, url => setAboutInfo({...aboutInfo, presidentImage: url}), 1)} disabled={isUploadingImage} />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="flex justify-end mt-2">

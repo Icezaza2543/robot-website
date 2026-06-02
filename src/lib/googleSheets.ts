@@ -1580,12 +1580,18 @@ export interface AboutInfo {
   history: string;
   vision: string;
   contact: string;
+  showHistory: boolean;
+  showVision: boolean;
+  presidentName?: string;
+  presidentImage?: string;
+  presidentMessage?: string;
+  presidentPrefix?: string;
 }
 
 export async function getAboutInfo(): Promise<AboutInfo> {
   const sheets = getSheetsClient();
   const sheetId = process.env.GOOGLE_SHEET_ID;
-  const defaultInfo = { history: "", vision: "", contact: "" };
+  const defaultInfo = { history: "", vision: "", contact: "", showHistory: true, showVision: true };
   if (!sheets || !sheetId) return defaultInfo;
 
   try {
@@ -1594,17 +1600,23 @@ export async function getAboutInfo(): Promise<AboutInfo> {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
-      range: "about_info!A2:B10",
+      range: "about_info!A2:B15",
     });
 
     const rows = response.data.values || [];
-    const info = { ...defaultInfo };
+    const info: AboutInfo = { ...defaultInfo };
     rows.forEach(row => {
       const section = String(row[0] || "").trim();
       const content = String(row[1] || "").trim();
       if (section === "history") info.history = content;
       if (section === "vision") info.vision = content;
       if (section === "contact") info.contact = content;
+      if (section === "showHistory") info.showHistory = content !== "false";
+      if (section === "showVision") info.showVision = content !== "false";
+      if (section === "presidentName") info.presidentName = content;
+      if (section === "presidentImage") info.presidentImage = content;
+      if (section === "presidentMessage") info.presidentMessage = content;
+      if (section === "presidentPrefix") info.presidentPrefix = content;
     });
 
     return info;
@@ -1626,11 +1638,11 @@ export async function updateAboutInfo(info: Partial<AboutInfo>): Promise<boolean
     // Fetch existing
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
-      range: "about_info!A2:B10",
+      range: "about_info!A2:B15",
     });
     const rows = response.data.values || [];
     
-    const existing: Record<string, string> = { history: "", vision: "", contact: "" };
+    const existing: Record<string, string> = { history: "", vision: "", contact: "", showHistory: "true", showVision: "true", presidentName: "", presidentImage: "", presidentMessage: "", presidentPrefix: "" };
     rows.forEach(row => {
       existing[String(row[0] || "").trim()] = String(row[1] || "");
     });
@@ -1639,17 +1651,29 @@ export async function updateAboutInfo(info: Partial<AboutInfo>): Promise<boolean
       history: info.history !== undefined ? info.history : existing.history,
       vision: info.vision !== undefined ? info.vision : existing.vision,
       contact: info.contact !== undefined ? info.contact : existing.contact,
+      showHistory: info.showHistory !== undefined ? String(info.showHistory) : existing.showHistory,
+      showVision: info.showVision !== undefined ? String(info.showVision) : existing.showVision,
+      presidentName: info.presidentName !== undefined ? info.presidentName : existing.presidentName,
+      presidentImage: info.presidentImage !== undefined ? info.presidentImage : existing.presidentImage,
+      presidentMessage: info.presidentMessage !== undefined ? info.presidentMessage : existing.presidentMessage,
+      presidentPrefix: info.presidentPrefix !== undefined ? info.presidentPrefix : existing.presidentPrefix,
     };
 
     await sheets.spreadsheets.values.update({
       spreadsheetId: sheetId,
-      range: "about_info!A2:B4",
+      range: "about_info!A2:B10",
       valueInputOption: "RAW",
       requestBody: {
         values: [
           ["history", updated.history],
           ["vision", updated.vision],
-          ["contact", updated.contact]
+          ["contact", updated.contact],
+          ["showHistory", updated.showHistory],
+          ["showVision", updated.showVision],
+          ["presidentName", updated.presidentName],
+          ["presidentImage", updated.presidentImage],
+          ["presidentMessage", updated.presidentMessage],
+          ["presidentPrefix", updated.presidentPrefix],
         ]
       }
     });

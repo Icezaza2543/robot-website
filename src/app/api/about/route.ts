@@ -20,12 +20,18 @@ export async function PATCH(request: Request) {
 
   try {
     const data = await request.json();
-    const { history, vision, contact } = data;
+    const { history, vision, contact, showHistory, showVision, presidentName, presidentImage, presidentMessage, presidentPrefix } = data;
 
     const updateData: any = {};
     if (history !== undefined) updateData.history = String(history);
     if (vision !== undefined) updateData.vision = String(vision);
     if (contact !== undefined) updateData.contact = String(contact);
+    if (showHistory !== undefined) updateData.showHistory = Boolean(showHistory);
+    if (showVision !== undefined) updateData.showVision = Boolean(showVision);
+    if (presidentName !== undefined) updateData.presidentName = String(presidentName);
+    if (presidentImage !== undefined) updateData.presidentImage = String(presidentImage);
+    if (presidentMessage !== undefined) updateData.presidentMessage = String(presidentMessage);
+    if (presidentPrefix !== undefined) updateData.presidentPrefix = String(presidentPrefix);
 
     const success = await updateAboutInfo(updateData);
     if (!success) {

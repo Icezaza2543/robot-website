@@ -8,6 +8,12 @@ interface AboutInfo {
   history: string;
   vision: string;
   contact: string;
+  showHistory?: boolean;
+  showVision?: boolean;
+  presidentName?: string;
+  presidentImage?: string;
+  presidentMessage?: string;
+  presidentPrefix?: string;
 }
 
 interface Advisor {
@@ -19,7 +25,7 @@ interface Advisor {
 }
 
 export default function AboutPage() {
-  const [info, setInfo] = useState<AboutInfo>({ history: "", vision: "", contact: "" });
+  const [info, setInfo] = useState<AboutInfo>({ history: "", vision: "", contact: "", showHistory: true, showVision: true });
   const [advisors, setAdvisors] = useState<Advisor[]>([]);
   const [currentAdvisorIndex, setCurrentAdvisorIndex] = useState(0);
 
@@ -159,31 +165,93 @@ export default function AboutPage() {
       </section>
 
       {/* 2. Core Information (History & Vision) */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-        <div className="rounded-3xl border border-gray-200 bg-white p-8 md:p-10 shadow-sm flex flex-col gap-5 hover:border-orange-500/30 transition duration-300">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-orange-100 text-orange-600 rounded-2xl">
-              <History className="w-6 h-6" />
+      {(info.showHistory !== false || info.showVision !== false) && (
+        <section className={`grid grid-cols-1 ${info.showHistory !== false && info.showVision !== false ? 'md:grid-cols-2' : ''} gap-8 md:gap-12`}>
+          {info.showHistory !== false && (
+            <div className="rounded-3xl border border-gray-200 bg-white p-8 md:p-10 shadow-sm flex flex-col gap-5 hover:border-orange-500/30 transition duration-300">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-orange-100 text-orange-600 rounded-2xl">
+                  <History className="w-6 h-6" />
+                </div>
+                <h2 className="text-2xl font-black text-gray-900">ประวัติชมรม</h2>
+              </div>
+              <p className="text-gray-600 leading-relaxed font-medium whitespace-pre-line text-sm md:text-base">
+                {info.history || "กำลังอัปเดตประวัติชมรม..."}
+              </p>
             </div>
-            <h2 className="text-2xl font-black text-gray-900">ประวัติชมรม</h2>
-          </div>
-          <p className="text-gray-600 leading-relaxed font-medium whitespace-pre-line text-sm md:text-base">
-            {info.history || "กำลังอัปเดตประวัติชมรม..."}
-          </p>
-        </div>
+          )}
 
-        <div className="rounded-3xl border border-gray-200 bg-white p-8 md:p-10 shadow-sm flex flex-col gap-5 hover:border-blue-500/30 transition duration-300">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-100 text-blue-600 rounded-2xl">
-              <Target className="w-6 h-6" />
+          {info.showVision !== false && (
+            <div className="rounded-3xl border border-gray-200 bg-white p-8 md:p-10 shadow-sm flex flex-col gap-5 hover:border-blue-500/30 transition duration-300">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-blue-100 text-blue-600 rounded-2xl">
+                  <Target className="w-6 h-6" />
+                </div>
+                <h2 className="text-2xl font-black text-gray-900">วิสัยทัศน์ & เป้าหมาย</h2>
+              </div>
+              <p className="text-gray-600 leading-relaxed font-medium whitespace-pre-line text-sm md:text-base">
+                {info.vision || "กำลังอัปเดตวิสัยทัศน์..."}
+              </p>
             </div>
-            <h2 className="text-2xl font-black text-gray-900">วิสัยทัศน์ & เป้าหมาย</h2>
+          )}
+        </section>
+      )}
+
+      {/* 2.5 President Section */}
+      {info.presidentName && (
+        <section className="flex flex-col items-center gap-10 pt-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl flex items-center justify-center gap-3">
+              <UserCheck className="w-8 h-8 text-orange-500" /> ประธานชมรม (ปัจจุบัน)
+            </h2>
+            <p className="text-sm text-gray-500 font-semibold mt-2">
+              ประธานชมรมโรบอท มหาวิทยาลัยนเรศวร
+            </p>
           </div>
-          <p className="text-gray-600 leading-relaxed font-medium whitespace-pre-line text-sm md:text-base">
-            {info.vision || "กำลังอัปเดตวิสัยทัศน์..."}
-          </p>
-        </div>
-      </section>
+
+          <div className="relative w-full max-w-4xl mx-auto group">
+            <div className="overflow-hidden rounded-[2.5rem] border border-gray-200 bg-white shadow-xl shadow-gray-100 flex flex-col-reverse md:flex-row items-center transition-all duration-300 transform group-hover:-translate-y-1">
+              
+              {/* Text Section */}
+              <div className="w-full md:w-1/2 px-8 pb-8 pt-6 md:p-16 flex flex-col justify-center items-center md:items-start text-center md:text-left min-h-[200px] md:min-h-[300px]">
+                <span className="inline-block px-5 py-2 bg-orange-100 text-orange-700 font-bold text-xs rounded-full uppercase tracking-widest mb-4 md:mb-6 mt-2 md:mt-0">
+                  President
+                </span>
+                <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-black text-gray-900 leading-[1.2] md:leading-[1.15] tracking-tight mb-6">
+                  {info.presidentPrefix && (
+                    <span className="block text-xl md:text-2xl lg:text-3xl font-bold text-gray-500 mb-1">{info.presidentPrefix}</span>
+                  )}
+                  {info.presidentName}
+                </h3>
+                {info.presidentMessage && (
+                  <blockquote className="text-gray-600 font-medium italic border-l-4 border-orange-400 pl-4 text-left w-full whitespace-pre-line text-sm md:text-base">
+                    "{info.presidentMessage}"
+                  </blockquote>
+                )}
+              </div>
+
+              {/* Image Section */}
+              <div className="w-full md:w-1/2 h-[340px] sm:h-[400px] md:h-[500px] bg-white relative flex items-end justify-center overflow-hidden shrink-0 border-b md:border-b-0 md:border-l border-gray-100">
+                {/* Decorative background circles */}
+                <div className="absolute top-10 right-10 w-48 h-48 bg-gray-50 rounded-full blur-2xl"></div>
+                <div className="absolute bottom-10 left-10 w-32 h-32 bg-orange-50/50 rounded-full blur-xl"></div>
+                
+                {info.presidentImage ? (
+                  <img 
+                    src={info.presidentImage} 
+                    alt="President" 
+                    className="w-full h-full object-cover md:object-contain object-top md:object-bottom relative z-10" 
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center relative z-10 bg-gray-50">
+                    <UserCheck className="w-32 h-32 text-gray-200" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 3. Advisors Carousel Section */}
       <section className="flex flex-col items-center gap-10 pt-8">
