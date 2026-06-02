@@ -98,6 +98,8 @@ export default function AdminAboutPage() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setUrl: (url: string) => void) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    e.target.value = '';
 
     try {
       setIsUploadingImage(true);
@@ -222,12 +224,15 @@ export default function AdminAboutPage() {
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-gray-500">รูปภาพ</label>
-                <div className="flex items-center gap-3">
-                  {advImage && <img src={advImage} className="w-12 h-12 object-cover rounded-full border shadow-sm" />}
-                  <label className="flex-1 border-2 border-dashed rounded-xl px-3 py-2 cursor-pointer hover:bg-white text-center">
-                    <span className="text-xs text-gray-500">{isUploadingImage ? "กำลังอัปโหลด..." : "คลิกเพื่ออัปโหลดรูปจากคอม"}</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, setAdvImage)} disabled={isUploadingImage} />
-                  </label>
+                <div className="flex flex-col gap-2">
+                  <input type="url" placeholder="หรือวางลิงก์รูปภาพ (URL) ที่นี่..." value={advImage} onChange={e => setAdvImage(e.target.value)} className="rounded-xl border px-3 py-2 text-sm outline-none w-full" />
+                  <div className="flex items-center gap-3">
+                    {advImage && <img src={advImage} className="w-12 h-12 object-cover rounded-full border shadow-sm" />}
+                    <label className="flex-1 border-2 border-dashed rounded-xl px-3 py-2 cursor-pointer hover:bg-white text-center">
+                      <span className="text-xs text-gray-500">{isUploadingImage ? "กำลังอัปโหลด..." : "อัปโหลดรูปภาพใหม่จากคอม"}</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, setAdvImage)} disabled={isUploadingImage} />
+                    </label>
+                  </div>
                 </div>
               </div>
               <div className="flex justify-end pt-2">

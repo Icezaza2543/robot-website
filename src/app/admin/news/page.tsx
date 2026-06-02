@@ -86,6 +86,9 @@ export default function AdminNewsPage() {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setUrl: (url: string) => void) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    // Clear the input so the same file can be selected again
+    e.target.value = '';
 
     try {
       setIsUploadingImage(true);
@@ -364,15 +367,31 @@ export default function AdminNewsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5 md:col-span-2">
                 <label className="text-xs font-bold text-gray-400">หัวข้อข่าว</label>
-                <input type="text" value={editingItem.title} onChange={e => setEditingItem({ ...editingItem, title: e.target.value })} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
+                <input type="text" value={editingItem.title} onChange={e => setEditingItem(prev => prev ? { ...prev, title: e.target.value } : null)} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-400">วันที่แสดงผล</label>
+                <input type="text" value={editingItem.date} onChange={e => setEditingItem(prev => prev ? { ...prev, date: e.target.value } : null)} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-400">หมวดหมู่</label>
+                <input type="text" value={editingItem.category} onChange={e => setEditingItem(prev => prev ? { ...prev, category: e.target.value } : null)} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-400">ผู้เขียน</label>
+                <input type="text" value={editingItem.author} onChange={e => setEditingItem(prev => prev ? { ...prev, author: e.target.value } : null)} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
+              </div>
+              <div className="flex flex-col gap-1.5 md:col-span-2">
+                <label className="text-xs font-bold text-gray-400">สรุปเนื้อหาย่อ</label>
+                <input type="text" value={editingItem.summary} onChange={e => setEditingItem(prev => prev ? { ...prev, summary: e.target.value } : null)} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
               </div>
               <div className="flex flex-col gap-1.5 md:col-span-2">
                 <label className="text-xs font-bold text-gray-400">เนื้อหาเต็ม</label>
-                <textarea rows={6} value={editingItem.content} onChange={e => setEditingItem({ ...editingItem, content: e.target.value })} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none resize-none" />
+                <textarea rows={6} value={editingItem.content} onChange={e => setEditingItem(prev => prev ? { ...prev, content: e.target.value } : null)} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none resize-none" />
               </div>
               <div className="flex flex-col gap-1.5 md:col-span-2">
                 <label className="text-xs font-bold text-gray-400">ลิงก์ IG</label>
-                <input type="url" value={editingItem.igLink} onChange={e => setEditingItem({ ...editingItem, igLink: e.target.value })} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
+                <input type="url" value={editingItem.igLink} onChange={e => setEditingItem(prev => prev ? { ...prev, igLink: e.target.value } : null)} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
               </div>
               <div className="flex flex-col gap-1.5 md:col-span-2">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">เปลี่ยนรูปภาพปก</label>
@@ -380,7 +399,7 @@ export default function AdminNewsPage() {
                   {editingItem.imageUrl && <img src={editingItem.imageUrl} className="w-16 h-16 object-cover rounded-xl border" />}
                   <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-4 cursor-pointer hover:bg-gray-50">
                     <span className="text-xs text-gray-500">{isUploadingImage ? "กำลังอัปโหลด..." : "อัปโหลดภาพใหม่"}</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, url => setEditingItem({ ...editingItem, imageUrl: url }))} disabled={isUploadingImage} />
+                    <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUpload(e, url => setEditingItem(prev => prev ? { ...prev, imageUrl: url } : null))} disabled={isUploadingImage} />
                   </label>
                 </div>
               </div>

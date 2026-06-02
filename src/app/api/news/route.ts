@@ -26,15 +26,34 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
     }
 
+    const finalTitle = String(title).trim();
+    let finalImageUrl = String(imageUrl || "").trim();
+    const finalIgLink = String(igLink || "").trim();
+
+    // Auto-fetch IG thumbnail if no image is provided
+    if (!finalImageUrl && finalIgLink.includes("instagram.com")) {
+      try {
+        const mlRes = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(finalIgLink)}`);
+        if (mlRes.ok) {
+          const mlData = await mlRes.json();
+          if (mlData?.data?.image?.url) {
+            finalImageUrl = mlData.data.image.url;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch IG thumbnail via microlink", err);
+      }
+    }
+
     const newItem = {
-      title: String(title).trim(),
+      title: finalTitle,
       date: String(date || "").trim(),
       summary: String(summary || "").trim(),
       content: String(content).trim(),
       category: String(category || "ทั่วไป").trim(),
       author: String(author || "Admin").trim(),
-      imageUrl: String(imageUrl || "").trim(),
-      igLink: String(igLink || "").trim(),
+      imageUrl: finalImageUrl,
+      igLink: finalIgLink,
     };
 
     const success = await addNewsItem(newItem);
@@ -70,8 +89,27 @@ export async function PATCH(request: Request) {
     if (content !== undefined) updateData.content = String(content).trim();
     if (category !== undefined) updateData.category = String(category).trim();
     if (author !== undefined) updateData.author = String(author).trim();
-    if (imageUrl !== undefined) updateData.imageUrl = String(imageUrl).trim();
     if (igLink !== undefined) updateData.igLink = String(igLink).trim();
+    
+    if (imageUrl !== undefined) {
+      updateData.imageUrl = String(imageUrl).trim();
+    }
+
+    // Auto-fetch IG thumbnail if igLink is updated/present and imageUrl is explicitly empty
+    if ((updateData.igLink || igLink) && !updateData.imageUrl && updateData.igLink?.includes("instagram.com")) {
+      try {
+        const targetLink = updateData.igLink || igLink;
+        const mlRes = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(targetLink)}`);
+        if (mlRes.ok) {
+          const mlData = await mlRes.json();
+          if (mlData?.data?.image?.url) {
+            updateData.imageUrl = mlData.data.image.url;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch IG thumbnail via microlink on update", err);
+      }
+    }
 
     const success = await updateNewsItem(id, updateData);
     if (!success) {
