@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
   try {
     const data = await request.json();
-    const { name, role, imageUrl } = data;
+    const { name, role, imageUrl, prefix } = data;
 
     if (!name || !role) {
       return NextResponse.json({ error: "Name and role are required" }, { status: 400 });
@@ -30,6 +30,7 @@ export async function POST(request: Request) {
       name: String(name).trim(),
       role: String(role).trim(),
       imageUrl: String(imageUrl || "").trim(),
+      prefix: String(prefix || "").trim(),
     };
 
     const success = await addAdvisor(newItem);

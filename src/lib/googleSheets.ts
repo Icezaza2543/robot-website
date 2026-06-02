@@ -1669,6 +1669,7 @@ export interface Advisor {
   name: string;
   role: string;
   imageUrl: string;
+  prefix?: string;
 }
 
 export async function getAdvisors(): Promise<Advisor[]> {
@@ -1677,12 +1678,12 @@ export async function getAdvisors(): Promise<Advisor[]> {
   if (!sheets || !sheetId) return [];
 
   try {
-    const headers = ["ID", "Name", "Role", "ImageUrl", "Status"];
+    const headers = ["ID", "Name", "Role", "ImageUrl", "Status", "Prefix"];
     await ensureSheetExists(sheets, sheetId, "advisors", headers);
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
-      range: "advisors!A2:E100",
+      range: "advisors!A2:F100",
     });
 
     const rows = response.data.values || [];
@@ -1692,7 +1693,8 @@ export async function getAdvisors(): Promise<Advisor[]> {
         id: String(row[0] || ""),
         name: String(row[1] || ""),
         role: String(row[2] || ""),
-        imageUrl: String(row[3] || "")
+        imageUrl: String(row[3] || ""),
+        prefix: String(row[5] || "")
       })).filter(i => i.id);
   } catch (error) {
     console.error("[ERROR] Failed to fetch advisors:", error);
@@ -1707,13 +1709,13 @@ export async function addAdvisor(item: Omit<Advisor, "id">): Promise<boolean> {
 
   try {
     const id = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-    const headers = ["ID", "Name", "Role", "ImageUrl", "Status"];
+    const headers = ["ID", "Name", "Role", "ImageUrl", "Status", "Prefix"];
     await ensureSheetExists(sheets, sheetId, "advisors", headers);
 
-    const newRow = [id, item.name, item.role, item.imageUrl, "active"];
+    const newRow = [id, item.name, item.role, item.imageUrl, "active", item.prefix || ""];
     await sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
-      range: "advisors!A:E",
+      range: "advisors!A:F",
       valueInputOption: "RAW",
       requestBody: { values: [newRow] },
     });

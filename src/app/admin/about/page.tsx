@@ -31,8 +31,8 @@ export default function AdminAboutPage() {
   const [isSavingInfo, setIsSavingInfo] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  // Form for Advisor
   const [showAddAdvisor, setShowAddAdvisor] = useState(false);
+  const [advPrefix, setAdvPrefix] = useState("");
   const [advName, setAdvName] = useState("");
   const [advRole, setAdvRole] = useState("");
   const [advImage, setAdvImage] = useState("");
@@ -147,10 +147,10 @@ export default function AdminAboutPage() {
       const res = await fetch("/api/advisors", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: advName, role: advRole, imageUrl: advImage }),
+        body: JSON.stringify({ prefix: advPrefix, name: advName, role: advRole, imageUrl: advImage }),
       });
       if (res.ok) {
-        setAdvName(""); setAdvRole(""); setAdvImage(""); setShowAddAdvisor(false);
+        setAdvPrefix(""); setAdvName(""); setAdvRole(""); setAdvImage(""); setShowAddAdvisor(false);
         fetchData();
       } else alert("เพิ่มที่ปรึกษาล้มเหลว");
     } catch (err) {
@@ -233,7 +233,11 @@ export default function AdminAboutPage() {
 
           {showAddAdvisor && (
             <form onSubmit={handleAddAdvisor} className="bg-gray-50 border border-gray-200 rounded-2xl p-5 grid grid-cols-1 gap-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5 md:col-span-2">
+                  <label className="text-xs font-bold text-gray-500">คำนำหน้า (ไม่บังคับ)</label>
+                  <input type="text" placeholder="เช่น ผู้ช่วยศาสตราจารย์ ดร." value={advPrefix} onChange={e => setAdvPrefix(e.target.value)} className="rounded-xl border px-3 py-2 text-sm outline-none" />
+                </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-bold text-gray-500">ชื่อ - นามสกุล *</label>
                   <input type="text" required value={advName} onChange={e => setAdvName(e.target.value)} className="rounded-xl border px-3 py-2 text-sm outline-none" />
@@ -275,7 +279,7 @@ export default function AdminAboutPage() {
                       <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center"><Users className="w-5 h-5 text-gray-400" /></div>
                     )}
                     <div>
-                      <div className="font-bold text-gray-900">{adv.name}</div>
+                      <div className="font-bold text-gray-900">{adv.prefix ? `${adv.prefix} ` : ""}{adv.name}</div>
                       <div className="text-xs font-medium text-gray-500">{adv.role}</div>
                     </div>
                   </div>

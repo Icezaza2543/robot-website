@@ -15,6 +15,7 @@ interface Advisor {
   name: string;
   role: string;
   imageUrl: string;
+  prefix?: string;
 }
 
 export default function AboutPage() {
@@ -200,11 +201,14 @@ export default function AboutPage() {
             <div className="overflow-hidden rounded-[2.5rem] border border-gray-200 bg-white shadow-xl shadow-gray-100 flex flex-col-reverse md:flex-row items-center transition-all duration-300 transform group-hover:-translate-y-1">
               
               {/* Text Section */}
-              <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center items-center md:items-start text-center md:text-left min-h-[250px] md:min-h-[300px]">
-                <span className="inline-block px-5 py-2 bg-orange-100 text-orange-700 font-bold text-xs rounded-full uppercase tracking-widest mb-4 md:mb-6">
+              <div className="w-full md:w-1/2 px-8 pb-8 pt-6 md:p-16 flex flex-col justify-center items-center md:items-start text-center md:text-left min-h-[200px] md:min-h-[300px]">
+                <span className="inline-block px-5 py-2 bg-orange-100 text-orange-700 font-bold text-xs rounded-full uppercase tracking-widest mb-4 md:mb-6 mt-2 md:mt-0">
                   {advisors[currentAdvisorIndex]?.role}
                 </span>
                 <h3 className="text-2xl sm:text-3xl md:text-5xl lg:text-[54px] font-black text-gray-900 leading-[1.2] md:leading-[1.15] tracking-tight">
+                  {advisors[currentAdvisorIndex]?.prefix && (
+                    <span className="block text-xl md:text-2xl lg:text-3xl font-bold text-gray-500 mb-2">{advisors[currentAdvisorIndex].prefix}</span>
+                  )}
                   {advisors[currentAdvisorIndex]?.name}
                 </h3>
               </div>
@@ -219,7 +223,7 @@ export default function AboutPage() {
                   <img 
                     src={advisors[currentAdvisorIndex].imageUrl} 
                     alt="Advisor" 
-                    className="w-full h-full object-cover md:object-contain object-[center_20%] md:object-bottom relative z-10" 
+                    className="w-full h-full object-cover md:object-contain object-top md:object-bottom relative z-10" 
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center relative z-10 bg-gray-50">
@@ -230,16 +234,7 @@ export default function AboutPage() {
             </div>
 
             {/* Carousel Controls */}
-            {advisors.length > 1 && (
-              <>
-                <button onClick={prevAdvisor} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-orange-500 shadow-md transition hover:scale-110 active:scale-95">
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button onClick={nextAdvisor} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-orange-500 shadow-md transition hover:scale-110 active:scale-95">
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </>
-            )}
+            
             
             {/* Indicators */}
             {advisors.length > 1 && (
