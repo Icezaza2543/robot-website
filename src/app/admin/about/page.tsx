@@ -127,7 +127,8 @@ export default function AdminAboutPage() {
         const data = await res.json();
         if (cropperCallback) cropperCallback(data.url);
       } else {
-        alert("อัปโหลดรูปภาพล้มเหลว");
+        const data = await res.json();
+        alert(`อัปโหลดรูปภาพล้มเหลว: ${data.details || data.error || 'Unknown Error'}`);
       }
     } catch (error) {
       alert("เกิดข้อผิดพลาดในการอัปโหลด");

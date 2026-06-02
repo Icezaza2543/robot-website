@@ -201,7 +201,7 @@ export default function AboutPage() {
               
               {/* Text Section */}
               <div className="w-full md:w-1/2 p-10 md:p-16 flex flex-col justify-center items-center md:items-start text-center md:text-left min-h-[300px]">
-                <span className="inline-block px-5 py-2 bg-green-100 text-green-700 font-bold text-xs rounded-full uppercase tracking-widest mb-6">
+                <span className="inline-block px-5 py-2 bg-orange-100 text-orange-700 font-bold text-xs rounded-full uppercase tracking-widest mb-6">
                   {advisors[currentAdvisorIndex]?.role}
                 </span>
                 <h3 className="text-3xl md:text-5xl lg:text-[54px] font-black text-gray-900 leading-[1.15] tracking-tight">
@@ -210,10 +210,10 @@ export default function AboutPage() {
               </div>
 
               {/* Image Section (Vertical / Portrait) */}
-              <div className="w-full md:w-1/2 h-[350px] md:h-[500px] bg-gradient-to-br from-[#10b981] to-[#047857] relative flex items-end justify-center overflow-hidden shrink-0">
+              <div className="w-full md:w-1/2 h-[350px] md:h-[500px] bg-white relative flex items-end justify-center overflow-hidden shrink-0 border-l border-gray-100">
                 {/* Decorative background circles */}
-                <div className="absolute top-10 right-10 w-48 h-48 bg-white/20 rounded-full blur-2xl"></div>
-                <div className="absolute bottom-10 left-10 w-32 h-32 bg-[#34d399]/40 rounded-full blur-xl"></div>
+                <div className="absolute top-10 right-10 w-48 h-48 bg-gray-50 rounded-full blur-2xl"></div>
+                <div className="absolute bottom-10 left-10 w-32 h-32 bg-orange-50/50 rounded-full blur-xl"></div>
                 
                 {advisors[currentAdvisorIndex]?.imageUrl ? (
                   <img 
@@ -222,8 +222,8 @@ export default function AboutPage() {
                     className="w-full h-full object-cover md:object-contain object-bottom relative z-10" 
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center relative z-10">
-                    <UserCheck className="w-32 h-32 text-white/30" />
+                  <div className="w-full h-full flex items-center justify-center relative z-10 bg-gray-50">
+                    <UserCheck className="w-32 h-32 text-gray-200" />
                   </div>
                 )}
               </div>

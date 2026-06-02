@@ -11,7 +11,16 @@ function getDriveClient() {
   }
 
   try {
-    const formattedKey = privateKey.replace(/\\n/g, "\n");
+    let formattedKey = privateKey;
+    // Strip surrounding quotes if Vercel added them
+    if (formattedKey.startsWith('"') && formattedKey.endsWith('"')) {
+      formattedKey = formattedKey.slice(1, -1);
+    } else if (formattedKey.startsWith("'") && formattedKey.endsWith("'")) {
+      formattedKey = formattedKey.slice(1, -1);
+    }
+    // Replace escaped newlines with actual newlines
+    formattedKey = formattedKey.replace(/\\n/g, "\n");
+
     const auth = new google.auth.JWT({
       email,
       key: formattedKey,
@@ -71,8 +80,8 @@ export async function uploadFileToDrive(fileBuffer: Buffer, fileName: string, mi
     // or we can construct a direct download link
     // Google Drive direct link format: https://drive.google.com/uc?export=view&id=FILE_ID
     return `https://drive.google.com/uc?export=view&id=${fileId}`;
-  } catch (error) {
+  } catch (error: any) {
     console.error("[ERROR] Failed to upload file to Google Drive:", error);
-    return null;
+    throw new Error(error.message || "Failed to upload to Drive");
   }
 }
