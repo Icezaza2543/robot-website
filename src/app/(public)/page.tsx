@@ -1,13 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { blogPosts, BlogPost } from "@/constants/news";
-import { Newspaper, Lightbulb, Inbox, Camera, PenLine, Calendar, Zap } from "lucide-react";
+import { Newspaper, Lightbulb, Inbox, Camera, PenLine, Calendar, Zap, ExternalLink } from "lucide-react";
 import SponsorMarquee from "@/components/ui/SponsorMarquee";
 
+interface NewsItem {
+  id: string;
+  title: string;
+  date: string;
+  summary: string;
+  content: string;
+  category: string;
+  author: string;
+  imageUrl: string;
+  igLink: string;
+}
+
 export default function HomePage() {
-  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [selectedPost, setSelectedPost] = useState<NewsItem | null>(null);
+  const [blogPosts, setBlogPosts] = useState<NewsItem[]>([]);
+  const [isLoadingNews, setIsLoadingNews] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/news")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setBlogPosts(data);
+        setIsLoadingNews(false);
+      })
+      .catch(err => {
+        console.error("Failed to fetch news", err);
+        setIsLoadingNews(false);
+      });
+  }, []);
 
   return (
     <div className="flex flex-col gap-24 pb-24 relative">
@@ -87,19 +113,13 @@ export default function HomePage() {
                   {/* Post Banner Image */}
                   <div className="relative h-48 w-full overflow-hidden bg-gray-50 border-b border-gray-100">
                     <img
-                      src={post.image}
+                      src={post.imageUrl || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=60"}
                       alt={post.title}
                       className="h-full w-full object-cover"
                     />
                     <div className="absolute top-3 left-3">
                       <span className="inline-block text-[10px] font-black uppercase tracking-wider bg-white/90 backdrop-blur-xs border border-gray-200/50 text-orange-600 px-3 py-1.5 rounded-full shadow-xs">
                         {post.category}
-                      </span>
-                    </div>
-                    {/* Floating Image Size Label */}
-                    <div className="absolute bottom-3 right-3 z-10">
-                      <span className="inline-flex items-center gap-1 text-[9px] font-extrabold bg-black/60 backdrop-blur-xs text-white px-2 py-1 rounded-md tracking-wider">
-                        <Camera className="w-3 h-3" /> {post.imageSize}
                       </span>
                     </div>
                   </div>
@@ -151,7 +171,7 @@ export default function HomePage() {
               {/* Image Banner Header with soft fading blend */}
               <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-gray-50 shrink-0">
                 <img
-                  src={selectedPost.image}
+                  src={selectedPost.imageUrl || "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=60"}
                   alt={selectedPost.title}
                   className="h-full w-full object-cover"
                 />
@@ -162,13 +182,6 @@ export default function HomePage() {
                 <div className="absolute bottom-5 left-6 sm:left-8">
                   <span className="inline-block text-[10px] font-black uppercase tracking-widest bg-orange-500 text-white px-3.5 py-1.5 rounded-xl shadow-lg shadow-orange-500/20">
                     {selectedPost.category}
-                  </span>
-                </div>
-
-                {/* Floating Image Size badge inside Modal */}
-                <div className="absolute bottom-5 right-6 sm:right-8">
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-wider bg-black/60 backdrop-blur-xs text-white px-3.5 py-1.5 rounded-xl shadow-md border border-white/10">
-                    <Camera className="w-3 h-3" /> ขนาดรูปภาพ: {selectedPost.imageSize}
                   </span>
                 </div>
               </div>
@@ -237,6 +250,24 @@ export default function HomePage() {
                       );
                     })}
                   </div>
+
+                  {/* Instagram Embed (If available) */}
+                  {selectedPost.igLink && (
+                    <div className="pt-6 border-t border-gray-100 flex flex-col items-center">
+                      <a href={selectedPost.igLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 mb-4 text-xs font-bold text-orange-500 hover:text-orange-600">
+                        <ExternalLink className="w-4 h-4" /> ดูโพสต์บน Instagram ต้นฉบับ
+                      </a>
+                      <iframe 
+                        src={selectedPost.igLink.endsWith('/') ? selectedPost.igLink + 'embed' : selectedPost.igLink + '/embed'} 
+                        width="100%" 
+                        height="550" 
+                        frameBorder="0" 
+                        scrolling="no" 
+                        allowTransparency={true}
+                        className="rounded-xl border border-gray-200 max-w-sm"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

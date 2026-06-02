@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Settings, X, Plus, Inbox, Save, Search, Package, MapPin, Minus, Trash2, Megaphone, FileUp, Download, Edit2 } from "lucide-react";
+import { Settings, X, Plus, Inbox, Save, Search, Package, MapPin, Minus, Trash2, Megaphone, FileUp, Download, Edit2, Image as ImageIcon, UploadCloud } from "lucide-react";
 import * as XLSX from "xlsx";
 
 interface EquipmentItem {
@@ -14,6 +14,7 @@ interface EquipmentItem {
   stock: number;
   location: string;
   description: string;
+  imageUrl?: string;
 }
 
 const CATEGORIES = [
@@ -41,10 +42,40 @@ export default function AdminItemsPage() {
   const [formStock, setFormStock] = useState("10");
   const [formLocation, setFormLocation] = useState("");
   const [formDescription, setFormDescription] = useState("");
+  const [formImageUrl, setFormImageUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Edit Item Form State
   const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setUrl: (url: string) => void) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploadingImage(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setUrl(data.url);
+      } else {
+        alert("อัปโหลดรูปภาพล้มเหลว");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   // Excel Import handlers
   const handleDownloadTemplate = () => {
@@ -171,6 +202,7 @@ export default function AdminItemsPage() {
           stock: Number(formStock),
           location: formLocation,
           description: formDescription,
+          imageUrl: formImageUrl,
         }),
       });
 
@@ -181,6 +213,7 @@ export default function AdminItemsPage() {
         setFormStock("10");
         setFormLocation("");
         setFormDescription("");
+        setFormImageUrl("");
         setShowAddForm(false);
         // Refresh catalog
         await fetchItems();
@@ -439,6 +472,22 @@ export default function AdminItemsPage() {
               />
             </div>
 
+            <div className="flex flex-col gap-2 md:col-span-3">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">รูปภาพอุปกรณ์ (ไม่บังคับ)</label>
+              <div className="flex items-center gap-4">
+                {formImageUrl && (
+                  <img src={formImageUrl} alt="Preview" className="w-16 h-16 object-cover rounded-xl border border-gray-200 shadow-sm" />
+                )}
+                <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl px-4 py-6 cursor-pointer hover:bg-gray-50 hover:border-orange-400 transition">
+                  <UploadCloud className="w-6 h-6 text-gray-400 mb-2" />
+                  <span className="text-sm text-gray-500 font-medium">
+                    {isUploadingImage ? "กำลังอัปโหลด..." : "คลิกเพื่ออัปโหลดรูปภาพ (Google Drive)"}
+                  </span>
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, setFormImageUrl)} disabled={isUploadingImage} />
+                </label>
+              </div>
+            </div>
+
             <div className="md:col-span-3 flex justify-end gap-3 mt-2">
               <button
                 type="button"
@@ -557,11 +606,20 @@ export default function AdminItemsPage() {
                       return (
                         <tr key={item.id} className="hover:bg-orange-500/[0.02] active:bg-orange-500/[0.01] transition-all duration-200">
                           <td className="px-6 py-5">
-                            <div className="flex flex-col">
-                              <span className="font-extrabold text-gray-800 text-[15px] sm:text-base tracking-tight leading-tight">{item.name}</span>
-                              <span className="text-xs text-gray-400 font-semibold mt-1.5 max-w-sm line-clamp-1">
-                                {item.description || "ไม่มีรายละเอียดประกอบสิ่งของ"}
-                              </span>
+                            <div className="flex items-center gap-4">
+                              {item.imageUrl ? (
+                                <img src={item.imageUrl} alt={item.name} className="w-12 h-12 object-cover rounded-xl border border-gray-200 shrink-0 shadow-sm" />
+                              ) : (
+                                <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-200 shrink-0 flex items-center justify-center">
+                                  <ImageIcon className="w-5 h-5 text-gray-300" />
+                                </div>
+                              )}
+                              <div className="flex flex-col">
+                                <span className="font-extrabold text-gray-800 text-[15px] sm:text-base tracking-tight leading-tight">{item.name}</span>
+                                <span className="text-xs text-gray-400 font-semibold mt-1.5 max-w-sm line-clamp-1">
+                                  {item.description || "ไม่มีรายละเอียดประกอบสิ่งของ"}
+                                </span>
+                              </div>
                             </div>
                           </td>
                           <td className="px-6 py-5">
@@ -707,6 +765,22 @@ export default function AdminItemsPage() {
                   rows={2}
                   className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition resize-none"
                 />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">รูปภาพอุปกรณ์ (เปลี่ยนรูปใหม่)</label>
+                <div className="flex items-center gap-4">
+                  {editingItem.imageUrl && (
+                    <img src={editingItem.imageUrl} alt="Preview" className="w-16 h-16 object-cover rounded-xl border border-gray-200 shadow-sm" />
+                  )}
+                  <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl px-4 py-4 cursor-pointer hover:bg-gray-50 hover:border-orange-400 transition">
+                    <UploadCloud className="w-5 h-5 text-gray-400 mb-1" />
+                    <span className="text-xs text-gray-500 font-medium">
+                      {isUploadingImage ? "กำลังอัปโหลด..." : "คลิกเพื่ออัปโหลดรูปภาพใหม่"}
+                    </span>
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, (url) => setEditingItem({ ...editingItem, imageUrl: url }))} disabled={isUploadingImage} />
+                  </label>
+                </div>
               </div>
 
               <div className="mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">

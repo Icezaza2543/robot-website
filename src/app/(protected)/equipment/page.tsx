@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/providers/CartProvider";
-import { Plug, Settings, Search, MapPin, ShoppingCart, Check, X, AlertTriangle } from "lucide-react";
+import { Plug, Settings, Search, MapPin, ShoppingCart, Check, X, AlertTriangle, Package } from "lucide-react";
 
 interface EquipmentItem {
   id: string;
@@ -13,6 +13,7 @@ interface EquipmentItem {
   stock: number;
   location: string;
   description: string;
+  imageUrl?: string;
 }
 
 export default function EquipmentPage() {
@@ -164,6 +165,17 @@ export default function EquipmentPage() {
                 className="flex flex-col justify-between rounded-3xl border border-gray-200/80 bg-white p-6 hover:border-orange-500/30 hover:shadow-lg hover:shadow-gray-100 transition-all duration-300 group"
               >
                 <div>
+                  {/* Item Image */}
+                  {item.imageUrl ? (
+                    <div className="w-full aspect-[4/3] mb-5 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 shrink-0 relative group-hover:border-orange-200 transition-colors">
+                      <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                  ) : (
+                    <div className="w-full h-32 mb-5 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-100 shrink-0 flex items-center justify-center relative overflow-hidden group-hover:border-orange-200 transition-colors">
+                      <Package className="w-8 h-8 text-gray-300" />
+                    </div>
+                  )}
+
                   {/* Category tag */}
                   <div className="flex items-center justify-between mb-4">
                     <span className="inline-block text-xs font-bold bg-gray-50 border border-gray-200/40 text-gray-500 px-3 py-1 rounded-full">

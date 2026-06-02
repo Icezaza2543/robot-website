@@ -1,8 +1,44 @@
-import Link from "next/link"
-import { Users, UserCheck, MapPin, Map, Image as ImageIcon, Lightbulb, DoorOpen, MessageCircle } from "lucide-react"
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Users, UserCheck, MapPin, Map, Image as ImageIcon, Lightbulb, DoorOpen, MessageCircle, Info, Target, History, ChevronLeft, ChevronRight, Contact } from "lucide-react";
+
+interface AboutInfo {
+  history: string;
+  vision: string;
+  contact: string;
+}
+
+interface Advisor {
+  id: string;
+  name: string;
+  role: string;
+  imageUrl: string;
+}
 
 export default function AboutPage() {
-  // Clean Data Array for 10 Route Steps (ง่ายต่อการแก้ไขและดูแลรักษา)
+  const [info, setInfo] = useState<AboutInfo>({ history: "", vision: "", contact: "" });
+  const [advisors, setAdvisors] = useState<Advisor[]>([]);
+  const [currentAdvisorIndex, setCurrentAdvisorIndex] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/about").then(res => res.json()).then(data => setInfo(data));
+    fetch("/api/advisors").then(res => res.json()).then(data => setAdvisors(data));
+  }, []);
+
+  useEffect(() => {
+    if (advisors.length > 1) {
+      const timer = setInterval(() => {
+        setCurrentAdvisorIndex(prev => (prev + 1) % advisors.length);
+      }, 4000);
+      return () => clearInterval(timer);
+    }
+  }, [advisors]);
+
+  const prevAdvisor = () => setCurrentAdvisorIndex(prev => (prev - 1 + advisors.length) % advisors.length);
+  const nextAdvisor = () => setCurrentAdvisorIndex(prev => (prev + 1) % advisors.length);
+
   const routeSteps = [
     {
       step: "STEP 01",
@@ -105,7 +141,7 @@ export default function AboutPage() {
         </svg>
       )
     }
-  ]
+  ];
 
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-16 md:py-24 md:px-8 flex flex-col gap-20">
@@ -116,74 +152,98 @@ export default function AboutPage() {
           เกี่ยวกับชมรมโรบอท
         </h1>
         <p className="mt-6 text-base text-gray-500 font-medium leading-relaxed">
-          ทำความรู้จักกับอาจารย์ที่ปรึกษา ทีมงานคณะกรรมการบริหาร และสถานที่ตั้งของพวกเรา <br />
-          คณะวิศวกรรมศาสตร์ มหาวิทยาลัยนเรศวร
+          ทำความรู้จักกับประวัติ วิสัยทัศน์ อาจารย์ที่ปรึกษา <br className="hidden sm:block" />
+          และสถานที่ตั้งของพวกเรา มหาวิทยาลัยนเรศวร
         </p>
       </section>
 
-      {/* 2. Advisors Poster Section (โปสเตอร์คณะอาจารย์ที่ปรึกษา) */}
-      <section className="flex flex-col items-center gap-10 border-t border-gray-100 pt-16">
-        <div className="text-center">
-          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl">
-            <Users className="inline-block w-8 h-8 mr-2 text-gray-900" /> คณะอาจารย์ที่ปรึกษาชมรม
-          </h2>
-          <p className="text-sm text-gray-400 font-semibold mt-1">
-            โปสเตอร์รวมทำเนียบอาจารย์ผู้ดูแลและให้การสนับสนุนทางวิชาการ
+      {/* 2. Core Information (History & Vision) */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+        <div className="rounded-3xl border border-gray-200 bg-white p-8 md:p-10 shadow-sm flex flex-col gap-5 hover:border-orange-500/30 transition duration-300">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-orange-100 text-orange-600 rounded-2xl">
+              <History className="w-6 h-6" />
+            </div>
+            <h2 className="text-2xl font-black text-gray-900">ประวัติชมรม</h2>
+          </div>
+          <p className="text-gray-600 leading-relaxed font-medium whitespace-pre-line text-sm md:text-base">
+            {info.history || "กำลังอัปเดตประวัติชมรม..."}
           </p>
         </div>
 
-        {/* Advisor Poster Placeholder (Landscape / standard ratio) */}
-        <div className="w-full max-w-4xl rounded-3xl border border-gray-200 bg-white p-6 shadow-md flex flex-col items-center text-center group">
-          <div className="w-full aspect-[4/3] rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center p-8 text-gray-400 font-bold text-sm gap-4 group-hover:bg-gray-100/50 transition-colors duration-200">
-            <svg className="h-14 w-14 text-gray-300 transition-transform duration-300 group-hover:scale-105" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l4 4v10a2 2 0 01-2 2z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 11l3 3m0 0l-3 3m3-3H8" />
-            </svg>
-
-            <div className="flex flex-col gap-1.5">
-              <span className="text-base md:text-lg text-gray-700 flex items-center justify-center gap-1.5"><ImageIcon className="w-5 h-5" /> โปสเตอร์คณะอาจารย์ที่ปรึกษาชมรม</span>
-              <span className="text-xs text-gray-400 font-semibold leading-relaxed">
-                (คณาจารย์ผู้ดูแลชมรมโรบอท คณะวิศวกรรมศาสตร์)
-              </span>
+        <div className="rounded-3xl border border-gray-200 bg-white p-8 md:p-10 shadow-sm flex flex-col gap-5 hover:border-blue-500/30 transition duration-300">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-blue-100 text-blue-600 rounded-2xl">
+              <Target className="w-6 h-6" />
             </div>
-
-            <span className="bg-gray-200/70 text-gray-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5">
-              <Lightbulb className="w-4 h-4 shrink-0" /> ขนาดแนะนำ: อัตราส่วนแนวนอน 4:3 (เช่น 1200 x 900 px) หรือสัดส่วน 16:9
-            </span>
+            <h2 className="text-2xl font-black text-gray-900">วิสัยทัศน์ & เป้าหมาย</h2>
           </div>
+          <p className="text-gray-600 leading-relaxed font-medium whitespace-pre-line text-sm md:text-base">
+            {info.vision || "กำลังอัปเดตวิสัยทัศน์..."}
+          </p>
         </div>
       </section>
 
-      {/* 3. Executive Board Poster Section (โปสเตอร์คณะกรรมการบริหารชมรม) */}
-      <section className="flex flex-col items-center gap-10 border-t border-gray-100 pt-16">
+      {/* 3. Advisors Carousel Section */}
+      <section className="flex flex-col items-center gap-10 pt-8">
         <div className="text-center">
-          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl">
-            <UserCheck className="inline-block w-8 h-8 mr-2 text-gray-900" /> ทีมบริหารชมรม
+          <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight sm:text-3xl flex items-center justify-center gap-3">
+            <Users className="w-8 h-8 text-orange-500" /> ทำเนียบที่ปรึกษาชมรม
           </h2>
-          <p className="text-sm text-gray-400 font-semibold mt-1">
-            โปสเตอร์ผังโครงสร้างคณะทำงานหลักและฝ่ายปฏิบัติการของนิสิตชมรม
+          <p className="text-sm text-gray-500 font-semibold mt-2">
+            คณาจารย์ผู้ดูแลและให้การสนับสนุนทางวิชาการ
           </p>
         </div>
 
-        {/* Board Poster Placeholder (Portrait / A4 ratio) */}
-        <div className="w-full max-w-4xl rounded-3xl border border-gray-200 bg-white p-6 shadow-md flex flex-col items-center text-center group">
-          <div className="w-full aspect-[1/1.414] rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center p-8 text-gray-400 font-bold text-sm gap-4 group-hover:bg-gray-100/50 transition-colors duration-200">
-            <svg className="h-14 w-14 text-gray-300 transition-transform duration-300 group-hover:scale-105" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-3c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-3c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-
-            <div className="flex flex-col gap-1.5">
-              <span className="text-base md:text-lg text-gray-700 flex items-center justify-center gap-1.5"><ImageIcon className="w-5 h-5" /> โปสเตอร์ผังโครงสร้างคณะกรรมการบริหารชมรม</span>
-              <span className="text-xs text-gray-400 font-semibold leading-relaxed">
-                (ฝ่ายบริหาร ฝ่ายวิชาการ ฝ่ายพัสดุ ฝ่ายประชาสัมพันธ์ และทีมงานนิสิต)
+        {advisors.length > 0 ? (
+          <div className="relative w-full max-w-sm md:max-w-md mx-auto group">
+            <div className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl shadow-gray-100 p-8 flex flex-col items-center text-center transition-all duration-300 transform group-hover:-translate-y-1">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gray-50 border-4 border-gray-100 overflow-hidden mb-6 shadow-sm">
+                {advisors[currentAdvisorIndex]?.imageUrl ? (
+                  <img src={advisors[currentAdvisorIndex].imageUrl} alt="Advisor" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                    <UserCheck className="w-12 h-12 text-gray-300" />
+                  </div>
+                )}
+              </div>
+              <h3 className="text-xl md:text-2xl font-black text-gray-900">{advisors[currentAdvisorIndex]?.name}</h3>
+              <span className="inline-block mt-2 px-4 py-1.5 bg-orange-100 text-orange-700 font-bold text-xs rounded-full uppercase tracking-wider">
+                {advisors[currentAdvisorIndex]?.role}
               </span>
             </div>
 
-            <span className="bg-gray-200/70 text-gray-600 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm flex items-center gap-1.5">
-              <Lightbulb className="w-4 h-4 shrink-0" /> ขนาดแนะนำ: อัตราส่วน A4 แนวตั้ง (1 : 1.414) หรือสัดส่วน 3:4 (เช่น 1200 x 1700 px)
-            </span>
+            {/* Carousel Controls */}
+            {advisors.length > 1 && (
+              <>
+                <button onClick={prevAdvisor} className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-orange-500 shadow-md transition hover:scale-110 active:scale-95">
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button onClick={nextAdvisor} className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-orange-500 shadow-md transition hover:scale-110 active:scale-95">
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </>
+            )}
+            
+            {/* Indicators */}
+            {advisors.length > 1 && (
+              <div className="flex justify-center gap-2 mt-6">
+                {advisors.map((_, idx) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => setCurrentAdvisorIndex(idx)}
+                    className={`h-2 rounded-full transition-all ${idx === currentAdvisorIndex ? "w-6 bg-orange-500" : "w-2 bg-gray-300 hover:bg-gray-400"}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="w-full max-w-lg rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center text-gray-400 font-bold">
+            <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            ยังไม่มีข้อมูลที่ปรึกษาชมรม
+          </div>
+        )}
       </section>
 
       {/* 4. Location Section (ที่ตั้งชมรมพร้อมคู่มือเดินทาง) */}
@@ -200,9 +260,7 @@ export default function AboutPage() {
         </div>
 
         {/* Part 1: Main Address Card & Contacts */}
-        <div className="rounded-3xl border border-gray-200/60 bg-white p-6 md:p-10 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-
-          {/* Left Block: Text Address details */}
+        <div className="rounded-3xl border border-gray-200/60 bg-white p-6 md:p-10 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-8 items-center hover:shadow-md transition duration-300">
           <div className="flex flex-col gap-4">
             <span className="text-xs font-bold text-orange-500 uppercase tracking-widest block">
               CLUBHOUSE LOCATION
@@ -210,20 +268,29 @@ export default function AboutPage() {
             <h3 className="text-2xl font-black text-gray-900 leading-tight">
               ห้องชมรม NU Robot Club
             </h3>
-            <p className="text-base text-gray-600 font-medium leading-relaxed mt-2">
+            <p className="text-base text-gray-600 font-medium leading-relaxed mt-2 whitespace-pre-line">
               <DoorOpen className="inline w-4 h-4 text-gray-400 mr-1" /> ชั้น 7 ห้อง EE701 อาคารวิศกรรมไฟฟ้าและคอมพิวเตอร์ คณะวิศวกรรมศาสตร์ <br />
               มหาวิทยาลัยนเรศวร ต.ท่าโพธิ์ อ.เมือง จ.พิษณุโลก 65000
             </p>
           </div>
 
-          {/* Right Block: Contacts & Social buttons */}
           <div className="flex flex-col gap-4 md:border-l md:border-gray-100 md:pl-8">
             <div className="text-gray-700 font-bold text-sm">
-              <MessageCircle className="inline w-4 h-4 text-gray-400 mr-1" /> ช่องทางการติดต่อชมรม:
+              <Contact className="inline w-4 h-4 text-gray-400 mr-1" /> ข้อมูลติดต่อเพิ่มเติม:
+            </div>
+            {info.contact ? (
+              <p className="text-sm text-gray-600 whitespace-pre-line font-medium leading-relaxed">
+                {info.contact}
+              </p>
+            ) : (
+              <p className="text-sm text-gray-400 font-medium italic">ไม่มีข้อมูลการติดต่อเพิ่มเติม</p>
+            )}
+
+            <div className="text-gray-700 font-bold text-sm mt-2">
+              <MessageCircle className="inline w-4 h-4 text-gray-400 mr-1" /> ช่องทางโซเชียล:
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              {/* Facebook Link */}
               <a
                 href="https://www.facebook.com/nurobot"
                 className="flex items-center justify-center gap-2.5 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-gray-50 active:translate-y-0 hover:text-blue-600 w-full sm:w-auto"
@@ -236,9 +303,8 @@ export default function AboutPage() {
                 <span>Facebook</span>
               </a>
 
-              {/* Instagram Link */}
               <a
-                href="https://www.instagram.com/nurobotclub_official?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                href="https://www.instagram.com/nurobotclub_official"
                 className="flex items-center justify-center gap-2.5 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-gray-50 active:translate-y-0 hover:text-pink-600 w-full sm:w-auto"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -252,11 +318,10 @@ export default function AboutPage() {
               </a>
             </div>
           </div>
-
         </div>
 
         {/* Part 2: Step-by-Step Photo Navigation Guide */}
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8 mt-4">
           <div className="border-b border-gray-100 pb-4">
             <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <Map className="w-6 h-6 text-gray-900" /> คู่มือการเดินทางไปห้องชมรมทีละขั้นตอน
@@ -266,29 +331,19 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* Responsive grid that displays cards in 3 columns for huge visual clarity */}
           <div className="mx-auto grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-5xl">
             {routeSteps.map((stepItem, idx) => (
               <div
                 key={idx}
                 className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm flex flex-col gap-4 group hover:border-orange-500/20 transition-all duration-300"
               >
-                {/* 16:9 Image Placeholder (Wider & Proportional taller) */}
                 <div className="w-full aspect-[16/9] rounded-xl bg-gray-50 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center p-4 text-gray-400 font-bold text-[10px] gap-2.5 group-hover:bg-gray-100/50 transition-colors duration-200 relative overflow-hidden">
-                  {/* Step Orange Badge */}
                   <span className="absolute top-3 left-3 bg-orange-500 text-white font-black text-[9px] px-2.5 py-1 rounded-md leading-none shadow-sm tracking-wider">
                     {stepItem.step}
                   </span>
-
                   {stepItem.icon}
-
                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{stepItem.title}</span>
-                  <span className="bg-gray-200/60 text-gray-600 px-2 py-0.5 rounded text-[8px] font-medium leading-none">
-                    แนะนำ: 800 x 450 px
-                  </span>
                 </div>
-
-                {/* Description details */}
                 <div>
                   <h4 className="text-base font-bold text-gray-800 tracking-tight leading-snug group-hover:text-orange-500 transition-colors duration-200">
                     {stepItem.title}
@@ -303,7 +358,6 @@ export default function AboutPage() {
         </div>
 
       </section>
-
     </div>
   )
 }

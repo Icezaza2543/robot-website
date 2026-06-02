@@ -143,6 +143,7 @@ export interface EquipmentItem {
   stock: number;
   location: string;
   description: string;
+  imageUrl?: string;
 }
 
 /**
@@ -711,12 +712,12 @@ export async function getSheetItems(): Promise<EquipmentItem[]> {
   }
 
   try {
-    const headers = ["ID", "Name", "Category", "Stock", "Location", "Description", "CreatedAt", "UpdatedAt"];
+    const headers = ["ID", "Name", "Category", "Stock", "Location", "Description", "CreatedAt", "UpdatedAt", "ImageUrl"];
     await ensureSheetExists(sheets, sheetId, "items", headers);
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
-      range: "items!A2:H1000",
+      range: "items!A2:I1000",
     });
 
     const rows = response.data.values;
@@ -731,6 +732,7 @@ export async function getSheetItems(): Promise<EquipmentItem[]> {
       stock: Number(row[3] || 0),
       location: String(row[4] || ""),
       description: String(row[5] || ""),
+      imageUrl: String(row[8] || ""),
     })).filter(item => item.id !== ""); // Filter out empty rows if any
   } catch (error) {
     console.error("[ERROR] Failed to fetch items from Google Sheets:", error);
@@ -751,16 +753,16 @@ export async function appendSheetItem(item: EquipmentItem): Promise<boolean> {
   }
 
   try {
-    const headers = ["ID", "Name", "Category", "Stock", "Location", "Description", "CreatedAt", "UpdatedAt"];
+    const headers = ["ID", "Name", "Category", "Stock", "Location", "Description", "CreatedAt", "UpdatedAt", "ImageUrl"];
     await ensureSheetExists(sheets, sheetId, "items", headers);
 
     const now = getShortTimestamp();
     await sheets.spreadsheets.values.append({
       spreadsheetId: sheetId,
-      range: "items!A2:H",
+      range: "items!A2:I",
       valueInputOption: "RAW",
       requestBody: {
-        values: [[item.id, item.name, item.category, item.stock, item.location, item.description, now, now]],
+        values: [[item.id, item.name, item.category, item.stock, item.location, item.description, now, now, item.imageUrl || ""]],
       },
     });
 
@@ -910,6 +912,16 @@ export async function updateSheetItem(id: string, data: Partial<EquipmentItem>):
       valueInputOption: "RAW",
       requestBody: { values: [[now]] }
     });
+
+    // Update Image URL if provided
+    if (data.imageUrl !== undefined) {
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: sheetId,
+        range: `items!I${rowNum}`,
+        valueInputOption: "RAW",
+        requestBody: { values: [[data.imageUrl]] }
+      });
+    }
 
     return true;
   } catch (error) {
@@ -1413,6 +1425,328 @@ export async function deleteSponsor(id: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error("[ERROR] Failed to delete sponsor:", error);
+    return false;
+  }
+}
+
+// ==========================================
+// NEWS SYSTEM (CMS)
+// ==========================================
+export interface NewsItem {
+  id: string;
+  title: string;
+  date: string;
+  summary: string;
+  content: string;
+  category: string;
+  author: string;
+  imageUrl: string;
+  igLink: string;
+  createdAt: string;
+}
+
+export async function getNewsItems(): Promise<NewsItem[]> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return [];
+
+  try {
+    const headers = ["ID", "Title", "Date", "Summary", "Content", "Category", "Author", "ImageUrl", "IgLink", "CreatedAt", "Status"];
+    await ensureSheetExists(sheets, sheetId, "news", headers);
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "news!A2:K1000",
+    });
+
+    const rows = response.data.values || [];
+    return rows
+      .filter((row) => row[10] !== "deleted")
+      .map((row) => ({
+        id: String(row[0] || ""),
+        title: String(row[1] || ""),
+        date: String(row[2] || ""),
+        summary: String(row[3] || ""),
+        content: String(row[4] || ""),
+        category: String(row[5] || ""),
+        author: String(row[6] || ""),
+        imageUrl: String(row[7] || ""),
+        igLink: String(row[8] || ""),
+        createdAt: String(row[9] || ""),
+      })).filter(i => i.id);
+  } catch (error) {
+    console.error("[ERROR] Failed to fetch news:", error);
+    return [];
+  }
+}
+
+export async function addNewsItem(item: Omit<NewsItem, "id" | "createdAt">): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const id = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    const createdAt = new Date().toISOString();
+    const headers = ["ID", "Title", "Date", "Summary", "Content", "Category", "Author", "ImageUrl", "IgLink", "CreatedAt", "Status"];
+    await ensureSheetExists(sheets, sheetId, "news", headers);
+
+    const newRow = [id, item.title, item.date, item.summary, item.content, item.category, item.author, item.imageUrl, item.igLink, createdAt, "active"];
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: "news!A:K",
+      valueInputOption: "RAW",
+      requestBody: { values: [newRow] },
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to add news:", error);
+    return false;
+  }
+}
+
+export async function updateNewsItem(id: string, data: Partial<NewsItem>): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: "news!A2:A1000" });
+    const rows = response.data.values;
+    if (!rows) return false;
+
+    const rowIndex = rows.findIndex((row) => String(row[0] || "").trim() === id.trim());
+    if (rowIndex === -1) return false;
+
+    const rowNum = rowIndex + 2;
+    
+    // Fetch current row to preserve un-updated fields
+    const rowResp = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: `news!A${rowNum}:I${rowNum}` });
+    const existing = rowResp.data.values?.[0] || Array(9).fill("");
+    
+    const newTitle = data.title !== undefined ? data.title : existing[1];
+    const newDate = data.date !== undefined ? data.date : existing[2];
+    const newSummary = data.summary !== undefined ? data.summary : existing[3];
+    const newContent = data.content !== undefined ? data.content : existing[4];
+    const newCategory = data.category !== undefined ? data.category : existing[5];
+    const newAuthor = data.author !== undefined ? data.author : existing[6];
+    const newImageUrl = data.imageUrl !== undefined ? data.imageUrl : existing[7];
+    const newIgLink = data.igLink !== undefined ? data.igLink : existing[8];
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `news!B${rowNum}:I${rowNum}`,
+      valueInputOption: "RAW",
+      requestBody: { values: [[newTitle, newDate, newSummary, newContent, newCategory, newAuthor, newImageUrl, newIgLink]] }
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to update news:", error);
+    return false;
+  }
+}
+
+export async function deleteNewsItem(id: string): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: "news!A2:A1000" });
+    const rows = response.data.values;
+    if (!rows) return false;
+
+    const rowIndex = rows.findIndex((row) => String(row[0] || "").trim() === id.trim());
+    if (rowIndex === -1) return false;
+
+    const rowNum = rowIndex + 2;
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `news!K${rowNum}`, // Status column
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [["deleted"]] }
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to delete news:", error);
+    return false;
+  }
+}
+
+// ==========================================
+// ABOUT PAGE SYSTEM
+// ==========================================
+export interface AboutInfo {
+  history: string;
+  vision: string;
+  contact: string;
+}
+
+export async function getAboutInfo(): Promise<AboutInfo> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  const defaultInfo = { history: "", vision: "", contact: "" };
+  if (!sheets || !sheetId) return defaultInfo;
+
+  try {
+    const headers = ["Section", "Content"];
+    await ensureSheetExists(sheets, sheetId, "about_info", headers);
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "about_info!A2:B10",
+    });
+
+    const rows = response.data.values || [];
+    const info = { ...defaultInfo };
+    rows.forEach(row => {
+      const section = String(row[0] || "").trim();
+      const content = String(row[1] || "").trim();
+      if (section === "history") info.history = content;
+      if (section === "vision") info.vision = content;
+      if (section === "contact") info.contact = content;
+    });
+
+    return info;
+  } catch (error) {
+    console.error("[ERROR] Failed to fetch about info:", error);
+    return defaultInfo;
+  }
+}
+
+export async function updateAboutInfo(info: Partial<AboutInfo>): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const headers = ["Section", "Content"];
+    await ensureSheetExists(sheets, sheetId, "about_info", headers);
+
+    // Fetch existing
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "about_info!A2:B10",
+    });
+    const rows = response.data.values || [];
+    
+    const existing: Record<string, string> = { history: "", vision: "", contact: "" };
+    rows.forEach(row => {
+      existing[String(row[0] || "").trim()] = String(row[1] || "");
+    });
+
+    const updated = {
+      history: info.history !== undefined ? info.history : existing.history,
+      vision: info.vision !== undefined ? info.vision : existing.vision,
+      contact: info.contact !== undefined ? info.contact : existing.contact,
+    };
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: "about_info!A2:B4",
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [
+          ["history", updated.history],
+          ["vision", updated.vision],
+          ["contact", updated.contact]
+        ]
+      }
+    });
+
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to update about info:", error);
+    return false;
+  }
+}
+
+// ==========================================
+// ADVISORS SYSTEM
+// ==========================================
+export interface Advisor {
+  id: string;
+  name: string;
+  role: string;
+  imageUrl: string;
+}
+
+export async function getAdvisors(): Promise<Advisor[]> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return [];
+
+  try {
+    const headers = ["ID", "Name", "Role", "ImageUrl", "Status"];
+    await ensureSheetExists(sheets, sheetId, "advisors", headers);
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "advisors!A2:E100",
+    });
+
+    const rows = response.data.values || [];
+    return rows
+      .filter(row => row[4] !== "deleted")
+      .map(row => ({
+        id: String(row[0] || ""),
+        name: String(row[1] || ""),
+        role: String(row[2] || ""),
+        imageUrl: String(row[3] || "")
+      })).filter(i => i.id);
+  } catch (error) {
+    console.error("[ERROR] Failed to fetch advisors:", error);
+    return [];
+  }
+}
+
+export async function addAdvisor(item: Omit<Advisor, "id">): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const id = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    const headers = ["ID", "Name", "Role", "ImageUrl", "Status"];
+    await ensureSheetExists(sheets, sheetId, "advisors", headers);
+
+    const newRow = [id, item.name, item.role, item.imageUrl, "active"];
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: "advisors!A:E",
+      valueInputOption: "RAW",
+      requestBody: { values: [newRow] },
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to add advisor:", error);
+    return false;
+  }
+}
+
+export async function deleteAdvisor(id: string): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: "advisors!A2:A100" });
+    const rows = response.data.values;
+    if (!rows) return false;
+
+    const rowIndex = rows.findIndex((row) => String(row[0] || "").trim() === id.trim());
+    if (rowIndex === -1) return false;
+
+    const rowNum = rowIndex + 2;
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `advisors!E${rowNum}`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [["deleted"]] }
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to delete advisor:", error);
     return false;
   }
 }

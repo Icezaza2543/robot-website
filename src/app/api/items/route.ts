@@ -63,6 +63,7 @@ export async function POST(request: Request) {
       stock: Math.max(0, Number(data.stock)),
       location: String(data.location || "General Shelf").trim(),
       description: String(data.description || "").trim(),
+      imageUrl: data.imageUrl ? String(data.imageUrl).trim() : "",
     };
 
     const success = await appendSheetItem(newItem);
@@ -126,7 +127,7 @@ export async function PATCH(request: Request) {
 
   try {
     const data = await request.json();
-    const { id, stock, name, category, location, description } = data;
+    const { id, stock, name, category, location, description, imageUrl } = data;
 
     if (!id) {
       return NextResponse.json(
@@ -136,7 +137,7 @@ export async function PATCH(request: Request) {
     }
 
     // Determine if it's a full update or just stock update
-    if (name !== undefined || category !== undefined || location !== undefined || description !== undefined) {
+    if (name !== undefined || category !== undefined || location !== undefined || description !== undefined || imageUrl !== undefined) {
       // Full update
       const updateData: Partial<EquipmentItem> = {};
       if (name !== undefined) updateData.name = String(name).trim();
@@ -144,6 +145,7 @@ export async function PATCH(request: Request) {
       if (stock !== undefined) updateData.stock = Math.max(0, Number(stock));
       if (location !== undefined) updateData.location = String(location).trim();
       if (description !== undefined) updateData.description = String(description).trim();
+      if (imageUrl !== undefined) updateData.imageUrl = String(imageUrl).trim();
 
       const success = await updateSheetItem(id, updateData);
       if (!success) {
