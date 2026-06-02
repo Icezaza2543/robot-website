@@ -21,6 +21,7 @@ interface AboutInfo {
 
 interface Advisor {
   id: string;
+  prefix?: string;
   name: string;
   role: string;
   imageUrl: string;
