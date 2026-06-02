@@ -200,17 +200,17 @@ export default function AboutPage() {
             <div className="overflow-hidden rounded-[2.5rem] border border-gray-200 bg-white shadow-xl shadow-gray-100 flex flex-col-reverse md:flex-row items-center transition-all duration-300 transform group-hover:-translate-y-1">
               
               {/* Text Section */}
-              <div className="w-full md:w-1/2 p-10 md:p-16 flex flex-col justify-center items-center md:items-start text-center md:text-left min-h-[300px]">
-                <span className="inline-block px-5 py-2 bg-orange-100 text-orange-700 font-bold text-xs rounded-full uppercase tracking-widest mb-6">
+              <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center items-center md:items-start text-center md:text-left min-h-[250px] md:min-h-[300px]">
+                <span className="inline-block px-5 py-2 bg-orange-100 text-orange-700 font-bold text-xs rounded-full uppercase tracking-widest mb-4 md:mb-6">
                   {advisors[currentAdvisorIndex]?.role}
                 </span>
-                <h3 className="text-3xl md:text-5xl lg:text-[54px] font-black text-gray-900 leading-[1.15] tracking-tight">
+                <h3 className="text-2xl sm:text-3xl md:text-5xl lg:text-[54px] font-black text-gray-900 leading-[1.2] md:leading-[1.15] tracking-tight">
                   {advisors[currentAdvisorIndex]?.name}
                 </h3>
               </div>
 
               {/* Image Section (Vertical / Portrait) */}
-              <div className="w-full md:w-1/2 h-[350px] md:h-[500px] bg-white relative flex items-end justify-center overflow-hidden shrink-0 border-l border-gray-100">
+              <div className="w-full md:w-1/2 h-[280px] sm:h-[350px] md:h-[500px] bg-white relative flex items-end justify-center overflow-hidden shrink-0 border-b md:border-b-0 md:border-l border-gray-100">
                 {/* Decorative background circles */}
                 <div className="absolute top-10 right-10 w-48 h-48 bg-gray-50 rounded-full blur-2xl"></div>
                 <div className="absolute bottom-10 left-10 w-32 h-32 bg-orange-50/50 rounded-full blur-xl"></div>

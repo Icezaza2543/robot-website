@@ -5,7 +5,9 @@ import { getNewsItems, addNewsItem, updateNewsItem, deleteNewsItem } from "@/lib
 export async function GET() {
   try {
     const items = await getNewsItems();
-    return NextResponse.json(items);
+    // Sort latest first (since they are appended to the bottom of the sheet)
+    const sortedItems = [...items].reverse();
+    return NextResponse.json(sortedItems);
   } catch (error) {
     console.error("Error fetching news:", error);
     return NextResponse.json({ error: "Failed to fetch news" }, { status: 500 });
