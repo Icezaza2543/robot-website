@@ -47,7 +47,7 @@ export default function SponsorMarquee() {
       <div className="flex w-[200%] sm:w-[150%] md:w-[100%] animate-marquee">
         <div className="flex shrink-0 items-center justify-around gap-12 sm:gap-20 md:gap-32 w-full">
           {marqueeItems.map((sponsor, idx) => (
-            <div key={`${sponsor.id}-${idx}`} className="flex-shrink-0 hover:scale-105 transition-transform duration-300 w-24 h-12 md:w-32 md:h-16">
+            <div key={`${sponsor.id}-${idx}`} className="flex-shrink-0 hover:scale-105 transition-transform duration-300 w-32 h-16 md:w-48 md:h-24">
               <img
                 src={sponsor.url}
                 alt={`Sponsor ${idx}`}

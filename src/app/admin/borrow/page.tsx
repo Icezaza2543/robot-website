@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, Timer, CheckCircle2, RefreshCw, XCircle, Package, AlertTriangle, FileText, Settings, ClipboardList, Search, PartyPopper, Inbox, MapPin, User, Megaphone } from "lucide-react";
+import { Lock, Timer, CheckCircle2, RefreshCw, XCircle, Package, AlertTriangle, FileText, Settings, ClipboardList, Search, PartyPopper, Inbox, MapPin, User, Megaphone, Newspaper, Settings2 } from "lucide-react";
 
 interface RequestItem {
   id: string;
@@ -294,9 +294,21 @@ export default function AdminBorrowPage() {
           </Link>
           <Link
             href="/admin/items"
-            className="rounded-2xl border border-orange-200 bg-orange-50 hover:bg-orange-100 px-5 py-3.5 text-sm font-bold text-orange-600 shadow-sm transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+            className="rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 px-5 py-3.5 text-sm font-bold text-gray-700 shadow-sm transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
           >
-            <Package className="w-4 h-4" /> จัดการรายการอุปกรณ์
+            <Package className="w-4 h-4 text-orange-500" /> จัดการรายการอุปกรณ์
+          </Link>
+          <Link
+            href="/admin/news"
+            className="rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 px-5 py-3.5 text-sm font-bold text-gray-700 shadow-sm transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Newspaper className="w-4 h-4 text-orange-500" /> จัดการข่าวสาร
+          </Link>
+          <Link
+            href="/admin/about"
+            className="rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 px-5 py-3.5 text-sm font-bold text-gray-700 shadow-sm transition active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Settings2 className="w-4 h-4 text-orange-500" /> จัดการหน้าเกี่ยวกับ
           </Link>
         </div>
       </div>
