@@ -48,7 +48,6 @@ export function ProfileCardModal({ isOpen, onClose, user }: ProfileCardModalProp
       const dataUrl = await htmlToImage.toPng(cardRef.current, { 
         quality: 1, 
         pixelRatio: 2,
-        useCORS: true, // Fix for Google profile images
         // We capture the front of the card only for sharing
         style: { transform: 'none' } 
       });
@@ -73,7 +72,6 @@ export function ProfileCardModal({ isOpen, onClose, user }: ProfileCardModalProp
       const dataUrl = await htmlToImage.toBlob(cardRef.current, { 
         quality: 1, 
         pixelRatio: 2,
-        useCORS: true, // Fix for Google profile images
         style: { transform: 'none' } 
       });
 
