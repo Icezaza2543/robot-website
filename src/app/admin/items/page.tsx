@@ -473,18 +473,30 @@ export default function AdminItemsPage() {
             </div>
 
             <div className="flex flex-col gap-2 md:col-span-3">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">รูปภาพอุปกรณ์ (ไม่บังคับ)</label>
-              <div className="flex items-center gap-4">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">รูปภาพอุปกรณ์ (อัปโหลด หรือ วางลิงก์ภาพ)</label>
+              <div className="flex items-start gap-4">
                 {formImageUrl && (
-                  <img src={formImageUrl} alt="Preview" className="w-16 h-16 object-cover rounded-xl border border-gray-200 shadow-sm" />
+                  <img src={formImageUrl} alt="Preview" className="w-20 h-20 object-cover rounded-xl border border-gray-200 shadow-sm shrink-0" />
                 )}
-                <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl px-4 py-6 cursor-pointer hover:bg-gray-50 hover:border-orange-400 transition">
-                  <UploadCloud className="w-6 h-6 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-500 font-medium">
-                    {isUploadingImage ? "กำลังอัปโหลด..." : "คลิกเพื่ออัปโหลดรูปภาพ (Google Drive)"}
-                  </span>
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, setFormImageUrl)} disabled={isUploadingImage} />
-                </label>
+                <div className="flex-1 flex flex-col gap-3">
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl px-4 py-4 cursor-pointer hover:bg-gray-50 hover:border-orange-400 transition">
+                    <UploadCloud className="w-6 h-6 text-gray-400 mb-2" />
+                    <span className="text-sm text-gray-500 font-medium">
+                      {isUploadingImage ? "กำลังอัปโหลด..." : "คลิกเพื่ออัปโหลดรูปภาพ (จากเครื่อง)"}
+                    </span>
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, setFormImageUrl)} disabled={isUploadingImage} />
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400 font-bold">หรือ</span>
+                    <input
+                      type="text"
+                      placeholder="วางลิงก์รูปภาพ (URL) ที่นี่"
+                      value={formImageUrl}
+                      onChange={(e) => setFormImageUrl(e.target.value)}
+                      className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -768,18 +780,30 @@ export default function AdminItemsPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">รูปภาพอุปกรณ์ (เปลี่ยนรูปใหม่)</label>
-                <div className="flex items-center gap-4">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">รูปภาพอุปกรณ์ (อัปโหลด หรือ วางลิงก์ภาพ)</label>
+                <div className="flex items-start gap-4">
                   {editingItem.imageUrl && (
-                    <img src={editingItem.imageUrl} alt="Preview" className="w-16 h-16 object-cover rounded-xl border border-gray-200 shadow-sm" />
+                    <img src={editingItem.imageUrl} alt="Preview" className="w-20 h-20 object-cover rounded-xl border border-gray-200 shadow-sm shrink-0" />
                   )}
-                  <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl px-4 py-4 cursor-pointer hover:bg-gray-50 hover:border-orange-400 transition">
-                    <UploadCloud className="w-5 h-5 text-gray-400 mb-1" />
-                    <span className="text-xs text-gray-500 font-medium">
-                      {isUploadingImage ? "กำลังอัปโหลด..." : "คลิกเพื่ออัปโหลดรูปภาพใหม่"}
-                    </span>
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, (url) => setEditingItem({ ...editingItem, imageUrl: url }))} disabled={isUploadingImage} />
-                  </label>
+                  <div className="flex-1 flex flex-col gap-3">
+                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl px-4 py-4 cursor-pointer hover:bg-gray-50 hover:border-orange-400 transition">
+                      <UploadCloud className="w-5 h-5 text-gray-400 mb-1" />
+                      <span className="text-xs text-gray-500 font-medium">
+                        {isUploadingImage ? "กำลังอัปโหลด..." : "คลิกเพื่ออัปโหลดรูปภาพใหม่"}
+                      </span>
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, (url) => setEditingItem({ ...editingItem, imageUrl: url }))} disabled={isUploadingImage} />
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-400 font-bold">หรือ</span>
+                      <input
+                        type="text"
+                        placeholder="วางลิงก์รูปภาพ (URL) ที่นี่"
+                        value={editingItem.imageUrl || ""}
+                        onChange={(e) => setEditingItem({ ...editingItem, imageUrl: e.target.value })}
+                        className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
