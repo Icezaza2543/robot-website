@@ -18,7 +18,7 @@ export interface ProfileCardProps {
   };
   className?: string;
   /** Pass a ref to capture only the front side for sharing */
-  frontRef?: React.RefObject<HTMLDivElement>;
+  frontRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 const rankConfig: Record<UserRank, { color: string; label: string }> = {
