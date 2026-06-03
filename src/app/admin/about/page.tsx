@@ -45,6 +45,13 @@ export default function AdminAboutPage() {
   const [advImage, setAdvImage] = useState("");
   const [isAddingAdv, setIsAddingAdv] = useState(false);
 
+  const [editingAdvId, setEditingAdvId] = useState<string | null>(null);
+  const [editAdvPrefix, setEditAdvPrefix] = useState("");
+  const [editAdvName, setEditAdvName] = useState("");
+  const [editAdvRole, setEditAdvRole] = useState("");
+  const [editAdvImage, setEditAdvImage] = useState("");
+  const [isUpdatingAdv, setIsUpdatingAdv] = useState(false);
+
   const [cropperFileSrc, setCropperFileSrc] = useState<string | null>(null);
   const [cropperCallback, setCropperCallback] = useState<((url: string) => void) | null>(null);
   const [cropperAspect, setCropperAspect] = useState<number>(3 / 4);
@@ -164,6 +171,28 @@ export default function AdminAboutPage() {
       alert("ข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setIsAddingAdv(false);
+    }
+  };
+
+  const handleUpdateAdvisor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editAdvName || !editAdvRole) return alert("กรุณากรอกข้อมูลให้ครบ");
+
+    try {
+      setIsUpdatingAdv(true);
+      const res = await fetch("/api/advisors", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editingAdvId, prefix: editAdvPrefix, name: editAdvName, role: editAdvRole, imageUrl: editAdvImage }),
+      });
+      if (res.ok) {
+        setEditingAdvId(null);
+        fetchData();
+      } else alert("แก้ไขที่ปรึกษาล้มเหลว");
+    } catch (err) {
+      alert("ข้อผิดพลาดในการเชื่อมต่อ");
+    } finally {
+      setIsUpdatingAdv(false);
     }
   };
 
@@ -323,21 +352,64 @@ export default function AdminAboutPage() {
               <p className="text-sm text-gray-400 text-center py-6">ยังไม่มีรายชื่อที่ปรึกษา</p>
             ) : (
               advisors.map(adv => (
-                <div key={adv.id} className="flex items-center justify-between bg-white border border-gray-100 hover:border-blue-100 rounded-2xl p-4 shadow-xs transition">
-                  <div className="flex items-center gap-4">
-                    {adv.imageUrl ? (
-                      <img src={adv.imageUrl} className="w-12 h-12 rounded-full object-cover shadow-sm" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center"><Users className="w-5 h-5 text-gray-400" /></div>
-                    )}
-                    <div>
-                      <div className="font-bold text-gray-900">{adv.prefix ? `${adv.prefix} ` : ""}{adv.name}</div>
-                      <div className="text-xs font-medium text-gray-500">{adv.role}</div>
+                <div key={adv.id} className="bg-white border border-gray-100 hover:border-blue-100 rounded-2xl p-4 shadow-xs transition">
+                  {editingAdvId === adv.id ? (
+                    <form onSubmit={handleUpdateAdvisor} className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1.5 md:col-span-2">
+                          <label className="text-xs font-bold text-gray-500">คำนำหน้า (ไม่บังคับ)</label>
+                          <input type="text" placeholder="เช่น ผู้ช่วยศาสตราจารย์ ดร." value={editAdvPrefix} onChange={e => setEditAdvPrefix(e.target.value)} className="rounded-xl border px-3 py-2 text-sm outline-none" />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-bold text-gray-500">ชื่อ - นามสกุล *</label>
+                          <input type="text" required value={editAdvName} onChange={e => setEditAdvName(e.target.value)} className="rounded-xl border px-3 py-2 text-sm outline-none" />
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-bold text-gray-500">ตำแหน่ง *</label>
+                          <input type="text" required placeholder="เช่น อาจารย์ที่ปรึกษา" value={editAdvRole} onChange={e => setEditAdvRole(e.target.value)} className="rounded-xl border px-3 py-2 text-sm outline-none" />
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-bold text-gray-500">รูปภาพ</label>
+                        <div className="flex flex-col gap-2">
+                          <input type="url" placeholder="หรือวางลิงก์รูปภาพ (URL) ที่นี่..." value={editAdvImage} onChange={e => setEditAdvImage(e.target.value)} className="rounded-xl border px-3 py-2 text-sm outline-none w-full" />
+                          <div className="flex items-center gap-3">
+                            {editAdvImage && <img src={editAdvImage} className="w-12 h-12 object-cover rounded-full border shadow-sm" />}
+                            <label className="flex-1 border-2 border-dashed rounded-xl px-3 py-2 cursor-pointer hover:bg-gray-50 text-center">
+                              <span className="text-xs text-gray-500">{isUploadingImage ? "กำลังอัปโหลด..." : "อัปโหลดรูปภาพใหม่จากคอม"}</span>
+                              <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUploadSelect(e, setEditAdvImage, 3 / 4)} disabled={isUploadingImage} />
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end pt-2 gap-2">
+                        <button type="button" onClick={() => setEditingAdvId(null)} className="rounded-xl bg-gray-100 text-gray-600 px-5 py-2 text-sm font-bold hover:bg-gray-200">ยกเลิก</button>
+                        <button type="submit" disabled={isUpdatingAdv} className="rounded-xl bg-blue-600 text-white px-5 py-2 text-sm font-bold hover:bg-blue-700">บันทึก</button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        {adv.imageUrl ? (
+                          <img src={adv.imageUrl} className="w-12 h-12 rounded-full object-cover shadow-sm" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center"><Users className="w-5 h-5 text-gray-400" /></div>
+                        )}
+                        <div>
+                          <div className="font-bold text-gray-900">{adv.prefix ? `${adv.prefix} ` : ""}{adv.name}</div>
+                          <div className="text-xs font-medium text-gray-500">{adv.role}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => { setEditingAdvId(adv.id); setEditAdvPrefix(adv.prefix || ""); setEditAdvName(adv.name); setEditAdvRole(adv.role); setEditAdvImage(adv.imageUrl || ""); }} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition">
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => handleDeleteAdvisor(adv.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  <button onClick={() => handleDeleteAdvisor(adv.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  )}
                 </div>
               ))
             )}

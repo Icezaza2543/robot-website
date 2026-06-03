@@ -27,24 +27,10 @@ interface Advisor {
 export default function AboutPage() {
   const [info, setInfo] = useState<AboutInfo>({ history: "", vision: "", contact: "", showHistory: true, showVision: true });
   const [advisors, setAdvisors] = useState<Advisor[]>([]);
-  const [currentAdvisorIndex, setCurrentAdvisorIndex] = useState(0);
-
   useEffect(() => {
     fetch("/api/about").then(res => res.json()).then(data => setInfo(data));
     fetch("/api/advisors").then(res => res.json()).then(data => setAdvisors(data));
   }, []);
-
-  useEffect(() => {
-    if (advisors.length > 1) {
-      const timer = setInterval(() => {
-        setCurrentAdvisorIndex(prev => (prev + 1) % advisors.length);
-      }, 4000);
-      return () => clearInterval(timer);
-    }
-  }, [advisors]);
-
-  const prevAdvisor = () => setCurrentAdvisorIndex(prev => (prev - 1 + advisors.length) % advisors.length);
-  const nextAdvisor = () => setCurrentAdvisorIndex(prev => (prev + 1) % advisors.length);
 
   const routeSteps = [
     {
@@ -209,42 +195,54 @@ export default function AboutPage() {
             </p>
           </div>
 
-          <div className="relative w-full max-w-4xl mx-auto group">
-            <div className="overflow-hidden rounded-[2.5rem] border border-gray-200 bg-white shadow-xl shadow-gray-100 flex flex-col-reverse md:flex-row items-center transition-all duration-300 transform group-hover:-translate-y-1">
-              
+          <div className="relative w-full max-w-5xl mx-auto group">
+            {/* Soft shadow/glow behind */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-orange-200 to-orange-100 rounded-[2.5rem] blur-lg opacity-40 group-hover:opacity-60 transition duration-500"></div>
+
+            <div className="relative overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/80 backdrop-blur-xl shadow-2xl shadow-gray-200/50 flex flex-col-reverse md:flex-row items-stretch transition-all duration-500 transform group-hover:-translate-y-1">
+
               {/* Text Section */}
-              <div className="w-full md:w-1/2 px-8 pb-8 pt-6 md:p-16 flex flex-col justify-center items-center md:items-start text-center md:text-left min-h-[200px] md:min-h-[300px]">
-                <span className="inline-block px-5 py-2 bg-orange-100 text-orange-700 font-bold text-xs rounded-full uppercase tracking-widest mb-4 md:mb-6 mt-2 md:mt-0">
-                  President
-                </span>
-                <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-black text-gray-900 leading-[1.2] md:leading-[1.15] tracking-tight mb-6">
+              <div className="w-full md:w-[55%] p-10 md:p-16 flex flex-col justify-center relative z-20">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-100 to-orange-50 text-orange-700 font-extrabold text-[11px] rounded-full uppercase tracking-[0.2em] mb-6 w-max border border-orange-200/50 shadow-sm">
+                  <Target className="w-3.5 h-3.5" /> ประธานชมรม
+                </div>
+
+                <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 leading-[1.1] tracking-tight mb-8">
                   {info.presidentPrefix && (
-                    <span className="block text-xl md:text-2xl lg:text-3xl font-bold text-gray-500 mb-1">{info.presidentPrefix}</span>
+                    <span className="block text-xl md:text-2xl font-bold text-gray-400 mb-2">{info.presidentPrefix}</span>
                   )}
                   {info.presidentName}
                 </h3>
+
                 {info.presidentMessage && (
-                  <blockquote className="text-gray-600 font-medium italic border-l-4 border-orange-400 pl-4 text-left w-full whitespace-pre-line text-sm md:text-base">
-                    "{info.presidentMessage}"
-                  </blockquote>
+                  <div className="relative">
+                    <div className="absolute -top-6 -left-4 text-7xl text-orange-100 font-serif leading-none select-none z-0">“</div>
+                    <blockquote className="relative z-10 text-gray-600 font-medium leading-relaxed text-base md:text-lg border-l-2 border-orange-300 pl-5">
+                      {info.presidentMessage}
+                    </blockquote>
+                  </div>
                 )}
               </div>
 
               {/* Image Section */}
-              <div className="w-full md:w-1/2 h-[340px] sm:h-[400px] md:h-[500px] bg-white relative flex items-end justify-center overflow-hidden shrink-0 border-b md:border-b-0 md:border-l border-gray-100">
-                {/* Decorative background circles */}
-                <div className="absolute top-10 right-10 w-48 h-48 bg-gray-50 rounded-full blur-2xl"></div>
-                <div className="absolute bottom-10 left-10 w-32 h-32 bg-orange-50/50 rounded-full blur-xl"></div>
-                
+              <div className="w-full md:w-[45%] h-[350px] md:h-auto min-h-[400px] relative bg-gray-50 flex items-center justify-center overflow-hidden shrink-0 border-b md:border-b-0 md:border-l border-gray-100">
+                {/* Decorative background shapes */}
+                <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-orange-50 to-transparent z-0"></div>
+                <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-orange-200/40 rounded-full blur-3xl z-0 transition-transform duration-700 group-hover:scale-110"></div>
+
                 {info.presidentImage ? (
-                  <img 
-                    src={info.presidentImage} 
-                    alt="President" 
-                    className="w-full h-full object-cover md:object-contain object-top md:object-bottom relative z-10" 
-                  />
+                  <div className="absolute inset-5 md:inset-8 rounded-[2rem] overflow-hidden shadow-lg border-4 border-white z-10 bg-gray-100 transform transition-transform duration-700 group-hover:scale-[1.02]">
+                    <img
+                      src={info.presidentImage}
+                      alt="President"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  </div>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center relative z-10 bg-gray-50">
-                    <UserCheck className="w-32 h-32 text-gray-200" />
+                  <div className="w-full h-full flex items-center justify-center relative z-10">
+                    <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center shadow-inner">
+                      <UserCheck className="w-16 h-16 text-gray-400" />
+                    </div>
                   </div>
                 )}
               </div>
@@ -265,57 +263,44 @@ export default function AboutPage() {
         </div>
 
         {advisors.length > 0 ? (
-          <div className="relative w-full max-w-4xl mx-auto group">
-            <div className="overflow-hidden rounded-[2.5rem] border border-gray-200 bg-white shadow-xl shadow-gray-100 flex flex-col-reverse md:flex-row items-center transition-all duration-300 transform group-hover:-translate-y-1">
-              
-              {/* Text Section */}
-              <div className="w-full md:w-1/2 px-8 pb-8 pt-6 md:p-16 flex flex-col justify-center items-center md:items-start text-center md:text-left min-h-[200px] md:min-h-[300px]">
-                <span className="inline-block px-5 py-2 bg-orange-100 text-orange-700 font-bold text-xs rounded-full uppercase tracking-widest mb-4 md:mb-6 mt-2 md:mt-0">
-                  {advisors[currentAdvisorIndex]?.role}
-                </span>
-                <h3 className="text-2xl sm:text-3xl md:text-5xl lg:text-[54px] font-black text-gray-900 leading-[1.2] md:leading-[1.15] tracking-tight">
-                  {advisors[currentAdvisorIndex]?.prefix && (
-                    <span className="block text-xl md:text-2xl lg:text-3xl font-bold text-gray-500 mb-2">{advisors[currentAdvisorIndex].prefix}</span>
+          <div className="flex flex-wrap justify-center gap-8 w-full max-w-7xl mx-auto px-4">
+            {advisors.map((advisor, index) => (
+              <div key={advisor.id || index} className="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(25%-1.5rem)] max-w-[320px] group relative bg-white border border-gray-200 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col items-center">
+
+                {/* Image Section */}
+                <div className="w-full h-[280px] sm:h-[320px] relative bg-gray-50 flex items-end justify-center overflow-hidden border-b border-gray-100">
+                  {/* Decorative background circles */}
+                  <div className="absolute -top-10 -right-10 w-32 h-32 bg-orange-100/50 rounded-full blur-2xl transition-all group-hover:scale-150"></div>
+                  <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-blue-50/50 rounded-full blur-xl transition-all group-hover:scale-150"></div>
+
+                  {advisor.imageUrl ? (
+                    <img
+                      src={advisor.imageUrl}
+                      alt={advisor.name}
+                      className="w-full h-full object-cover object-top relative z-10"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center relative z-10 bg-gray-100">
+                      <UserCheck className="w-20 h-20 text-gray-300" />
+                    </div>
                   )}
-                  {advisors[currentAdvisorIndex]?.name}
-                </h3>
-              </div>
+                </div>
 
-              {/* Image Section (Vertical / Portrait) */}
-              <div className="w-full md:w-1/2 h-[340px] sm:h-[400px] md:h-[500px] bg-white relative flex items-end justify-center overflow-hidden shrink-0 border-b md:border-b-0 md:border-l border-gray-100">
-                {/* Decorative background circles */}
-                <div className="absolute top-10 right-10 w-48 h-48 bg-gray-50 rounded-full blur-2xl"></div>
-                <div className="absolute bottom-10 left-10 w-32 h-32 bg-orange-50/50 rounded-full blur-xl"></div>
-                
-                {advisors[currentAdvisorIndex]?.imageUrl ? (
-                  <img 
-                    src={advisors[currentAdvisorIndex].imageUrl} 
-                    alt="Advisor" 
-                    className="w-full h-full object-cover md:object-contain object-top md:object-bottom relative z-10" 
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center relative z-10 bg-gray-50">
-                    <UserCheck className="w-32 h-32 text-gray-200" />
-                  </div>
-                )}
-              </div>
-            </div>
+                {/* Text Section */}
+                <div className="p-6 text-center w-full flex flex-col items-center bg-white z-20 relative">
+                  <span className="inline-block px-4 py-1.5 bg-orange-50 text-orange-600 font-bold text-[11px] rounded-full uppercase tracking-wider mb-3">
+                    {advisor.role}
+                  </span>
+                  <h3 className="text-xl font-black text-gray-900 leading-tight">
+                    {advisor.prefix && (
+                      <span className="block text-sm font-bold text-gray-500 mb-1">{advisor.prefix}</span>
+                    )}
+                    {advisor.name}
+                  </h3>
+                </div>
 
-            {/* Carousel Controls */}
-            
-            
-            {/* Indicators */}
-            {advisors.length > 1 && (
-              <div className="flex justify-center gap-2 mt-6">
-                {advisors.map((_, idx) => (
-                  <button 
-                    key={idx} 
-                    onClick={() => setCurrentAdvisorIndex(idx)}
-                    className={`h-2 rounded-full transition-all ${idx === currentAdvisorIndex ? "w-6 bg-orange-500" : "w-2 bg-gray-300 hover:bg-gray-400"}`}
-                  />
-                ))}
               </div>
-            )}
+            ))}
           </div>
         ) : (
           <div className="w-full max-w-lg rounded-3xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center text-gray-400 font-bold">

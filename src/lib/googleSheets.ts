@@ -1776,3 +1776,38 @@ export async function deleteAdvisor(id: string): Promise<boolean> {
     return false;
   }
 }
+
+export async function updateAdvisor(id: string, item: Partial<Omit<Advisor, "id">>): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: "advisors!A2:F100" });
+    const rows = response.data.values;
+    if (!rows) return false;
+
+    const rowIndex = rows.findIndex((row) => String(row[0] || "").trim() === id.trim());
+    if (rowIndex === -1) return false;
+
+    const rowNum = rowIndex + 2;
+    const existing = rows[rowIndex];
+    
+    const newName = item.name !== undefined ? item.name : existing[1];
+    const newRole = item.role !== undefined ? item.role : existing[2];
+    const newImageUrl = item.imageUrl !== undefined ? item.imageUrl : existing[3];
+    const currentStatus = existing[4];
+    const newPrefix = item.prefix !== undefined ? item.prefix : existing[5];
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `advisors!B${rowNum}:F${rowNum}`,
+      valueInputOption: "RAW",
+      requestBody: { values: [[newName, newRole, newImageUrl, currentStatus, newPrefix]] }
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to update advisor:", error);
+    return false;
+  }
+}
