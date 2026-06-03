@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Download, Share2 } from "lucide-react";
 import { ProfileCard, UserRank } from "./ProfileCard";
 import * as htmlToImage from "html-to-image";
@@ -19,8 +20,13 @@ interface ProfileCardModalProps {
 export function ProfileCardModal({ isOpen, onClose, user }: ProfileCardModalProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   // Extract student ID from email if possible, else generate one
   const studentIdMatch = user.email.match(/^(\d+)/);
@@ -98,7 +104,7 @@ export function ProfileCardModal({ isOpen, onClose, user }: ProfileCardModalProp
     }
   };
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
       {/* Click outside to close */}
       <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
@@ -143,6 +149,7 @@ export function ProfileCardModal({ isOpen, onClose, user }: ProfileCardModalProp
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
