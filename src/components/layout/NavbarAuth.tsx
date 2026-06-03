@@ -192,7 +192,10 @@ export default function NavbarAuth() {
               <div className="mt-1.5 flex flex-col gap-0.5">
                 {/* ID Card Button */}
                 <button
-                  onClick={() => setIsCardModalOpen(true)}
+                  onClick={() => {
+                    setIsCardModalOpen(true);
+                    setIsOpen(false);
+                  }}
                   className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors text-left w-full cursor-pointer"
                 >
                   <IdCard className="w-4 h-4" />

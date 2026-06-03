@@ -124,7 +124,7 @@ export function ProfileCardModal({ isOpen, onClose, user }: ProfileCardModalProp
         </div>
 
         {/* The Card to Capture (We wrap it to apply specific styles during capture if needed) */}
-        <div ref={cardRef} className="bg-transparent rounded-3xl p-1">
+        <div ref={cardRef} className="w-[340px] max-w-full bg-transparent rounded-3xl p-1">
           <ProfileCard user={cardData} className="shadow-2xl" />
         </div>
 
