@@ -6,6 +6,16 @@ export interface SheetUser {
   name: string;
   role: UserRole;
   status: string;
+  // Extended profile fields (columns E-K in 'users' sheet)
+  nickname?: string;
+  studentId?: string;
+  phone?: string;
+  year?: string;
+  department?: string;
+  faculty?: string;
+  bio?: string;
+  // Custom avatar (column L)
+  customAvatar?: string;
 }
 
 /**
@@ -63,11 +73,11 @@ export async function getSheetUserByEmail(email: string): Promise<SheetUser | nu
   }
 
   try {
-    // Retrieve values from the 'users' sheet
-    // Assumes A2:D1000 range containing: Email, Name, Role, Status
+    // Retrieve values from the 'users' sheet — now reads up to column K (index 10)
+    // Columns: A=email, B=name, C=role, D=status, E=nickname, F=studentId, G=phone, H=year, I=department, J=faculty, K=bio
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
-      range: "users!A2:D1000",
+      range: "users!A2:K1000",
     });
 
     const rows = response.data.values;
@@ -79,14 +89,11 @@ export async function getSheetUserByEmail(email: string): Promise<SheetUser | nu
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Loop through rows to find matching email (Column A / Index 0)
     for (const row of rows) {
       const rowEmail = String(row[0] || "").trim().toLowerCase();
 
       if (rowEmail === normalizedEmail) {
         const roleStr = String(row[2] || "").trim().toLowerCase();
-        
-        // Ensure role is normalized to "admin" or "user"
         const role: UserRole = roleStr === "admin" ? "admin" : "user";
 
         return {
@@ -94,6 +101,14 @@ export async function getSheetUserByEmail(email: string): Promise<SheetUser | nu
           name: String(row[1] || "").trim(),
           role,
           status: String(row[3] || "active").trim().toLowerCase(),
+          nickname: String(row[4] || "").trim(),
+          studentId: String(row[5] || "").trim(),
+          phone: String(row[6] || "").trim(),
+          year: String(row[7] || "").trim(),
+          department: String(row[8] || "").trim(),
+          faculty: String(row[9] || "").trim(),
+          bio: String(row[10] || "").trim(),
+          customAvatar: String(row[11] || "").trim(),
         };
       }
     }
@@ -132,6 +147,64 @@ export async function appendSheetUser(user: SheetUser): Promise<boolean> {
     return true;
   } catch (error) {
     console.error(`[ERROR] Failed to append user ${user.email} to Google Sheets:`, error);
+    return false;
+  }
+}
+
+/**
+ * Updates extended profile fields (columns E-K) for an existing user row.
+ */
+export async function updateSheetUserProfile(
+  email: string,
+  updates: Record<string, string>
+): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+
+  if (!sheets || !sheetId) {
+    console.error("[ERROR] Google Sheets client is not configured.");
+    return false;
+  }
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "users!A2:K1000",
+    });
+
+    const rows = response.data.values || [];
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const rowIndex = rows.findIndex(
+      (row) => String(row[0] || "").trim().toLowerCase() === normalizedEmail
+    );
+
+    if (rowIndex === -1) {
+      console.warn(`[WARNING] User ${email} not found in sheet for profile update.`);
+      return false;
+    }
+
+    // Sheet rows start at row 2 (1-indexed), rowIndex is 0-indexed → actual row = rowIndex + 2
+    const actualRow = rowIndex + 2;
+    const existingRow = rows[rowIndex];
+
+    // Columns E-L (index 4-11)
+    const profileCols = ["nickname", "studentId", "phone", "year", "department", "faculty", "bio", "customAvatar"];
+    const values = profileCols.map((key, i) => {
+      return updates[key] ?? String(existingRow[4 + i] || "");
+    });
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `users!E${actualRow}:L${actualRow}`,
+      valueInputOption: "RAW",
+      requestBody: { values: [values] },
+    });
+
+    console.log(`[SUCCESS] Updated profile for ${email}`);
+    return true;
+  } catch (error) {
+    console.error(`[ERROR] Failed to update profile for ${email}:`, error);
     return false;
   }
 }

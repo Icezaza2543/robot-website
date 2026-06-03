@@ -5,14 +5,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { useCart } from "@/providers/CartProvider";
-import { ShoppingCart, ClipboardList, Plug, Package, Trash2, ExternalLink, Settings, MonitorUp, History, LogOut, X, IdCard } from "lucide-react";
+import { ShoppingCart, ClipboardList, Plug, Package, Trash2, ExternalLink, Settings, MonitorUp, History, LogOut, X, IdCard, Pencil } from "lucide-react";
 import { ProfileCardModal } from "@/components/ui/ProfileCardModal";
+import { EditProfileModal } from "@/components/ui/EditProfileModal";
 
 export default function NavbarAuth() {
   const { data: session, status } = useSession();
   const [isOpen, setIsOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const { cartItems, cartCount, removeFromCart } = useCart();
   const cartRef = useRef<HTMLDivElement>(null);
 
@@ -202,6 +204,18 @@ export default function NavbarAuth() {
                   บัตรประจำตัว (ID Card)
                 </button>
 
+                {/* Edit Profile Button */}
+                <button
+                  onClick={() => {
+                    setIsEditProfileOpen(true);
+                    setIsOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors text-left w-full cursor-pointer"
+                >
+                  <Pencil className="w-4 h-4" />
+                  แก้ไขโปรไฟล์
+                </button>
+
                 {isAdmin && (
                   <Link
                     href="/admin"
@@ -263,6 +277,11 @@ export default function NavbarAuth() {
           image: image || undefined,
           role: role || undefined
         }}
+      />
+
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
       />
     </>
   );

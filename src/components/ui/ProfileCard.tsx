@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { QrCode, Award, Shield, Fingerprint } from "lucide-react";
+import { QrCode, Fingerprint } from "lucide-react";
 
 export type UserRank = "Member" | "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond";
 
@@ -13,139 +13,119 @@ export interface ProfileCardProps {
     role?: string;
     points?: number;
     rank: UserRank;
+    issueDate?: string;   // e.g. "2024-01-01"
+    expiryDate?: string;  // e.g. "2026-12-31"
   };
   className?: string;
+  /** Pass a ref to capture only the front side for sharing */
+  frontRef?: React.RefObject<HTMLDivElement>;
 }
 
-const rankConfig: Record<UserRank, { color: string; bgClass: string; textClass: string; borderClass: string; label: string }> = {
-  Member: {
-    color: "#64748b", // slate-500
-    bgClass: "bg-slate-50",
-    textClass: "text-slate-700",
-    borderClass: "border-slate-200",
-    label: "MEMBER",
-  },
-  Bronze: {
-    color: "#b45309", // amber-700
-    bgClass: "bg-amber-50",
-    textClass: "text-amber-800",
-    borderClass: "border-amber-200",
-    label: "BRONZE",
-  },
-  Silver: {
-    color: "#64748b", // slate-500
-    bgClass: "bg-slate-50",
-    textClass: "text-slate-800",
-    borderClass: "border-slate-300",
-    label: "SILVER",
-  },
-  Gold: {
-    color: "#ca8a04", // yellow-600
-    bgClass: "bg-yellow-50",
-    textClass: "text-yellow-800",
-    borderClass: "border-yellow-300",
-    label: "GOLD",
-  },
-  Platinum: {
-    color: "#0d9488", // teal-600
-    bgClass: "bg-teal-50",
-    textClass: "text-teal-800",
-    borderClass: "border-teal-200",
-    label: "PLATINUM",
-  },
-  Diamond: {
-    color: "#4f46e5", // indigo-600
-    bgClass: "bg-indigo-50",
-    textClass: "text-indigo-800",
-    borderClass: "border-indigo-200",
-    label: "DIAMOND",
-  },
+const rankConfig: Record<UserRank, { color: string; label: string }> = {
+  Member:   { color: "#64748b", label: "MEMBER"   },
+  Bronze:   { color: "#b45309", label: "BRONZE"   },
+  Silver:   { color: "#64748b", label: "SILVER"   },
+  Gold:     { color: "#ca8a04", label: "GOLD"     },
+  Platinum: { color: "#0d9488", label: "PLATINUM" },
+  Diamond:  { color: "#4f46e5", label: "DIAMOND"  },
 };
 
-export function ProfileCard({ user, className = "" }: ProfileCardProps) {
+function formatDate(dateStr?: string) {
+  if (!dateStr) return "-";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" });
+}
+
+export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const config = rankConfig[user.rank] || rankConfig.Member;
 
-  // Format name for bold display (split into parts)
   const nameParts = user.name.split(" ");
   const firstName = nameParts[0] || "";
   const lastName = nameParts.slice(1).join(" ") || "";
 
+  // Default dates if not provided
+  const issueDate = user.issueDate || new Date().toISOString().split("T")[0];
+  const expiryDate = user.expiryDate || (() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() + 1);
+    return d.toISOString().split("T")[0];
+  })();
+
   return (
-    <div 
+    <div
       className={`relative w-full max-w-[340px] aspect-[5/8] mx-auto select-none ${className}`}
       style={{ perspective: "1200px" }}
       onDoubleClick={() => setIsFlipped(!isFlipped)}
     >
-      <div 
+      <div
         className="w-full h-full relative transition-transform duration-700 cursor-pointer"
-        style={{ 
-          transformStyle: "preserve-3d", 
-          transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" 
+        style={{
+          transformStyle: "preserve-3d",
+          transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
         }}
       >
-        
+
         {/* ================= FRONT SIDE ================= */}
-        <div 
+        <div
+          ref={frontRef}
           className="absolute inset-0 bg-white rounded-3xl shadow-xl flex flex-col overflow-hidden border-2 border-gray-100"
           style={{ backfaceVisibility: "hidden" }}
         >
           {/* Badge Clip Hole */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 w-16 h-3.5 bg-gray-200/80 rounded-full border border-gray-300/50 shadow-inner z-20"></div>
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 w-16 h-3.5 bg-gray-200/80 rounded-full border border-gray-300/50 shadow-inner z-20" />
 
-          {/* Top Header Section */}
+          {/* Top Header */}
           <div className="px-6 pt-12 pb-4 flex justify-between items-start z-10 relative">
             <div className="flex flex-col">
               <span className="text-[10px] font-black tracking-widest text-white px-2 py-0.5 bg-black w-max mb-0.5">ROBOT</span>
-              <span 
+              <span
                 className="text-[11px] font-black tracking-widest text-white px-2 py-0.5 w-max"
                 style={{ backgroundColor: config.color }}
-              >
-                CLUB
-              </span>
+              >CLUB</span>
             </div>
             {user.points !== undefined && (
               <div className="text-right">
-                <div className="text-2xl font-black tracking-tighter text-gray-900 leading-none">
-                  {user.points.toLocaleString()}
-                </div>
+                <div className="text-2xl font-black tracking-tighter text-gray-900 leading-none">{user.points.toLocaleString()}</div>
                 <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">PTS</div>
               </div>
             )}
           </div>
 
-          {/* Photo Section */}
+          {/* Photo Section — fixed aspect ratio container, image fills without stretching */}
           <div className="px-6 relative z-10">
-            <div 
-              className="w-full aspect-[4/3] rounded-xl overflow-hidden relative border-4 border-white shadow-sm"
-              style={{ backgroundColor: config.color }}
+            <div
+              className="w-full rounded-xl overflow-hidden relative border-4 border-white shadow-sm"
+              style={{ backgroundColor: config.color, aspectRatio: "4/3" }}
             >
-              {/* Subtle Grid Pattern Overlay */}
-              <div 
-                className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay" 
-                style={{ 
+              {/* Grid overlay */}
+              <div
+                className="absolute inset-0 opacity-20 pointer-events-none"
+                style={{
                   backgroundImage: "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
-                  backgroundSize: "20px 20px"
+                  backgroundSize: "20px 20px",
                 }}
               />
-              
+
               {user.image ? (
-                <img
-                  src={user.image}
-                  alt={user.name}
-                  className="w-full h-full object-cover object-center relative z-10"
+                // Use a div with background-image to prevent img stretching entirely
+                <div
+                  className="absolute inset-0 z-10"
+                  style={{
+                    backgroundImage: `url('${user.image}')`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center top",
+                  }}
                 />
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-white/80 relative z-10">
-                  <span className="text-6xl font-black opacity-50">
-                    {firstName.charAt(0).toUpperCase()}
-                  </span>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-white/80 z-10">
+                  <span className="text-6xl font-black opacity-50">{firstName.charAt(0).toUpperCase()}</span>
                 </div>
               )}
 
-              {/* Decorative Circle (like in the ref image) */}
+              {/* Level Badge Circle */}
               <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-white rounded-full z-20 shadow-md flex items-center justify-center p-1 border border-gray-100">
-                <div 
+                <div
                   className="w-full h-full rounded-full border-2 flex flex-col items-center justify-center text-center leading-none"
                   style={{ borderColor: config.color, color: config.color }}
                 >
@@ -159,42 +139,38 @@ export function ProfileCard({ user, className = "" }: ProfileCardProps) {
           {/* Details Section */}
           <div className="px-6 flex-1 flex flex-col mt-4">
             <div className="flex gap-4 items-end">
-              <div className="flex-1">
-                <h3 className="text-lg font-black text-gray-800 leading-none uppercase tracking-tight break-words">
-                  {firstName}
-                </h3>
-                <h3 className="text-xl font-black text-gray-900 leading-none uppercase tracking-tighter mt-1 break-words">
-                  {lastName}
-                </h3>
-                <div className="mt-2 inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-white" style={{ backgroundColor: config.color }}>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-black text-gray-800 leading-none uppercase tracking-tight truncate">{firstName}</h3>
+                <h3 className="text-xl font-black text-gray-900 leading-none uppercase tracking-tighter mt-1 truncate">{lastName}</h3>
+                <div
+                  className="mt-2 inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-white"
+                  style={{ backgroundColor: config.color }}
+                >
                   {user.role || "Member"}
                 </div>
               </div>
-              
-              {/* Rank Graphic */}
-              <div className="flex flex-col items-end pb-1">
-                 <span className="text-[10px] font-black text-gray-400">RANK</span>
-                 <span className="text-3xl font-black leading-none tracking-tighter" style={{ color: config.color }}>
-                   {user.rank === "Member" ? "00" : user.rank.charAt(0)}
-                 </span>
+              <div className="flex flex-col items-end pb-1 shrink-0">
+                <span className="text-[10px] font-black text-gray-400">RANK</span>
+                <span className="text-3xl font-black leading-none tracking-tighter" style={{ color: config.color }}>
+                  {user.rank === "Member" ? "00" : user.rank.charAt(0)}
+                </span>
               </div>
             </div>
 
-            {/* Footer Barcode Area */}
+            {/* Footer Barcode */}
             <div className="mt-auto mb-6 bg-gray-900 text-white rounded-xl p-3 flex justify-between items-center shadow-md">
               <div className="flex flex-col">
                 <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest leading-none">AUTHORIZED ACCESS</span>
                 <span className="text-[10px] font-bold uppercase mt-1 leading-none">ROBOT-{user.studentId}</span>
               </div>
-              {/* Fake Barcode */}
               <div className="flex gap-[2px] h-6 items-center opacity-80">
                 {[1,3,2,1,4,1,2,2,3,1,1,2,3,1,2].map((w, i) => (
-                  <div key={i} className="bg-white h-full" style={{ width: `${w}px` }}></div>
+                  <div key={i} className="bg-white h-full" style={{ width: `${w}px` }} />
                 ))}
               </div>
             </div>
           </div>
-          
+
           {/* Double Click Hint */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/60 text-white px-4 py-2 rounded-full text-xs font-bold backdrop-blur-sm pointer-events-none z-50">
             Double Click to Flip
@@ -202,35 +178,54 @@ export function ProfileCard({ user, className = "" }: ProfileCardProps) {
         </div>
 
         {/* ================= BACK SIDE ================= */}
-        <div 
-          className="absolute inset-0 bg-gray-50 rounded-3xl shadow-xl flex flex-col items-center border-2 border-gray-200"
+        <div
+          className="absolute inset-0 bg-gray-50 rounded-3xl shadow-xl flex flex-col items-center border-2 border-gray-200 overflow-hidden"
           style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
         >
-          {/* Badge Clip Hole */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 w-16 h-3.5 bg-gray-200/80 rounded-full border border-gray-300/50 shadow-inner z-20"></div>
+          {/* Top color bar */}
+          <div className="w-full h-2 shrink-0" style={{ backgroundColor: config.color }} />
 
-          <div className="flex-1 flex flex-col items-center justify-center w-full px-8">
-            <Fingerprint className="w-12 h-12 text-gray-300 mb-6" />
-            
-            <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-2">Scan for Identity</h4>
-            
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 mb-6">
-              <QrCode className="w-32 h-32 text-gray-900" strokeWidth={1.5} />
+          {/* Badge Clip Hole */}
+          <div className="absolute top-5 left-1/2 -translate-x-1/2 w-16 h-3.5 bg-gray-200/80 rounded-full border border-gray-300/50 shadow-inner z-20" />
+
+          <div className="flex-1 flex flex-col items-center justify-center w-full px-8 mt-4">
+            <Fingerprint className="w-10 h-10 mb-4" style={{ color: config.color }} />
+            <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Scan for Identity</h4>
+
+            {/* QR Code */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 mb-5">
+              <QrCode className="w-28 h-28 text-gray-900" strokeWidth={1.5} />
             </div>
 
-            <div className="text-center w-full space-y-1">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Student ID</p>
-              <p className="font-mono text-xl font-bold tracking-[0.2em] text-gray-900 bg-gray-200/50 py-2 rounded-lg">{user.studentId}</p>
+            {/* Student ID */}
+            <div className="text-center w-full mb-4">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Student ID</p>
+              <p className="font-mono text-xl font-bold tracking-[0.2em] text-gray-900 bg-white border border-gray-200 py-2 rounded-xl shadow-sm">
+                {user.studentId}
+              </p>
+            </div>
+
+            {/* Issue & Expiry Dates */}
+            <div className="w-full grid grid-cols-2 gap-3">
+              <div className="bg-white border border-gray-200 rounded-xl p-3 text-center shadow-sm">
+                <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">วันที่ออกบัตร</p>
+                <p className="text-[11px] font-black text-gray-800 leading-tight">{formatDate(issueDate)}</p>
+              </div>
+              <div className="rounded-xl p-3 text-center shadow-sm border-2" style={{ backgroundColor: `${config.color}15`, borderColor: `${config.color}40` }}>
+                <p className="text-[8px] font-bold uppercase tracking-widest mb-1" style={{ color: config.color }}>วันหมดอายุ</p>
+                <p className="text-[11px] font-black leading-tight" style={{ color: config.color }}>{formatDate(expiryDate)}</p>
+              </div>
             </div>
           </div>
 
-          <div className="w-full p-6 text-center border-t border-gray-200 bg-gray-100/50 rounded-b-3xl">
-             <p className="text-[9px] font-bold text-gray-400 uppercase leading-relaxed">
-               This card is property of NU Robot Club.<br/>
-               If found, please return to EE701.
-             </p>
+          <div className="w-full p-4 text-center border-t border-gray-200 bg-gray-100/50">
+            <p className="text-[9px] font-bold text-gray-400 uppercase leading-relaxed">
+              This card is property of NU Robot Club.<br />
+              If found, please return to EE701.
+            </p>
           </div>
         </div>
+
       </div>
     </div>
   );
