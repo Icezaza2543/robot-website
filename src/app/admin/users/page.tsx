@@ -134,9 +134,9 @@ export default function AdminUsersPage() {
   };
 
   const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(search.toLowerCase()) || 
-    user.email.toLowerCase().includes(search.toLowerCase()) ||
-    (user.role && user.role.toLowerCase().includes(search.toLowerCase()))
+    String(user.name || "").toLowerCase().includes(search.toLowerCase()) || 
+    String(user.email || "").toLowerCase().includes(search.toLowerCase()) ||
+    (user.role && String(user.role).toLowerCase().includes(search.toLowerCase()))
   );
 
   // Pagination logic
