@@ -62,7 +62,7 @@ export default function NavbarAuth() {
     );
   }
 
-  const { name, email, role } = session.user;
+  const { name, email, role, image } = session.user;
   const isAdmin = role === "admin";
 
   const displayName = userProfile?.name || session.user.name || "";
