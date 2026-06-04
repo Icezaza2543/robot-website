@@ -62,8 +62,10 @@ export default function NavbarAuth() {
     );
   }
 
-  const { name, email, role, image } = session.user;
+  const { name, email, role, image, permissions } = session.user as any;
   const isAdmin = role === "admin";
+  const userPermissions = permissions || [];
+  const hasAdminAccess = isAdmin || userPermissions.some((p: string) => p.startsWith("manage_") || p === "*");
 
   const displayName = userProfile?.name || session.user.name || "";
   const displayImage = userProfile?.image || session.user.image || "";
@@ -236,7 +238,7 @@ export default function NavbarAuth() {
                   แก้ไขโปรไฟล์
                 </button>
 
-                {isAdmin && (
+                {hasAdminAccess && (
                   <Link
                     href="/admin"
                     className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold text-orange-600 hover:bg-orange-50 transition-colors"

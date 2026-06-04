@@ -3,10 +3,23 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { uploadFileToDrive } from "@/lib/googleDrive";
 
+import { hasPermission } from "@/lib/permissions";
+
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user || session.user.role !== "admin") {
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+  }
+
+  const role = session.user.role;
+  const canUpload = 
+    role === "admin" || 
+    (await hasPermission(role, "manage_news")) ||
+    (await hasPermission(role, "manage_items")) ||
+    (await hasPermission(role, "manage_website"));
+
+  if (!canUpload) {
     return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
   }
 

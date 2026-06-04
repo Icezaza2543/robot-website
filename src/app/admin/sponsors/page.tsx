@@ -49,7 +49,11 @@ export default function AdminSponsorsPage() {
     );
   }
 
-  if (status === "unauthenticated" || session?.user?.role !== "admin") {
+  const userPermissions = session?.user?.permissions || [];
+  const isAdmin = session?.user?.role === "admin";
+  const canAccess = isAdmin || userPermissions.includes("manage_website") || userPermissions.includes("*");
+
+  if (status === "unauthenticated" || (status === "authenticated" && !canAccess)) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-50 text-center px-4">
         <Lock className="w-16 h-16 text-gray-300 mb-2" />

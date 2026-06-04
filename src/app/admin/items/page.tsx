@@ -165,7 +165,11 @@ export default function AdminItemsPage() {
     );
   }
 
-  if (status === "unauthenticated" || session?.user?.role !== "admin") {
+  const userPermissions = session?.user?.permissions || [];
+  const isAdmin = session?.user?.role === "admin";
+  const canAccess = isAdmin || userPermissions.includes("manage_items") || userPermissions.includes("*");
+
+  if (status === "unauthenticated" || (status === "authenticated" && !canAccess)) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-50 text-center px-4">
         <h1 className="text-2xl font-black text-red-500">ปฏิเสธการเข้าใช้งาน</h1>

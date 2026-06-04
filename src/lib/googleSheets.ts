@@ -1887,3 +1887,186 @@ export async function updateAdvisor(id: string, item: Partial<Omit<Advisor, "id"
     return false;
   }
 }
+// =========================================================================
+// ROLE-BASED ACCESS CONTROL (RBAC)
+// =========================================================================
+
+export interface RoleData {
+  roleName: string;
+  rank: string;
+  permissions: string;
+  createdAt?: string;
+}
+
+export async function getRoles(): Promise<RoleData[]> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return [];
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "roles!A2:D100",
+    });
+    const rows = response.data.values || [];
+    return rows.map((row) => ({
+      roleName: row[0] || "",
+      rank: row[1] || "",
+      permissions: row[2] || "",
+      createdAt: row[3] || "",
+    })).filter(r => r.roleName);
+  } catch (error: any) {
+    if (error.message?.includes("Unable to parse range")) {
+      await ensureSheetExists(sheets, sheetId, "roles", ["RoleName", "Rank", "Permissions", "CreatedAt"]);
+      return [];
+    }
+    console.error("[ERROR] Failed to fetch roles:", error);
+    return [];
+  }
+}
+
+export async function saveRole(roleName: string, rank: string, permissions: string): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    await ensureSheetExists(sheets, sheetId, "roles", ["RoleName", "Rank", "Permissions", "CreatedAt"]);
+    const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: "roles!A2:A100" });
+    const rows = response.data.values || [];
+    const rowIndex = rows.findIndex((row) => String(row[0] || "").trim().toLowerCase() === roleName.trim().toLowerCase());
+
+    const createdAt = new Date().toISOString();
+
+    if (rowIndex > -1) {
+      // Update existing
+      const rowNum = rowIndex + 2;
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: sheetId,
+        range: `roles!B${rowNum}:C${rowNum}`,
+        valueInputOption: "RAW",
+        requestBody: { values: [[rank, permissions]] }
+      });
+    } else {
+      // Create new
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: sheetId,
+        range: "roles!A:D",
+        valueInputOption: "RAW",
+        requestBody: { values: [[roleName, rank, permissions, createdAt]] }
+      });
+    }
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to save role:", error);
+    return false;
+  }
+}
+
+export async function deleteRole(roleName: string): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: "roles!A2:A100" });
+    const rows = response.data.values;
+    if (!rows) return false;
+
+    const rowIndex = rows.findIndex((row) => String(row[0] || "").trim().toLowerCase() === roleName.trim().toLowerCase());
+    if (rowIndex === -1) return false;
+
+    const rowNum = rowIndex + 2;
+    // Mark as deleted or empty
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `roles!A${rowNum}:D${rowNum}`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: { values: [["", "", "", ""]] }
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to delete role:", error);
+    return false;
+  }
+}
+
+export async function getAllUsers(): Promise<SheetUser[]> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return [];
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "users!A2:M1000",
+    });
+
+    const rows = response.data.values || [];
+    return rows.map((row) => ({
+      email: row[0] || "",
+      name: row[1] || "",
+      role: (row[2] || "user") as UserRole,
+      status: row[3] || "active",
+      nickname: row[4] || "",
+      studentId: row[5] || "",
+      phone: row[6] || "",
+      year: row[7] || "",
+      department: row[8] || "",
+      faculty: row[9] || "",
+      bio: row[10] || "",
+      customAvatar: row[11] || "",
+      rank: row[12] || "",
+    })).filter((u) => u.email);
+  } catch (error) {
+    console.error("[ERROR] Failed to fetch all users:", error);
+    return [];
+  }
+}
+
+export async function updateUserRoleAndRank(email: string, role: string, rank: string): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "users!A2:M1000",
+    });
+
+    const rows = response.data.values || [];
+    const normalizedEmail = email.trim().toLowerCase();
+    const rowIndex = rows.findIndex(
+      (row) => String(row[0] || "").trim().toLowerCase() === normalizedEmail
+    );
+
+    if (rowIndex === -1) return false;
+    const actualRow = rowIndex + 2;
+
+    // Update Role (C) and Rank (M)
+    // To do this, we can make two separate batch updates or update individually.
+    // Let's do batchUpdate:
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId: sheetId,
+      requestBody: {
+        valueInputOption: "RAW",
+        data: [
+          {
+            range: `users!C${actualRow}`,
+            values: [[role]]
+          },
+          {
+            range: `users!M${actualRow}`,
+            values: [[rank]]
+          }
+        ]
+      }
+    });
+
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to update user role/rank:", error);
+    return false;
+  }
+}

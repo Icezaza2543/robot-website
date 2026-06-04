@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { resolveUserRole } from "./roles";
+import { getRolePermissions } from "./permissions";
 
 const useSecureCookies = process.env.NEXTAUTH_URL?.startsWith("https://") || process.env.NODE_ENV === "production";
 const cookiePrefix = useSecureCookies ? "__Secure-" : "";
@@ -44,6 +45,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }): Promise<JWT> {
       if (user) {
         token.role = await resolveUserRole(user.email, user.name);
+        token.permissions = await getRolePermissions(token.role);
       }
       return token;
     },
@@ -55,6 +57,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.role = token.role;
+        session.user.permissions = token.permissions as string[];
       }
       return session;
     },

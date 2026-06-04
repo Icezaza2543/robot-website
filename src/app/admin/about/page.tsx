@@ -93,7 +93,11 @@ export default function AdminAboutPage() {
     );
   }
 
-  if (status === "unauthenticated" || session?.user?.role !== "admin") {
+  const userPermissions = session?.user?.permissions || [];
+  const isAdmin = session?.user?.role === "admin";
+  const canAccess = isAdmin || userPermissions.includes("manage_website") || userPermissions.includes("*");
+
+  if (status === "unauthenticated" || (status === "authenticated" && !canAccess)) {
     return <div className="flex min-h-screen justify-center items-center">ไม่ได้รับอนุญาต</div>;
   }
 

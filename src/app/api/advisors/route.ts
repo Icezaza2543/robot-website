@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { hasPermission } from "@/lib/permissions";
 import { getAdvisors, addAdvisor, deleteAdvisor, updateAdvisor } from "@/lib/googleSheets";
 
 export async function GET() {
@@ -13,9 +15,12 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const token = await getToken({ req: request as any, secret: process.env.NEXTAUTH_SECRET });
-  if (!token || token.role !== "admin") {
-    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user || !(await hasPermission(session.user.role, "manage_website"))) {
+    if (session?.user?.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
   }
 
   try {
@@ -46,9 +51,12 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const token = await getToken({ req: request as any, secret: process.env.NEXTAUTH_SECRET });
-  if (!token || token.role !== "admin") {
-    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user || !(await hasPermission(session.user.role, "manage_website"))) {
+    if (session?.user?.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
   }
 
   try {
@@ -79,9 +87,12 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const token = await getToken({ req: request as any, secret: process.env.NEXTAUTH_SECRET });
-  if (!token || token.role !== "admin") {
-    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user || !(await hasPermission(session.user.role, "manage_website"))) {
+    if (session?.user?.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
   }
 
   try {

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { hasPermission } from "@/lib/permissions";
 import {
   getAllSheetBorrowRequests,
   updateSheetBorrowRequestStatus,
@@ -14,13 +16,12 @@ import { checkAndUpdateOverdueRequests } from "@/lib/overdue";
  */
 export async function GET(request: Request) {
   // 1. Authenticate & Verify Role
-  const token = await getToken({
-    req: request as any,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  if (!token || token.role !== "admin") {
-    return NextResponse.json({ error: "Unauthorized access. Admins only." }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user || !(await hasPermission(session.user.role, "manage_requests"))) {
+    if (session?.user?.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized access. Admins only." }, { status: 401 });
+    }
   }
 
   try {
@@ -42,13 +43,12 @@ export async function GET(request: Request) {
  */
 export async function PATCH(request: Request) {
   // 1. Authenticate & Verify Role
-  const token = await getToken({
-    req: request as any,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  if (!token || token.role !== "admin") {
-    return NextResponse.json({ error: "Unauthorized access. Admins only." }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user || !(await hasPermission(session.user.role, "manage_requests"))) {
+    if (session?.user?.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized access. Admins only." }, { status: 401 });
+    }
   }
 
   try {

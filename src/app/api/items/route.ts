@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { hasPermission } from "@/lib/permissions";
 import { 
   getSheetItems, 
   appendSheetItem, 
@@ -33,14 +35,12 @@ export async function GET() {
  * Add a new equipment item (Admin only).
  */
 export async function POST(request: Request) {
-  // Verify Admin credentials
-  const token = await getToken({
-    req: request as any,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  if (!token || token.role !== "admin") {
-    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user || !(await hasPermission(session.user.role, "manage_items"))) {
+    if (session?.user?.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
   }
 
   try {
@@ -81,14 +81,12 @@ export async function POST(request: Request) {
  * Delete an equipment item (Admin only).
  */
 export async function DELETE(request: Request) {
-  // Verify Admin credentials
-  const token = await getToken({
-    req: request as any,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  if (!token || token.role !== "admin") {
-    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user || !(await hasPermission(session.user.role, "manage_items"))) {
+    if (session?.user?.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
   }
 
   const { searchParams } = new URL(request.url);
@@ -115,14 +113,12 @@ export async function DELETE(request: Request) {
  * Update stock level of an equipment item (Admin only).
  */
 export async function PATCH(request: Request) {
-  // Verify Admin credentials
-  const token = await getToken({
-    req: request as any,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  if (!token || token.role !== "admin") {
-    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user || !(await hasPermission(session.user.role, "manage_items"))) {
+    if (session?.user?.role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
   }
 
   try {
