@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Settings, X, Plus, Inbox, Save, Search, Package, MapPin, Minus, Trash2, Megaphone, UploadCloud, Image as ImageIcon } from "lucide-react";
+import { Settings, X, Plus, Inbox, Save, Search, Package, MapPin, Minus, Trash2, Megaphone, UploadCloud, Image as ImageIcon, Edit2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import Pagination from "@/components/ui/Pagination";
 
