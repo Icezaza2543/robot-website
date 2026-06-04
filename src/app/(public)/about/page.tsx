@@ -25,7 +25,7 @@ interface Advisor {
 }
 
 export default function AboutPage() {
-  const [info, setInfo] = useState<AboutInfo>({ history: "", vision: "", contact: "", showHistory: true, showVision: true });
+  const [info, setInfo] = useState<AboutInfo>({ history: "", vision: "", contact: "", showHistory: false, showVision: false });
   const [advisors, setAdvisors] = useState<Advisor[]>([]);
   useEffect(() => {
     fetch("/api/about").then(res => res.json()).then(data => setInfo(data));
@@ -144,10 +144,10 @@ export default function AboutPage() {
         <h1 className="text-4xl font-black tracking-tight text-gray-900 sm:text-5xl">
           เกี่ยวกับชมรมโรบอท
         </h1>
-        <p className="mt-6 text-base text-gray-500 font-medium leading-relaxed">
+        {/* <p className="mt-6 text-base text-gray-500 font-medium leading-relaxed">
           ทำความรู้จักกับประวัติ วิสัยทัศน์ อาจารย์ที่ปรึกษา <br className="hidden sm:block" />
           และสถานที่ตั้งของพวกเรา มหาวิทยาลัยนเรศวร
-        </p>
+        </p> */}
       </section>
 
       {/* 2. Core Information (History & Vision) */}
