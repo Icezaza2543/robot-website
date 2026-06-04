@@ -138,7 +138,7 @@ export default function DashboardClient() {
         <div className="px-6 py-4 border-b border-gray-100">
           <h2 className="text-xl font-bold text-gray-900 mb-4">ประวัติการยืมอุปกรณ์</h2>
         </div>
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        
         {requests.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             คุณยังไม่มีประวัติการยืมอุปกรณ์
