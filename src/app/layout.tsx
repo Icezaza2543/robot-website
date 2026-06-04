@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import AuthProvider from "@/providers/AuthProvider"
 import { CartProvider } from "@/providers/CartProvider"
+import CookieConsent from "@/components/ui/CookieConsent"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -48,6 +49,7 @@ export default function RootLayout({
             </main>
 
             <Footer />
+            <CookieConsent />
           </CartProvider>
         </AuthProvider>
       </body>
