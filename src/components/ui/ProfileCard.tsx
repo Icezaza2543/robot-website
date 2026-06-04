@@ -55,14 +55,15 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
 
   return (
     <div
-      className={`relative w-full max-w-[340px] aspect-[5/8] mx-auto select-none ${className}`}
-      style={{ perspective: "1200px" }}
+      className={`w-[300px] h-[480px] perspective-[1000px] select-none ${className}`}
+      style={{ perspective: "1000px", WebkitPerspective: "1000px" }}
       onDoubleClick={() => setIsFlipped(!isFlipped)}
     >
       <div
         className="w-full h-full relative transition-transform duration-700 cursor-pointer"
         style={{
           transformStyle: "preserve-3d",
+          WebkitTransformStyle: "preserve-3d",
           transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
         }}
       >
@@ -71,7 +72,7 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
         <div
           ref={frontRef}
           className="absolute inset-0 bg-white rounded-3xl shadow-xl flex flex-col overflow-hidden border-2 border-gray-100"
-          style={{ backfaceVisibility: "hidden" }}
+          style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
         >
           {/* Badge Clip Hole */}
           <div className="absolute top-4 left-1/2 -translate-x-1/2 w-16 h-3.5 bg-gray-200/80 rounded-full border border-gray-300/50 shadow-inner z-20" />
@@ -176,7 +177,7 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
         {/* ================= BACK SIDE ================= */}
         <div
           className="absolute inset-0 bg-gray-50 rounded-3xl shadow-xl flex flex-col items-center border-2 border-gray-200 overflow-hidden"
-          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+          style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
         >
           {/* Top color bar */}
           <div className="w-full h-2 shrink-0" style={{ backgroundColor: config.color }} />
