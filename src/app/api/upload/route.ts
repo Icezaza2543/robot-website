@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { uploadFileToDrive } from "@/lib/googleDrive";
 
 export async function POST(request: Request) {
-  // Check admin role
-  const token = await getToken({
-    req: request as any,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
+  const session = await getServerSession(authOptions);
 
-  if (!token || token.role !== "admin") {
+  if (!session?.user || session.user.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
   }
 

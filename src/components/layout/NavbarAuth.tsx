@@ -15,8 +15,24 @@ export default function NavbarAuth() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<{ name: string; image: string } | null>(null);
   const { cartItems, cartCount, removeFromCart } = useCart();
   const cartRef = useRef<HTMLDivElement>(null);
+
+  // Fetch real profile on mount to get custom avatar
+  useEffect(() => {
+    if (status === "authenticated") {
+      fetch("/api/profile")
+        .then((res) => res.json())
+        .then((data) => {
+          setUserProfile({
+            name: data.name || session?.user?.name || "",
+            image: data.customAvatar || data.image || session?.user?.image || "",
+          });
+        })
+        .catch((err) => console.error("Failed to load profile for navbar", err));
+    }
+  }, [status, session]);
 
   // Close cart popup when clicking outside
   useEffect(() => {
@@ -46,8 +62,11 @@ export default function NavbarAuth() {
     );
   }
 
-  const { name, email, image, role } = session.user;
+  const { role } = session.user;
   const isAdmin = role === "admin";
+
+  const displayName = userProfile?.name || session.user.name || "";
+  const displayImage = userProfile?.image || session.user.image || "";
 
   return (
     <>
@@ -142,23 +161,23 @@ export default function NavbarAuth() {
             className="flex items-center gap-2.5 rounded-xl border border-gray-200/80 bg-white p-1.5 pr-4 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 cursor-pointer active:scale-98"
           >
             <div className="relative h-8 w-8 overflow-hidden rounded-lg bg-orange-100 border border-orange-200">
-              {image ? (
+              {displayImage ? (
                 <Image
-                  src={image}
-                  alt={name || "User Profile"}
+                  src={displayImage}
+                  alt={displayName || "User Profile"}
                   fill
                   className="object-cover"
                   sizes="32px"
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center font-bold text-orange-500 uppercase">
-                  {name ? name.charAt(0) : "U"}
+                  {displayName ? displayName.charAt(0) : "U"}
                 </div>
               )}
             </div>
             <div className="hidden flex-col items-start text-left sm:flex">
               <span className="text-sm font-bold text-gray-800 line-clamp-1 max-w-[120px]">
-                {name || "สมาชิก"}
+                {displayName || "สมาชิก"}
               </span>
               <span className="text-[10px] font-extrabold uppercase tracking-wider text-orange-500">
                 {isAdmin ? "ผู้ดูแลระบบ" : "สมาชิกชมรม"}
@@ -282,6 +301,13 @@ export default function NavbarAuth() {
       <EditProfileModal
         isOpen={isEditProfileOpen}
         onClose={() => setIsEditProfileOpen(false)}
+        onSaved={(data) => {
+          // Update navbar state immediately when saved
+          setUserProfile((prev) => ({
+            name: data.name || prev?.name || "",
+            image: data.customAvatar || data.image || prev?.image || "",
+          }));
+        }}
       />
     </>
   );

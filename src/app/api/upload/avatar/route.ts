@@ -1,18 +1,12 @@
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { uploadFileToDrive } from "@/lib/googleDrive";
 
-/**
- * POST /api/upload/avatar
- * Allows any authenticated user (not just admin) to upload their avatar.
- */
 export async function POST(request: Request) {
-  const token = await getToken({
-    req: request as any,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
+  const session = await getServerSession(authOptions);
 
-  if (!token) {
+  if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
