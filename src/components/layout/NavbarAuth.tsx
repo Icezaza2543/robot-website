@@ -62,7 +62,7 @@ export default function NavbarAuth() {
     );
   }
 
-  const { role } = session.user;
+  const { name, email, role } = session.user;
   const isAdmin = role === "admin";
 
   const displayName = userProfile?.name || session.user.name || "";
@@ -202,7 +202,7 @@ export default function NavbarAuth() {
               {/* Header Info */}
               <div className="px-3.5 py-3 border-b border-gray-50 flex flex-col">
                 <span className="text-sm font-bold text-gray-800 truncate">
-                  {name}
+                  {displayName || name}
                 </span>
                 <span className="text-xs text-gray-400 truncate">
                   {email}
