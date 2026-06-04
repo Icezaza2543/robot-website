@@ -23,12 +23,12 @@ export interface ProfileCardProps {
 }
 
 const rankConfig: Record<UserRank, { color: string; label: string }> = {
-  Member:   { color: "#64748b", label: "MEMBER"   },
-  Bronze:   { color: "#b45309", label: "BRONZE"   },
-  Silver:   { color: "#64748b", label: "SILVER"   },
-  Gold:     { color: "#ca8a04", label: "GOLD"     },
+  Member: { color: "#64748b", label: "MEMBER" },
+  Bronze: { color: "#b45309", label: "BRONZE" },
+  Silver: { color: "#64748b", label: "SILVER" },
+  Gold: { color: "#ca8a04", label: "GOLD" },
   Platinum: { color: "#0d9488", label: "PLATINUM" },
-  Diamond:  { color: "#4f46e5", label: "DIAMOND"  },
+  Diamond: { color: "#4f46e5", label: "DIAMOND" },
 };
 
 function formatDate(dateStr?: string) {
@@ -72,8 +72,8 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
         <div
           ref={frontRef}
           className="absolute inset-0 bg-white rounded-3xl shadow-xl flex flex-col overflow-hidden border-2 border-gray-100"
-          style={{ 
-            backfaceVisibility: "hidden", 
+          style={{
+            backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
             transform: "rotateY(0deg) translateZ(1px)",
             WebkitTransform: "rotateY(0deg) translateZ(1px)"
@@ -91,6 +91,7 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
                 style={{ backgroundColor: config.color }}
               >CLUB</span>
             </div>
+            <img src="/Robot.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-sm" />
           </div>
 
           {/* Photo Section — fixed aspect ratio container, image fills without stretching */}
@@ -133,7 +134,7 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
                 style={{ borderColor: config.color, color: config.color }}
               >
                 <span className="text-[8px] font-black tracking-wider">LEVEL</span>
-                <span className="text-[10px] font-black">{config.label}</span>
+                <span className="text-[7px] font-black">{config.label}</span>
               </div>
             </div>
           </div>
@@ -166,7 +167,7 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
                 <span className="text-[10px] font-bold uppercase mt-1 leading-none">ROBOT-{user.studentId}</span>
               </div>
               <div className="flex gap-[2px] h-6 items-center opacity-80">
-                {[1,3,2,1,4,1,2,2,3,1,1,2,3,1,2].map((w, i) => (
+                {[1, 3, 2, 1, 4, 1, 2, 2, 3, 1, 1, 2, 3, 1, 2].map((w, i) => (
                   <div key={i} className="bg-white h-full" style={{ width: `${w}px` }} />
                 ))}
               </div>
@@ -182,9 +183,9 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
         {/* ================= BACK SIDE ================= */}
         <div
           className="absolute inset-0 bg-gray-50 rounded-3xl shadow-xl flex flex-col items-center border-2 border-gray-200 overflow-hidden"
-          style={{ 
-            backfaceVisibility: "hidden", 
-            WebkitBackfaceVisibility: "hidden", 
+          style={{
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
             transform: "rotateY(180deg) translateZ(1px)",
             WebkitTransform: "rotateY(180deg) translateZ(1px)"
           }}
@@ -195,7 +196,7 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
           {/* Badge Clip Hole */}
           <div className="absolute top-5 left-1/2 -translate-x-1/2 w-16 h-3.5 bg-gray-200/80 rounded-full border border-gray-300/50 shadow-inner z-20" />
 
-          <div className="flex-1 flex flex-col items-center justify-center w-full px-8 mt-4">
+          <div className="flex-1 flex flex-col items-center justify-center w-full px-8 mt-8">
             <Fingerprint className="w-10 h-10 mb-4" style={{ color: config.color }} />
             <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Scan for Identity</h4>
 
@@ -213,7 +214,7 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
             </div>
 
             {/* Student ID */}
-            <div className="text-center w-full mb-4">
+            <div className="text-center w-full mb-2 ">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Student ID</p>
               <p className="font-mono text-xl font-bold tracking-[0.2em] text-gray-900 bg-white border border-gray-200 py-2 rounded-xl shadow-sm">
                 {user.studentId}
@@ -221,7 +222,7 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
             </div>
 
             {/* Issue & Expiry Dates */}
-            <div className="w-full grid grid-cols-2 gap-3">
+            {/* <div className="w-full grid grid-cols-2 gap-3 mb-2">
               <div className="bg-white border border-gray-200 rounded-xl p-3 text-center shadow-sm">
                 <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1">วันที่ออกบัตร</p>
                 <p className="text-[11px] font-black text-gray-800 leading-tight">{formatDate(issueDate)}</p>
@@ -230,7 +231,7 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
                 <p className="text-[8px] font-bold uppercase tracking-widest mb-1" style={{ color: config.color }}>วันหมดอายุ</p>
                 <p className="text-[11px] font-black leading-tight" style={{ color: config.color }}>{formatDate(expiryDate)}</p>
               </div>
-            </div>
+            </div> */}
           </div>
 
           <div className="w-full p-4 text-center border-t border-gray-200 bg-gray-100/50">

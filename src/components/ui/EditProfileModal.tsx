@@ -277,9 +277,9 @@ export function EditProfileModal({ isOpen, onClose, onSaved }: EditProfileModalP
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-black text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <User className="w-3 h-3" /> ชื่อเล่น
+                    <User className="w-3 h-3" /> Instagram
                   </label>
-                  <input type="text" placeholder="ชื่อเล่นของคุณ" value={profile.nickname}
+                  <input type="text" placeholder="IG ของคุณ" value={profile.nickname}
                     onChange={e => setProfile({ ...profile, nickname: e.target.value })}
                     className="rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition" />
                 </div>
@@ -317,7 +317,7 @@ export function EditProfileModal({ isOpen, onClose, onSaved }: EditProfileModalP
                   <label className="text-xs font-black text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                     <GraduationCap className="w-3 h-3" /> สาขาวิชา
                   </label>
-                  <input type="text" placeholder="เช่น วิศวกรรมไฟฟ้า, วิทยาการคอมพิวเตอร์" value={profile.department}
+                  <input type="text" placeholder="สาขาวิชา" value={profile.department || "วิศวกรรมคอมพิวเตอร์"}
                     onChange={e => setProfile({ ...profile, department: e.target.value })}
                     className="rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition" />
                 </div>
