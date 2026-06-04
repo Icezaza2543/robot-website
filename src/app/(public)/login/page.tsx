@@ -8,7 +8,7 @@ import GoogleLoginButton from "@/components/auth/google-login-button";
 
 function LoginCard() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl") || "/auth-redirect";
 
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
