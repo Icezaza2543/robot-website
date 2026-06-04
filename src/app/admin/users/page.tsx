@@ -57,6 +57,11 @@ export default function AdminUsersPage() {
     }
   };
 
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
@@ -149,11 +154,6 @@ export default function AdminUsersPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
-
-  // Reset page when search changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search]);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
