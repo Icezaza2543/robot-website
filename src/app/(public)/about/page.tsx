@@ -151,9 +151,9 @@ export default function AboutPage() {
       </section>
 
       {/* 2. Core Information (History & Vision) */}
-      {(info.showHistory !== false || info.showVision !== false) && (
-        <section className={`grid grid-cols-1 ${info.showHistory !== false && info.showVision !== false ? 'md:grid-cols-2' : ''} gap-8 md:gap-12`}>
-          {info.showHistory !== false && (
+      {(info.showHistory === true || info.showVision === true) && (
+        <section className={`grid grid-cols-1 ${info.showHistory === true && info.showVision === true ? 'md:grid-cols-2' : ''} gap-8 md:gap-12`}>
+          {info.showHistory === true && (
             <div className="rounded-3xl border border-gray-200 bg-white p-8 md:p-10 shadow-sm flex flex-col gap-5 hover:border-orange-500/30 transition duration-300">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-orange-100 text-orange-600 rounded-2xl">
@@ -167,7 +167,7 @@ export default function AboutPage() {
             </div>
           )}
 
-          {info.showVision !== false && (
+          {info.showVision === true && (
             <div className="rounded-3xl border border-gray-200 bg-white p-8 md:p-10 shadow-sm flex flex-col gap-5 hover:border-blue-500/30 transition duration-300">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-blue-100 text-blue-600 rounded-2xl">
