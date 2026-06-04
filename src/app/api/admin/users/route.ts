@@ -8,9 +8,7 @@ export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   
   if (!session?.user || !(await hasPermission(session.user.role, "manage_users"))) {
-    if (session?.user?.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
-    }
+    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
   }
 
   try {
@@ -25,9 +23,7 @@ export async function PATCH(request: Request) {
   const session = await getServerSession(authOptions);
   
   if (!session?.user || !(await hasPermission(session.user.role, "manage_users"))) {
-    if (session?.user?.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
-    }
+    return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
   }
 
   try {

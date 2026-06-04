@@ -71,9 +71,8 @@ export default function AdminUsersPage() {
     );
   }
 
-  const isAdmin = session?.user?.role === "admin";
   const userPermissions = session?.user?.permissions || [];
-  const canManageUsers = isAdmin || userPermissions.includes("manage_users") || userPermissions.includes("*");
+  const canManageUsers = userPermissions.includes("manage_users") || userPermissions.includes("*");
 
   if (!canManageUsers) {
     return (
