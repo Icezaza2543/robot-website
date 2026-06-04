@@ -86,14 +86,22 @@ export function ProfileCardModal({ isOpen, onClose, user }: ProfileCardModalProp
     expiryDate,
   };
 
-  /** Capture only the FRONT face via frontRef */
   const captureFront = async (): Promise<string | null> => {
     if (!frontRef.current) return null;
     try {
+      // Workaround for Safari/iOS: The first capture often fails to render external images.
+      // We do a "dummy" capture first to force the browser to cache and load the assets into the canvas.
+      await htmlToImage.toPng(frontRef.current, { 
+        quality: 0.1, 
+        pixelRatio: 1,
+        fetchRequestInit: { mode: "cors", cache: "force-cache" },
+      });
+      
+      // The real high-quality capture
       return await htmlToImage.toPng(frontRef.current, {
         quality: 1,
         pixelRatio: 3,
-        fetchRequestInit: { mode: "cors" },
+        fetchRequestInit: { mode: "cors", cache: "force-cache" },
       });
     } catch (err) {
       console.error("Capture failed", err);
