@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Pagination from "@/components/ui/Pagination";
 
 type BorrowRequest = {
   id: string;
@@ -19,6 +20,9 @@ export default function DashboardClient() {
   const [returningId, setReturningId] = useState<string | null>(null);
   const [cancelingId, setCancelingId] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<BorrowRequest | null>(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
 
   useEffect(() => {
     fetchRequests();
@@ -132,25 +136,41 @@ export default function DashboardClient() {
       {/* History List */}
       <div className="bg-white border border-gray-200 rounded">
         <div className="px-6 py-4 border-b border-gray-100">
-          <h2 className="text-lg font-medium text-gray-900">ประวัติการขอยืมล่าสุด</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-4">ประวัติการยืมอุปกรณ์</h2>
         </div>
-        
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {requests.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">คุณยังไม่มีประวัติการยืมอุปกรณ์</div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {requests.map(req => (
-              <RequestItem 
-                key={req.id} 
-                request={req} 
-                onReturn={(e) => { e.stopPropagation(); handleReturn(req.id); }}
-                onCancel={(e) => { e.stopPropagation(); handleCancel(req.id); }}
-                isReturning={returningId === req.id}
-                isCanceling={cancelingId === req.id}
-                onClick={() => setSelectedRequest(req)}
-              />
-            ))}
+          <div className="p-8 text-center text-gray-500">
+            คุณยังไม่มีประวัติการยืมอุปกรณ์
+            <div className="mt-4">
+              <Link href="/equipment" className="text-orange-500 hover:underline">ยืมอุปกรณ์เลย</Link>
+            </div>
           </div>
+        ) : (
+          <>
+            <div className="divide-y divide-gray-100">
+              {requests.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map(req => (
+                <RequestItem 
+                  key={req.id} 
+                  request={req} 
+                  onReturn={(e) => { e.stopPropagation(); handleReturn(req.id); }}
+                  onCancel={(e) => { e.stopPropagation(); handleCancel(req.id); }}
+                  isReturning={returningId === req.id}
+                  isCanceling={cancelingId === req.id}
+                  onClick={() => setSelectedRequest(req)}
+                />
+              ))}
+            </div>
+            {Math.ceil(requests.length / ITEMS_PER_PAGE) > 1 && (
+              <div className="p-4 border-t border-gray-100 bg-gray-50">
+                <Pagination 
+                  currentPage={currentPage} 
+                  totalPages={Math.ceil(requests.length / ITEMS_PER_PAGE)} 
+                  onPageChange={setCurrentPage} 
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
 

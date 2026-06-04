@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Settings, X, Plus, Inbox, Save, Search, Trash2, Edit2, UploadCloud, Newspaper, Settings2, ShieldCheck, List } from "lucide-react";
 import ImageCropperModal from "@/components/ui/ImageCropperModal";
+import Pagination from "@/components/ui/Pagination";
 
 interface NewsItem {
   id: string;
@@ -25,6 +26,8 @@ export default function AdminNewsPage() {
 
   const [items, setItems] = useState<NewsItem[]>([]);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
   const [isLoading, setIsLoading] = useState(true);
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -221,6 +224,16 @@ export default function AdminNewsPage() {
     item.category.toLowerCase().includes(search.toLowerCase())
   );
 
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+  const paginatedItems = filteredItems.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       {/* Header banner */}
@@ -345,7 +358,7 @@ export default function AdminNewsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100/70 text-sm">
-              {filteredItems.map(item => (
+              {paginatedItems.map(item => (
                 <tr key={item.id} className="hover:bg-orange-50/30">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
@@ -375,6 +388,10 @@ export default function AdminNewsPage() {
           </table>
         </div>
       </div>
+      
+      {totalPages > 1 && (
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+      )}
 
       {/* Edit Modal */}
       {editingItem && (

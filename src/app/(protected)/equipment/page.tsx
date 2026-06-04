@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/providers/CartProvider";
 import { Plug, Settings, Search, MapPin, ShoppingCart, Check, X, AlertTriangle, Package, Plus, Minus } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 
 interface EquipmentItem {
   id: string;
@@ -25,6 +26,9 @@ export default function EquipmentPage() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [isLoading, setIsLoading] = useState(true);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 12;
 
   const fetchItems = async () => {
     try {
@@ -68,6 +72,16 @@ export default function EquipmentPage() {
     const matchesCategory = categoryFilter === "All" || item.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
+
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+  const paginatedItems = filteredItems.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, categoryFilter]);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -141,9 +155,10 @@ export default function EquipmentPage() {
           </p>
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredItems.map((item) => {
-            const isOutOfStock = item.stock === 0;
+        <div className="mt-8 flex flex-col gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {paginatedItems.map((item) => {
+              const isOutOfStock = item.stock === 0;
             const isLowStock = item.stock > 0 && item.stock <= 5;
             const cartItem = cartItems.find((i) => i.id === item.id);
             const qty = cartItem?.quantity ?? 0;
@@ -241,6 +256,13 @@ export default function EquipmentPage() {
               </div>
             );
           })}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="mt-4">
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            </div>
+          )}
         </div>
       )}
     </div>

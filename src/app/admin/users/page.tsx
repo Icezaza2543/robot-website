@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Users, Search, ShieldAlert, Edit2, ShieldCheck, Key, Save, X } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 
 interface SheetUser {
   email: string;
@@ -31,6 +32,9 @@ export default function AdminUsersPage() {
   const [editingEmail, setEditingEmail] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const fetchData = async () => {
     try {
@@ -136,6 +140,18 @@ export default function AdminUsersPage() {
     (user.role && user.role.toLowerCase().includes(search.toLowerCase()))
   );
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="relative overflow-hidden rounded-3xl border border-gray-200/80 bg-white p-8 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -177,7 +193,7 @@ export default function AdminUsersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100/70 text-sm">
-              {filteredUsers.map(user => (
+              {paginatedUsers.map(user => (
                 <tr key={user.email} className="hover:bg-orange-50/30 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
@@ -245,6 +261,12 @@ export default function AdminUsersPage() {
           </table>
         </div>
       </div>
+      
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }

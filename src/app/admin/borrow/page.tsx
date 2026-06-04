@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Timer, CheckCircle2, RefreshCw, XCircle, Package, AlertTriangle, FileText, Settings, ClipboardList, Search, PartyPopper, Inbox, MapPin, User, Megaphone, Newspaper, Settings2 } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
 
 interface RequestItem {
   id: string;
@@ -50,6 +51,9 @@ export default function AdminBorrowPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   // Load all borrow requests from API
   const fetchRequests = async () => {
@@ -271,6 +275,18 @@ export default function AdminBorrowPage() {
 
     return matchesSearch;
   });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);
+  const paginatedRequests = filteredRequests.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Reset page when search or status filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -574,7 +590,7 @@ export default function AdminBorrowPage() {
         </div>
       ) : (
         <div className="mt-8 flex flex-col gap-5 animate-in fade-in duration-300">
-          {filteredRequests.map((request) => {
+          {paginatedRequests.map((request) => {
             const statusDetail = getStatusDetails(request.status);
             const isExpanded = !!expandedRequests[request.id];
             
@@ -836,6 +852,12 @@ export default function AdminBorrowPage() {
               </div>
             );
           })}
+
+          {totalPages > 1 && (
+            <div className="mt-4">
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            </div>
+          )}
         </div>
       )}
     </div>
