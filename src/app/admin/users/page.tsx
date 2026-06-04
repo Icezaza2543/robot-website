@@ -58,10 +58,12 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    } else if (status === "authenticated") {
       fetchData();
     }
-  }, [status, session]);
+  }, [status, session, router]);
 
   if (status === "loading" || isLoading) {
     return (

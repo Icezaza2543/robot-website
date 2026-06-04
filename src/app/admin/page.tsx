@@ -3,17 +3,17 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { 
-  Settings, 
-  Newspaper, 
-  Package, 
-  List, 
-  LayoutTemplate, 
-  UsersRound, 
-  HandCoins, 
-  Key, 
-  Users, 
-  ShieldCheck, 
+import {
+  Settings,
+  Newspaper,
+  Package,
+  List,
+  LayoutTemplate,
+  UsersRound,
+  HandCoins,
+  Key,
+  Users,
+  ShieldCheck,
   LogOut,
   ChevronRight
 } from "lucide-react";
@@ -42,8 +42,8 @@ export default function AdminDashboardPage() {
 
   const hasPerm = (perm: string) => isAdmin || permissions.includes(perm);
 
-  const hasAdminAccess = 
-    isAdmin || 
+  const hasAdminAccess =
+    isAdmin ||
     permissions.some((p: string) => p.startsWith("manage_"));
 
   if (!hasAdminAccess) {
@@ -108,16 +108,16 @@ export default function AdminDashboardPage() {
           borderColor: "border-emerald-100",
           show: hasPerm("manage_website")
         },
-        {
-          title: "รายชื่อที่ปรึกษา (Advisors)",
-          desc: "เพิ่ม หรือแก้ไขรายชื่ออาจารย์ที่ปรึกษาชมรม",
-          href: "/admin/advisors",
-          icon: UsersRound,
-          color: "text-teal-500",
-          bgColor: "bg-teal-50",
-          borderColor: "border-teal-100",
-          show: hasPerm("manage_website")
-        },
+        // {
+        //   title: "รายชื่อที่ปรึกษา (Advisors)",
+        //   desc: "เพิ่ม หรือแก้ไขรายชื่ออาจารย์ที่ปรึกษาชมรม",
+        //   href: "/admin/advisors",
+        //   icon: UsersRound,
+        //   color: "text-teal-500",
+        //   bgColor: "bg-teal-50",
+        //   borderColor: "border-teal-100",
+        //   show: hasPerm("manage_website")
+        // },
         {
           title: "ผู้สนับสนุน (Sponsors)",
           desc: "จัดการรายชื่อและโลโก้ผู้สนับสนุนชมรม",
@@ -192,7 +192,7 @@ export default function AdminDashboardPage() {
       <div className="mt-10 flex flex-col gap-10">
         {menuGroups.map((group, groupIdx) => {
           const visibleItems = group.items.filter(item => item.show);
-          
+
           if (visibleItems.length === 0) return null;
 
           return (
@@ -204,8 +204,8 @@ export default function AdminDashboardPage() {
                 {visibleItems.map((item, i) => {
                   const Icon = item.icon;
                   return (
-                    <Link 
-                      key={i} 
+                    <Link
+                      key={i}
                       href={item.href}
                       className="group flex flex-col justify-between rounded-3xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-orange-200 transition-all active:scale-[0.98]"
                     >
