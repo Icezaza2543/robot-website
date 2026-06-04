@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { uploadFileToDrive } from "@/lib/googleDrive";
+import { uploadFileToImgbb } from "@/lib/imgbb";
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -34,10 +34,10 @@ export async function POST(request: Request) {
     const ext = file.name.split(".").pop() || "jpg";
     const uniqueName = `avatar-${Date.now()}.${ext}`;
 
-    const url = await uploadFileToDrive(buffer, uniqueName, file.type);
+    const url = await uploadFileToImgbb(buffer, uniqueName);
 
     if (!url) {
-      return NextResponse.json({ error: "Failed to upload to Google Drive" }, { status: 500 });
+      return NextResponse.json({ error: "Failed to upload to ImgBB (Ensure IMGBB_API_KEY is set)" }, { status: 500 });
     }
 
     return NextResponse.json({ url });

@@ -62,6 +62,7 @@ export async function uploadFileToDrive(fileBuffer: Buffer, fileName: string, mi
       requestBody: fileMetadata,
       media: media,
       fields: "id, webViewLink, webContentLink",
+      supportsAllDrives: true,
     });
 
     const fileId = response.data.id;
