@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { QrCode, Fingerprint } from "lucide-react";
+import { Fingerprint } from "lucide-react";
+import QRCode from "react-qr-code";
 
 export type UserRank = "Member" | "Bronze" | "Silver" | "Gold" | "Platinum" | "Diamond";
 
@@ -84,16 +85,12 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
                 style={{ backgroundColor: config.color }}
               >CLUB</span>
             </div>
-            {user.points !== undefined && (
-              <div className="text-right">
-                <div className="text-2xl font-black tracking-tighter text-gray-900 leading-none">{user.points.toLocaleString()}</div>
-                <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">PTS</div>
-              </div>
-            )}
           </div>
 
           {/* Photo Section — fixed aspect ratio container, image fills without stretching */}
+          {/* Photo Section wrapper — relative so badge can overflow */}
           <div className="px-6 relative z-10">
+            {/* Photo container — overflow hidden for background-image crop */}
             <div
               className="w-full rounded-xl overflow-hidden relative border-4 border-white shadow-sm"
               style={{ backgroundColor: config.color, aspectRatio: "4/3" }}
@@ -108,7 +105,6 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
               />
 
               {user.image ? (
-                // Use a div with background-image to prevent img stretching entirely
                 <div
                   className="absolute inset-0 z-10"
                   style={{
@@ -122,16 +118,16 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
                   <span className="text-6xl font-black opacity-50">{firstName.charAt(0).toUpperCase()}</span>
                 </div>
               )}
+            </div>
 
-              {/* Level Badge Circle */}
-              <div className="absolute -bottom-4 -right-4 w-20 h-20 bg-white rounded-full z-20 shadow-md flex items-center justify-center p-1 border border-gray-100">
-                <div
-                  className="w-full h-full rounded-full border-2 flex flex-col items-center justify-center text-center leading-none"
-                  style={{ borderColor: config.color, color: config.color }}
-                >
-                  <span className="text-[10px] font-black tracking-wider">LEVEL</span>
-                  <span className="text-sm font-black">{config.label}</span>
-                </div>
+            {/* Level Badge — outside overflow-hidden, floats over the photo corner */}
+            <div className="absolute bottom-0 right-3 translate-y-1/2 w-14 h-14 bg-white rounded-full z-20 shadow-lg flex items-center justify-center p-1 border-2 border-gray-100">
+              <div
+                className="w-full h-full rounded-full border-2 flex flex-col items-center justify-center text-center leading-none"
+                style={{ borderColor: config.color, color: config.color }}
+              >
+                <span className="text-[8px] font-black tracking-wider">LEVEL</span>
+                <span className="text-[10px] font-black">{config.label}</span>
               </div>
             </div>
           </div>
@@ -193,8 +189,16 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
             <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Scan for Identity</h4>
 
             {/* QR Code */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 mb-5">
-              <QrCode className="w-28 h-28 text-gray-900" strokeWidth={1.5} />
+            {/* Real scannable QR Code */}
+            <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-200 mb-5">
+              <QRCode
+                value={`ROBOT-CLUB:${user.studentId}`}
+                size={112}
+                bgColor="#ffffff"
+                fgColor="#111111"
+                level="M"
+                style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+              />
             </div>
 
             {/* Student ID */}

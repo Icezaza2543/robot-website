@@ -25,6 +25,8 @@ export async function GET() {
       faculty: profile?.faculty ?? "",
       bio: profile?.bio ?? "",
       customAvatar: profile?.customAvatar ?? "",
+      // Rank is assigned by admin (stored in column M of users sheet)
+      rank: profile?.rank ?? "Member",
     });
   } catch (err) {
     console.error(err);

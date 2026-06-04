@@ -16,6 +16,8 @@ export interface SheetUser {
   bio?: string;
   // Custom avatar (column L)
   customAvatar?: string;
+  // Rank assigned by admin (column M)
+  rank?: string;
 }
 
 /**
@@ -73,11 +75,11 @@ export async function getSheetUserByEmail(email: string): Promise<SheetUser | nu
   }
 
   try {
-    // Retrieve values from the 'users' sheet — now reads up to column K (index 10)
-    // Columns: A=email, B=name, C=role, D=status, E=nickname, F=studentId, G=phone, H=year, I=department, J=faculty, K=bio
+    // Retrieve values from the 'users' sheet — reads up to column M (index 12)
+    // Columns: A=email, B=name, C=role, D=status, E=nickname, F=studentId, G=phone, H=year, I=department, J=faculty, K=bio, L=customAvatar, M=rank
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
-      range: "users!A2:K1000",
+      range: "users!A2:M1000",
     });
 
     const rows = response.data.values;
@@ -109,6 +111,7 @@ export async function getSheetUserByEmail(email: string): Promise<SheetUser | nu
           faculty: String(row[9] || "").trim(),
           bio: String(row[10] || "").trim(),
           customAvatar: String(row[11] || "").trim(),
+          rank: String(row[12] || "").trim() || "Member",
         };
       }
     }
@@ -188,15 +191,15 @@ export async function updateSheetUserProfile(
     const actualRow = rowIndex + 2;
     const existingRow = rows[rowIndex];
 
-    // Columns E-L (index 4-11)
-    const profileCols = ["nickname", "studentId", "phone", "year", "department", "faculty", "bio", "customAvatar"];
+    // Columns E-M (index 4-12)
+    const profileCols = ["nickname", "studentId", "phone", "year", "department", "faculty", "bio", "customAvatar", "rank"];
     const values = profileCols.map((key, i) => {
       return updates[key] ?? String(existingRow[4 + i] || "");
     });
 
     await sheets.spreadsheets.values.update({
       spreadsheetId: sheetId,
-      range: `users!E${actualRow}:L${actualRow}`,
+      range: `users!E${actualRow}:M${actualRow}`,
       valueInputOption: "RAW",
       requestBody: { values: [values] },
     });
