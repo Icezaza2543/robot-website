@@ -166,6 +166,7 @@ export default function NavbarAuth() {
                   src={displayImage}
                   alt={displayName || "User Profile"}
                   fill
+                  unoptimized={true}
                   className="object-cover"
                   sizes="32px"
                 />
