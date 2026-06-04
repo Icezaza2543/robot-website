@@ -133,11 +133,13 @@ export default function AdminUsersPage() {
     }
   };
 
-  const filteredUsers = users.filter(user => 
+  const validUsers = Array.isArray(users) ? users : [];
+  const filteredUsers = validUsers.filter(user => 
     String(user.name || "").toLowerCase().includes(search.toLowerCase()) || 
     String(user.email || "").toLowerCase().includes(search.toLowerCase()) ||
     (user.role && String(user.role).toLowerCase().includes(search.toLowerCase()))
   );
+  const validRoles = Array.isArray(roles) ? roles : [];
 
   // Pagination logic
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
@@ -217,7 +219,7 @@ export default function AdminUsersPage() {
                         className="rounded-lg border border-orange-300 bg-orange-50 px-3 py-1.5 text-sm font-bold text-orange-800 focus:outline-none"
                       >
                         <option value="user">User (ผู้ใช้ทั่วไป)</option>
-                        {roles.map(r => (
+                        {validRoles.map(r => (
                           <option key={r.roleName} value={r.roleName}>{r.roleName}</option>
                         ))}
                         <option value="admin">Admin (ผู้ดูแลระบบ)</option>
