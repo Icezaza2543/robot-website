@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Plus, X, Save, Trash2, Edit2, ShieldAlert, Key, Users } from "lucide-react";
+import { Key, ShieldAlert, Plus, Save, X, Trash2, ShieldCheck, UserCheck, AlertCircle } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface RoleData {
   roleName: string;
@@ -111,12 +112,12 @@ export default function AdminRolesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formRoleName.trim()) {
-      alert("กรุณากรอกชื่อตำแหน่ง");
+      toast.error("กรุณากรอกชื่อตำแหน่ง");
       return;
     }
 
     if (formRoleName.toLowerCase() === "admin" || formRoleName.toLowerCase() === "user") {
-      alert("ไม่สามารถใช้ชื่อตำแหน่ง admin หรือ user ได้ (สงวนไว้สำหรับระบบ)");
+      toast.error("ไม่สามารถใช้ชื่อตำแหน่ง admin หรือ user ได้ (สงวนไว้สำหรับระบบ)");
       return;
     }
 
@@ -134,14 +135,15 @@ export default function AdminRolesPage() {
 
       if (res.ok) {
         setShowForm(false);
+        toast.success("บันทึกตำแหน่งสำเร็จ");
         await fetchRoles();
       } else {
         const data = await res.json();
-        alert(`เกิดข้อผิดพลาด: ${data.error}`);
+        toast.error(`เกิดข้อผิดพลาด: ${data.error}`);
       }
     } catch (err) {
       console.error(err);
-      alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+      toast.error("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
     } finally {
       setIsSubmitting(false);
     }
@@ -152,13 +154,15 @@ export default function AdminRolesPage() {
     try {
       const res = await fetch(`/api/admin/roles?roleName=${encodeURIComponent(roleName)}`, { method: "DELETE" });
       if (res.ok) {
+        toast.success("ลบตำแหน่งสำเร็จ");
         await fetchRoles();
       } else {
         const data = await res.json();
-        alert(data.error || "ไม่สามารถลบได้");
+        toast.error(data.error || "ไม่สามารถลบได้");
       }
     } catch (err) {
       console.error(err);
+      toast.error("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
     }
   };
 

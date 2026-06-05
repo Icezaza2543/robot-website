@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Settings, X, Plus, Inbox, Save, Search, Trash2, Edit2, UploadCloud, Newspaper, Settings2, ShieldCheck, List } from "lucide-react";
+import toast from "react-hot-toast";
 import ImageCropperModal from "@/components/ui/ImageCropperModal";
 import Pagination from "@/components/ui/Pagination";
 
@@ -127,11 +128,11 @@ export default function AdminNewsPage() {
         if (cropperCallback) cropperCallback(data.url);
       } else {
         const data = await res.json();
-        alert(`อัปโหลดรูปภาพล้มเหลว: ${data.details || data.error || 'Unknown Error'}`);
+        toast.error(`อัปโหลดรูปภาพล้มเหลว: ${data.details || data.error || 'Unknown Error'}`);
       }
     } catch (error) {
       console.error(error);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setIsUploadingImage(false);
       setCropperCallback(null);
@@ -141,7 +142,7 @@ export default function AdminNewsPage() {
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim() || !formContent.trim()) {
-      alert("กรุณากรอกหัวข้อและเนื้อหา");
+      toast.error("กรุณากรอกหัวข้อและเนื้อหา");
       return;
     }
 
@@ -172,14 +173,15 @@ export default function AdminNewsPage() {
         setFormImageUrl("");
         setFormIgLink("");
         setShowAddForm(false);
+        toast.success("เพิ่มบทความข่าวสารสำเร็จ");
         await fetchItems();
       } else {
         const data = await res.json();
-        alert(`เกิดข้อผิดพลาด: ${data.error}`);
+        toast.error(`เกิดข้อผิดพลาด: ${data.error}`);
       }
     } catch (err) {
       console.error(err);
-      alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+      toast.error("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
     } finally {
       setIsSubmitting(false);
     }
@@ -190,9 +192,10 @@ export default function AdminNewsPage() {
     try {
       const res = await fetch(`/api/news?id=${id}`, { method: "DELETE" });
       if (res.ok) {
+        toast.success("ลบข่าวสารสำเร็จ");
         await fetchItems();
       } else {
-        alert("ไม่สามารถลบได้");
+        toast.error("ไม่สามารถลบได้");
       }
     } catch (err) {
       console.error(err);
@@ -210,9 +213,10 @@ export default function AdminNewsPage() {
 
       if (res.ok) {
         setEditingItem(null);
+        toast.success("อัปเดตบทความข่าวสารสำเร็จ");
         await fetchItems();
       } else {
-        alert("อัปเดตไม่สำเร็จ");
+        toast.error("อัปเดตไม่สำเร็จ");
       }
     } catch (err) {
       console.error(err);

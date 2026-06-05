@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Lock, Plus, Trash2, Megaphone, CheckCircle2, Image as ImageIcon } from "lucide-react";
+import toast from "react-hot-toast";
 import Image from "next/image";
 
 interface Sponsor {
@@ -79,12 +80,13 @@ export default function AdminSponsorsPage() {
 
       if (res.ok) {
         setNewUrl("");
+        toast.success("เพิ่มผู้สนับสนุนสำเร็จ");
         fetchSponsors();
       } else {
-        alert("เกิดข้อผิดพลาดในการเพิ่มผู้สนับสนุน");
+        toast.error("เกิดข้อผิดพลาดในการเพิ่มผู้สนับสนุน");
       }
     } catch (err) {
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setIsSubmitting(false);
     }
@@ -96,12 +98,13 @@ export default function AdminSponsorsPage() {
     try {
       const res = await fetch(`/api/sponsors?id=${id}`, { method: "DELETE" });
       if (res.ok) {
+        toast.success("ลบผู้สนับสนุนสำเร็จ");
         setSponsors((prev) => prev.filter((s) => s.id !== id));
       } else {
-        alert("ไม่สามารถลบผู้สนับสนุนได้");
+        toast.error("ไม่สามารถลบผู้สนับสนุนได้");
       }
     } catch (err) {
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     }
   };
 

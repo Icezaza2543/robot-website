@@ -6,6 +6,7 @@ import {
   X, Save, User, Phone, GraduationCap, BookOpen, FileText,
   Loader2, CheckCircle, UploadCloud, Link as LinkIcon, Camera,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface ProfileData {
   name: string;
@@ -81,11 +82,11 @@ export function EditProfileModal({ isOpen, onClose, onSaved }: EditProfileModalP
         setAvatarUrlInput("");
       } else {
         const err = await res.json();
-        alert(`อัปโหลดไม่สำเร็จ: ${err.error}`);
+        toast.error(`อัปโหลดไม่สำเร็จ: ${err.error}`);
       }
     } catch (err) {
       console.error(err);
-      alert("เกิดข้อผิดพลาดในการอัปโหลด");
+      toast.error("เกิดข้อผิดพลาดในการอัปโหลด");
     } finally {
       setIsUploadingAvatar(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -126,17 +127,18 @@ export function EditProfileModal({ isOpen, onClose, onSaved }: EditProfileModalP
       });
       if (res.ok) {
         setSaved(true);
+        toast.success("บันทึกข้อมูลสำเร็จ");
         onSaved?.({ ...profile });
         setTimeout(() => {
           setSaved(false);
           onClose();
         }, 1500);
       } else {
-        alert("บันทึกไม่สำเร็จ กรุณาลองใหม่");
+        toast.error("บันทึกไม่สำเร็จ กรุณาลองใหม่");
       }
     } catch (err) {
       console.error(err);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setIsSaving(false);
     }

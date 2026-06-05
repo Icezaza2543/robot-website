@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Settings, X, Plus, Inbox, Save, Search, Package, MapPin, Minus, Trash2, Megaphone, UploadCloud, Image as ImageIcon, Edit2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import Pagination from "@/components/ui/Pagination";
+import toast from "react-hot-toast";
 
 interface EquipmentItem {
   id: string;
@@ -70,11 +71,11 @@ export default function AdminItemsPage() {
         const data = await res.json();
         setUrl(data.url);
       } else {
-        alert("อัปโหลดรูปภาพล้มเหลว");
+        toast.error("อัปโหลดรูปภาพล้มเหลว");
       }
     } catch (error) {
       console.error(error);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setIsUploadingImage(false);
     }
@@ -138,7 +139,7 @@ export default function AdminItemsPage() {
     e.preventDefault();
 
     if (!formName.trim() || !formCategory || formStock === "") {
-      alert("กรุณากรอกข้อมูลหลักให้ครบถ้วน");
+      toast.error("กรุณากรอกข้อมูลหลักให้ครบถ้วน");
       return;
     }
 
@@ -167,14 +168,15 @@ export default function AdminItemsPage() {
         setFormDescription("");
         setFormImageUrl("");
         setShowAddForm(false);
+        toast.success("เพิ่มอุปกรณ์สำเร็จ");
         await fetchItems();
       } else {
         const errorData = await res.json();
-        alert(`เกิดข้อผิดพลาด: ${errorData.error || "ไม่สามารถเพิ่มข้อมูลได้"}`);
+        toast.error(`เกิดข้อผิดพลาด: ${errorData.error || "ไม่สามารถเพิ่มข้อมูลได้"}`);
       }
     } catch (err) {
       console.error(err);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
     } finally {
       setIsSubmitting(false);
     }
@@ -192,14 +194,15 @@ export default function AdminItemsPage() {
       });
 
       if (res.ok) {
+        toast.success("ลบอุปกรณ์สำเร็จ");
         await fetchItems();
       } else {
         const errorData = await res.json();
-        alert(`เกิดข้อผิดพลาด: ${errorData.error || "ไม่สามารถลบข้อมูลได้"}`);
+        toast.error(`เกิดข้อผิดพลาด: ${errorData.error || "ไม่สามารถลบข้อมูลได้"}`);
       }
     } catch (err) {
       console.error(err);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
     }
   };
 
@@ -219,12 +222,12 @@ export default function AdminItemsPage() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        alert(`เกิดข้อผิดพลาด: ${errorData.error || "ไม่สามารถอัปเดตจำนวนสิ่งของได้"}`);
+        toast.error(`เกิดข้อผิดพลาด: ${errorData.error || "ไม่สามารถอัปเดตจำนวนสิ่งของได้"}`);
         await fetchItems();
       }
     } catch (err) {
       console.error(err);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
       await fetchItems();
     }
   };
@@ -247,12 +250,12 @@ export default function AdminItemsPage() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        alert(`เกิดข้อผิดพลาด: ${errorData.error || "ไม่สามารถอัปเดตจำนวนสิ่งของได้"}`);
+        toast.error(`เกิดข้อผิดพลาด: ${errorData.error || "ไม่สามารถอัปเดตจำนวนสิ่งของได้"}`);
         await fetchItems();
       }
     } catch (err) {
       console.error(err);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
       await fetchItems();
     }
   };
@@ -272,13 +275,14 @@ export default function AdminItemsPage() {
 
       if (res.ok) {
         setEditingItem(null);
+        toast.success("อัปเดตอุปกรณ์สำเร็จ");
         fetchItems();
       } else {
-        alert("เกิดข้อผิดพลาดในการบันทึก");
+        toast.error("เกิดข้อผิดพลาดในการบันทึก");
       }
     } catch (err) {
       console.error(err);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setIsSubmitting(false);
     }

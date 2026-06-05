@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { MapPin, Clock, Calendar as CalendarIcon, Info, Image as ImageIcon, Loader2, AlertCircle, ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { toast } from "react-hot-toast";
 
 export default function RoomDetailPage() {
   const { id } = useParams();
@@ -91,13 +92,13 @@ export default function RoomDetailPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (status !== "authenticated") {
-      // alert("กรุณาเข้าสู่ระบบก่อนทำการจอง");
+      toast.error("กรุณาเข้าสู่ระบบก่อนทำการจอง");
       router.push("/login");
       return;
     }
 
     if (isSpecialRequest && !specialReason) {
-      alert("กรุณาระบุเหตุผลการขออนุมัติพิเศษ");
+      toast.error("กรุณาระบุเหตุผลการขออนุมัติพิเศษ");
       return;
     }
 
@@ -120,15 +121,15 @@ export default function RoomDetailPage() {
       });
 
       if (res.ok) {
-        alert("ส่งคำขอจองห้องสำเร็จ! กรุณารอการอนุมัติจากผู้ดูแล");
+        toast.success("ส่งคำขอจองห้องสำเร็จ! กรุณารอการอนุมัติจากผู้ดูแล");
         router.push("/rooms");
       } else {
         const data = await res.json();
-        alert(`เกิดข้อผิดพลาด: ${data.error}`);
+        toast.error(`เกิดข้อผิดพลาด: ${data.error}`);
       }
     } catch (err) {
       console.error(err);
-      alert("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+      toast.error("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
     } finally {
       setIsSubmitting(false);
     }

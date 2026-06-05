@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Users, Search, ShieldAlert, Edit2, ShieldCheck, Key, Save, X } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
+import toast from "react-hot-toast";
 
 interface SheetUser {
   email: string;
@@ -127,14 +128,15 @@ export default function AdminUsersPage() {
 
       if (res.ok) {
         setEditingEmail(null);
+        toast.success("อัปเดตบทบาทสำเร็จ");
         await fetchData();
       } else {
         const data = await res.json();
-        alert(`เกิดข้อผิดพลาด: ${data.error}`);
+        toast.error(`เกิดข้อผิดพลาด: ${data.error}`);
       }
     } catch (err) {
       console.error(err);
-      alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+      toast.error("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
     } finally {
       setIsSubmitting(false);
     }

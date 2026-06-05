@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X, Download, Share2, Loader2 } from "lucide-react";
 import { ProfileCard, UserRank } from "./ProfileCard";
 import * as htmlToImage from "html-to-image";
+import toast from "react-hot-toast";
 
 interface ProfileCardModalProps {
   isOpen: boolean;
@@ -114,7 +115,7 @@ export function ProfileCardModal({ isOpen, onClose, user }: ProfileCardModalProp
     await new Promise(r => setTimeout(r, 300));
     const dataUrl = await captureFront();
     setIsCapturing(false);
-    if (!dataUrl) { alert("เกิดข้อผิดพลาดในการสร้างรูปภาพ"); return; }
+    if (!dataUrl) { toast.error("เกิดข้อผิดพลาดในการสร้างรูปภาพ"); return; }
     const link = document.createElement("a");
     link.download = `robot-id-${studentId}.png`;
     link.href = dataUrl;
@@ -126,7 +127,7 @@ export function ProfileCardModal({ isOpen, onClose, user }: ProfileCardModalProp
     await new Promise(r => setTimeout(r, 300));
     const dataUrl = await captureFront();
     setIsCapturing(false);
-    if (!dataUrl) { alert("เกิดข้อผิดพลาดในการสร้างรูปภาพ"); return; }
+    if (!dataUrl) { toast.error("เกิดข้อผิดพลาดในการสร้างรูปภาพ"); return; }
 
     const res = await fetch(dataUrl);
     const blob = await res.blob();
@@ -147,7 +148,7 @@ export function ProfileCardModal({ isOpen, onClose, user }: ProfileCardModalProp
       link.download = `robot-id-${studentId}.png`;
       link.href = dataUrl;
       link.click();
-      alert("เบราว์เซอร์ของคุณไม่รองรับการแชร์ตรง ระบบดาวน์โหลดรูปให้แล้ว นำไปลง IG Story ได้เลยครับ");
+      toast.success("เบราว์เซอร์ของคุณไม่รองรับการแชร์ตรง ระบบดาวน์โหลดรูปให้แล้ว นำไปลง IG Story ได้เลยครับ");
     }
   };
 

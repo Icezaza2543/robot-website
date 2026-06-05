@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Settings, Save, Users, Settings2, Trash2, Edit2, UploadCloud, Plus, X, Newspaper } from "lucide-react";
 import ImageCropperModal from "@/components/ui/ImageCropperModal";
+import toast from "react-hot-toast";
 
 interface AboutInfo {
   history: string;
@@ -109,10 +110,10 @@ export default function AdminAboutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(aboutInfo),
       });
-      if (res.ok) alert("บันทึกข้อมูลเรียบร้อย");
-      else alert("บันทึกข้อมูลล้มเหลว");
+      if (res.ok) toast.success("บันทึกข้อมูลเรียบร้อย");
+      else toast.error("บันทึกข้อมูลล้มเหลว");
     } catch (err) {
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setIsSavingInfo(false);
     }
@@ -146,10 +147,10 @@ export default function AdminAboutPage() {
         if (cropperCallback) cropperCallback(data.url);
       } else {
         const data = await res.json();
-        alert(`อัปโหลดรูปภาพล้มเหลว: ${data.details || data.error || 'Unknown Error'}`);
+        toast.error(`อัปโหลดรูปภาพล้มเหลว: ${data.details || data.error || 'Unknown Error'}`);
       }
     } catch (error) {
-      alert("เกิดข้อผิดพลาดในการอัปโหลด");
+      toast.error("เกิดข้อผิดพลาดในการอัปโหลด");
     } finally {
       setIsUploadingImage(false);
       setCropperCallback(null);
@@ -158,7 +159,10 @@ export default function AdminAboutPage() {
 
   const handleAddAdvisor = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!advName || !advRole) return alert("กรุณากรอกข้อมูลให้ครบ");
+    if (!advName || !advRole) {
+      toast.error("กรุณากรอกข้อมูลให้ครบ");
+      return;
+    }
 
     try {
       setIsAddingAdv(true);
@@ -169,10 +173,11 @@ export default function AdminAboutPage() {
       });
       if (res.ok) {
         setAdvPrefix(""); setAdvName(""); setAdvRole(""); setAdvImage(""); setShowAddAdvisor(false);
+        toast.success("เพิ่มที่ปรึกษาสำเร็จ");
         fetchData();
-      } else alert("เพิ่มที่ปรึกษาล้มเหลว");
+      } else toast.error("เพิ่มที่ปรึกษาล้มเหลว");
     } catch (err) {
-      alert("ข้อผิดพลาดในการเชื่อมต่อ");
+      toast.error("ข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setIsAddingAdv(false);
     }
@@ -180,7 +185,10 @@ export default function AdminAboutPage() {
 
   const handleUpdateAdvisor = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editAdvName || !editAdvRole) return alert("กรุณากรอกข้อมูลให้ครบ");
+    if (!editAdvName || !editAdvRole) {
+      toast.error("กรุณากรอกข้อมูลให้ครบ");
+      return;
+    }
 
     try {
       setIsUpdatingAdv(true);
@@ -191,10 +199,11 @@ export default function AdminAboutPage() {
       });
       if (res.ok) {
         setEditingAdvId(null);
+        toast.success("แก้ไขที่ปรึกษาสำเร็จ");
         fetchData();
-      } else alert("แก้ไขที่ปรึกษาล้มเหลว");
+      } else toast.error("แก้ไขที่ปรึกษาล้มเหลว");
     } catch (err) {
-      alert("ข้อผิดพลาดในการเชื่อมต่อ");
+      toast.error("ข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setIsUpdatingAdv(false);
     }

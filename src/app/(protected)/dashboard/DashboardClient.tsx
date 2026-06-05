@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Pagination from "@/components/ui/Pagination";
+import toast from "react-hot-toast";
 
 type BorrowRequest = {
   id: string;
@@ -56,8 +57,9 @@ export default function DashboardClient() {
       
       // Refresh list
       await fetchRequests();
+      toast.success("แจ้งคืนอุปกรณ์สำเร็จ");
     } catch (err) {
-      alert("เกิดข้อผิดพลาดในการแจ้งคืน กรุณาลองใหม่อีกครั้ง");
+      toast.error("เกิดข้อผิดพลาดในการแจ้งคืน กรุณาลองใหม่อีกครั้ง");
     } finally {
       setReturningId(null);
     }
@@ -82,8 +84,9 @@ export default function DashboardClient() {
       // Refresh list
       await fetchRequests();
       setSelectedRequest(null);
+      toast.success("ยกเลิกคำขอสำเร็จ");
     } catch (err: any) {
-      alert(`เกิดข้อผิดพลาดในการยกเลิก: ${err.message}`);
+      toast.error(`เกิดข้อผิดพลาดในการยกเลิก: ${err.message}`);
     } finally {
       setCancelingId(null);
     }

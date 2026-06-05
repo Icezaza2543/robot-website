@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { DoorOpen, CalendarDays, Plus, Image as ImageIcon, Trash2, Edit2, CheckCircle2, XCircle, AlertCircle, X, Loader2 } from "lucide-react";
+import { CalendarDays, DoorOpen, Plus, Search, Trash2, Edit2, Loader2, Image as ImageIcon, X, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
+import toast from "react-hot-toast";
 
 // Detect overlapping reservations within a list
 function isOverlapping(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) {
@@ -128,12 +129,12 @@ export default function AdminRoomsPage() {
           const uploadData = await uploadRes.json();
           if (uploadData.url) finalImageUrl = uploadData.url;
         } else {
-          alert("ไม่สามารถอัพโหลดรูปภาพได้");
+          toast.error("ไม่สามารถอัพโหลดรูปภาพได้");
           setIsUploading(false);
           return;
         }
       } catch (err) {
-        alert("ไม่สามารถอัพโหลดรูปภาพได้");
+        toast.error("ไม่สามารถอัพโหลดรูปภาพได้");
         setIsUploading(false);
         return;
       }
@@ -154,14 +155,16 @@ export default function AdminRoomsPage() {
       });
 
       if (res.ok) {
+        toast.success(editingRoom ? "อัปเดตห้องสำเร็จ" : "เพิ่มห้องสำเร็จ");
         setIsRoomModalOpen(false);
         fetchData();
       } else {
         const data = await res.json();
-        alert(`เกิดข้อผิดพลาด: ${data.error}`);
+        toast.error(`เกิดข้อผิดพลาด: ${data.error}`);
       }
     } catch (err) {
       console.error(err);
+      toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูลห้อง");
     } finally {
       setIsUploading(false);
     }
@@ -171,9 +174,13 @@ export default function AdminRoomsPage() {
     if (!confirm("คุณแน่ใจหรือไม่ที่จะลบห้องนี้? (Are you sure you want to delete this room?)")) return;
     try {
       const res = await fetch(`/api/admin/rooms?id=${roomId}`, { method: "DELETE" });
-      if (res.ok) fetchData();
+      if (res.ok) {
+        toast.success("ลบห้องสำเร็จ");
+        fetchData();
+      }
     } catch (err) {
       console.error(err);
+      toast.error("เกิดข้อผิดพลาดในการลบห้อง");
     }
   };
 
@@ -181,9 +188,13 @@ export default function AdminRoomsPage() {
     if (!confirm("คุณแน่ใจหรือไม่ที่จะลบรายการจองนี้? (Are you sure you want to delete this reservation?)")) return;
     try {
       const res = await fetch(`/api/admin/reservations?id=${resId}`, { method: "DELETE" });
-      if (res.ok) fetchData();
+      if (res.ok) {
+        toast.success("ลบรายการจองสำเร็จ");
+        fetchData();
+      }
     } catch (err) {
       console.error(err);
+      toast.error("เกิดข้อผิดพลาดในการลบรายการจอง");
     }
   };
 
@@ -199,13 +210,15 @@ export default function AdminRoomsPage() {
         body: JSON.stringify({ id, status: newStatus, rejectReason })
       });
       if (res.ok) {
+        toast.success(`อัปเดตสถานะเป็น ${newStatus} สำเร็จ`);
         fetchData();
       } else {
         const data = await res.json();
-        alert(`เกิดข้อผิดพลาด: ${data.error}`);
+        toast.error(`เกิดข้อผิดพลาด: ${data.error}`);
       }
     } catch (err) {
       console.error(err);
+      toast.error("เกิดข้อผิดพลาดในการอัปเดตสถานะ");
     }
   };
 

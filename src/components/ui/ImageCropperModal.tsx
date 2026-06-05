@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from "react";
 import Cropper from "react-easy-crop";
 import { getCroppedImg } from "@/lib/cropImage";
+import toast from "react-hot-toast";
 
 interface ImageCropperModalProps {
   imageSrc: string;
@@ -31,7 +32,7 @@ export default function ImageCropperModal({ imageSrc, onCropComplete, onCancel, 
       }
     } catch (e) {
       console.error(e);
-      alert("เกิดข้อผิดพลาดในการตัดรูปภาพ");
+      toast.error("เกิดข้อผิดพลาดในการตัดรูปภาพ");
     } finally {
       setIsProcessing(false);
     }

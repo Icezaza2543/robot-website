@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { DoorOpen, MapPin, Clock, CalendarDays, Loader2, Image as ImageIcon, Calendar as CalendarIcon } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function RoomsDirectoryPage() {
   const [rooms, setRooms] = useState<any[]>([]);
@@ -28,7 +29,7 @@ export default function RoomsDirectoryPage() {
 
   const handleRoomClick = (roomId: string) => {
     if (status !== "authenticated") {
-      // alert("กรุณาเข้าสู่ระบบก่อนทำการจองห้อง");
+      toast.error("กรุณาเข้าสู่ระบบก่อนทำการจองห้อง");
       router.push(`/login?callbackUrl=/rooms/${roomId}`);
     } else {
       router.push(`/rooms/${roomId}`);
