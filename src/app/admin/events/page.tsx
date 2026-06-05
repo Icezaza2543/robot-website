@@ -40,6 +40,8 @@ export default function AdminEventsPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [formTitle, setFormTitle] = useState("");
   const [formDate, setFormDate] = useState("");
+  const [formStartTime, setFormStartTime] = useState("");
+  const [formEndTime, setFormEndTime] = useState("");
   const [formLocation, setFormLocation] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [formImageUrl, setFormImageUrl] = useState("");
@@ -50,6 +52,39 @@ export default function AdminEventsPage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [editingItem, setEditingItem] = useState<EventItem | null>(null);
+  const [editDate, setEditDate] = useState("");
+  const [editStartTime, setEditStartTime] = useState("");
+  const [editEndTime, setEditEndTime] = useState("");
+
+  const thMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+  const parseThaiDate = (dateStr: string) => {
+    try {
+      const match = dateStr.match(/(\d{1,2})\s+(.+?)\s+(\d{2,4})\s+\((\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})\)/);
+      if (!match) return null;
+      const day = match[1].padStart(2, '0');
+      const monthStr = match[2].trim();
+      let monthIdx = thMonths.findIndex(m => m === monthStr) + 1;
+      if (monthIdx === 0) return null;
+      const month = monthIdx.toString().padStart(2, '0');
+      let year = parseInt(match[3]);
+      if (year < 100) year += 2500;
+      const gregYear = year - 543;
+      return {
+        date: `${gregYear}-${month}-${day}`,
+        startTime: match[4],
+        endTime: match[5]
+      };
+    } catch(e) { return null; }
+  };
+
+  const formatThaiDate = (date: string, start: string, end: string) => {
+    if (!date || !start || !end) return "";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "";
+    const year = (d.getFullYear() + 543).toString().slice(-2);
+    return `${d.getDate()} ${thMonths[d.getMonth()]} ${year} (${start} - ${end})`;
+  };
 
   const [cropperFileSrc, setCropperFileSrc] = useState<string | null>(null);
   const [cropperCallback, setCropperCallback] = useState<((url: string) => void) | null>(null);
@@ -155,14 +190,21 @@ export default function AdminEventsPage() {
       return;
     }
 
+    if (!formDate || !formStartTime || !formEndTime) {
+      toast.error("กรุณาเลือกวันและเวลาให้ครบถ้วน");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
+      const finalDate = formatThaiDate(formDate, formStartTime, formEndTime);
+      
       const res = await fetch("/api/admin/events", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: formTitle,
-          date: formDate,
+          date: finalDate,
           location: formLocation,
           description: formDescription,
           imageUrl: formImageUrl,
@@ -174,6 +216,8 @@ export default function AdminEventsPage() {
       if (res.ok) {
         setFormTitle("");
         setFormDate("");
+        setFormStartTime("");
+        setFormEndTime("");
         setFormLocation("");
         setFormDescription("");
         setFormImageUrl("");
@@ -211,11 +255,20 @@ export default function AdminEventsPage() {
 
   const handleSaveEdit = async () => {
     if (!editingItem) return;
+    
+    let finalDate = editingItem.date;
+    if (editDate && editStartTime && editEndTime) {
+      finalDate = formatThaiDate(editDate, editStartTime, editEndTime);
+    } else {
+      toast.error("กรุณาเลือกวันและเวลาให้ครบถ้วน");
+      return;
+    }
+
     try {
       const res = await fetch("/api/admin/events", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editingItem),
+        body: JSON.stringify({ ...editingItem, date: finalDate }),
       });
 
       if (res.ok) {
@@ -300,8 +353,16 @@ export default function AdminEventsPage() {
               <input type="text" required value={formTitle} onChange={e => setFormTitle(e.target.value)} className="rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none" />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">วันและเวลาที่จัดกิจกรรม</label>
-              <input type="text" placeholder="เช่น 15 มิ.ย. 67 (09:00 - 16:00)" value={formDate} onChange={e => setFormDate(e.target.value)} className="rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-orange-500 outline-none" />
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">วันที่จัดกิจกรรม *</label>
+              <input type="date" required value={formDate} onChange={e => setFormDate(e.target.value)} className="rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-orange-500 outline-none" />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">เวลาเริ่ม - สิ้นสุด *</label>
+              <div className="flex items-center gap-2">
+                <input type="time" required value={formStartTime} onChange={e => setFormStartTime(e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-orange-500 outline-none" />
+                <span className="text-gray-400 font-bold">-</span>
+                <input type="time" required value={formEndTime} onChange={e => setFormEndTime(e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-orange-500 outline-none" />
+              </div>
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">สถานที่</label>
@@ -325,11 +386,18 @@ export default function AdminEventsPage() {
 
             <div className="flex flex-col gap-2 md:col-span-2">
               <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">โปสเตอร์กิจกรรม</label>
-              <div className="flex items-center gap-4">
+              <input 
+                type="text" 
+                placeholder="วางลิงก์รูปภาพ (URL) หรืออัปโหลดไฟล์ด้านล่าง" 
+                value={formImageUrl} 
+                onChange={e => setFormImageUrl(e.target.value)} 
+                className="rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-orange-500 outline-none" 
+              />
+              <div className="flex items-center gap-4 mt-2">
                 {formImageUrl && <img src={formImageUrl} alt="Preview" className="w-20 h-20 object-cover rounded-xl border border-gray-200 shadow-sm" />}
                 <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl px-4 py-4 cursor-pointer hover:bg-gray-50 hover:border-orange-400 transition">
                   <UploadCloud className="w-5 h-5 text-gray-400 mb-1" />
-                  <span className="text-sm text-gray-500">{isUploadingImage ? "กำลังอัปโหลด..." : "อัปโหลดภาพโปสเตอร์"}</span>
+                  <span className="text-sm text-gray-500">{isUploadingImage ? "กำลังอัปโหลด..." : "คลิกเพื่ออัปโหลดภาพจากเครื่อง"}</span>
                   <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUploadSelect(e, setFormImageUrl, 4 / 5)} disabled={isUploadingImage} />
                 </label>
               </div>
@@ -395,7 +463,19 @@ export default function AdminEventsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right whitespace-nowrap">
-                      <button onClick={() => setEditingItem(item)} className="p-2 text-gray-400 hover:text-blue-500 transition"><Edit2 className="w-4 h-4" /></button>
+                      <button onClick={() => {
+                        setEditingItem(item);
+                        const parsed = parseThaiDate(item.date);
+                        if (parsed) {
+                          setEditDate(parsed.date);
+                          setEditStartTime(parsed.startTime);
+                          setEditEndTime(parsed.endTime);
+                        } else {
+                          setEditDate("");
+                          setEditStartTime("");
+                          setEditEndTime("");
+                        }
+                      }} className="p-2 text-gray-400 hover:text-blue-500 transition"><Edit2 className="w-4 h-4" /></button>
                       <button onClick={() => handleDeleteItem(item.id, item.title)} className="p-2 text-gray-400 hover:text-red-500 transition"><Trash2 className="w-4 h-4" /></button>
                     </td>
                   </tr>
@@ -429,7 +509,15 @@ export default function AdminEventsPage() {
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-gray-400">วันที่จัด</label>
-                <input type="text" value={editingItem.date} onChange={e => setEditingItem(prev => prev ? { ...prev, date: e.target.value } : null)} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
+                <input type="date" value={editDate} onChange={e => setEditDate(e.target.value)} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-400">เวลาเริ่ม - สิ้นสุด</label>
+                <div className="flex items-center gap-2">
+                  <input type="time" value={editStartTime} onChange={e => setEditStartTime(e.target.value)} className="w-full rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
+                  <span className="text-gray-400 font-bold">-</span>
+                  <input type="time" value={editEndTime} onChange={e => setEditEndTime(e.target.value)} className="w-full rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" />
+                </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-gray-400">สถานที่</label>
@@ -451,11 +539,18 @@ export default function AdminEventsPage() {
                 <textarea rows={6} value={editingItem.description} onChange={e => setEditingItem(prev => prev ? { ...prev, description: e.target.value } : null)} className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none resize-none" />
               </div>
               <div className="flex flex-col gap-1.5 md:col-span-2">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">เปลี่ยนรูปภาพโปสเตอร์</label>
-                <div className="flex items-center gap-4">
+                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">รูปภาพโปสเตอร์</label>
+                <input 
+                  type="text" 
+                  placeholder="วางลิงก์รูปภาพ (URL) หรืออัปโหลดไฟล์ด้านล่าง" 
+                  value={editingItem.imageUrl} 
+                  onChange={e => setEditingItem(prev => prev ? { ...prev, imageUrl: e.target.value } : null)} 
+                  className="rounded-xl border px-4 py-2 text-sm focus:border-orange-500 outline-none" 
+                />
+                <div className="flex items-center gap-4 mt-2">
                   {editingItem.imageUrl && <img src={editingItem.imageUrl} className="w-16 h-20 object-cover rounded-xl border" />}
                   <label className="flex-1 flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-4 cursor-pointer hover:bg-gray-50">
-                    <span className="text-xs text-gray-500">{isUploadingImage ? "กำลังอัปโหลด..." : "อัปโหลดภาพใหม่"}</span>
+                    <span className="text-xs text-gray-500">{isUploadingImage ? "กำลังอัปโหลด..." : "อัปโหลดภาพจากเครื่องใหม่"}</span>
                     <input type="file" accept="image/*" className="hidden" onChange={e => handleImageUploadSelect(e, url => setEditingItem(prev => prev ? { ...prev, imageUrl: url } : null), 4 / 5)} disabled={isUploadingImage} />
                   </label>
                 </div>
