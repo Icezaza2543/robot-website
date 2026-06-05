@@ -15,7 +15,9 @@ import {
   Users,
   ShieldCheck,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  DoorOpen,
+  CalendarDays
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -60,6 +62,21 @@ export default function AdminDashboardPage() {
   }
 
   const menuGroups = [
+    {
+      title: "ระบบจองห้อง",
+      items: [
+        {
+          title: "จัดการห้องและจอง (Rooms)",
+          desc: "เพิ่ม/ลดห้อง, ดูตารางการใช้, และอนุมัติคำขอ",
+          href: "/admin/rooms",
+          icon: DoorOpen,
+          color: "text-purple-500",
+          bgColor: "bg-purple-50",
+          borderColor: "border-purple-100",
+          show: hasPerm("manage_rooms")
+        }
+      ]
+    },
     {
       title: "ระบบยืม-คืนอุปกรณ์",
       items: [

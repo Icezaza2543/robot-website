@@ -12,6 +12,7 @@ const navLinks = [
   { href: "/", label: "หน้าหลัก" },
   { href: "/about", label: "เกี่ยวกับ" },
   { href: "/equipment", label: "ยืมอุปกรณ์" },
+  { href: "/rooms", label: "จองห้อง" },
 ];
 
 export default function Navbar() {

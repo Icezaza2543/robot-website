@@ -17,7 +17,8 @@ export async function POST(request: Request) {
     role === "admin" || 
     (await hasPermission(role, "manage_news")) ||
     (await hasPermission(role, "manage_items")) ||
-    (await hasPermission(role, "manage_website"));
+    (await hasPermission(role, "manage_website")) ||
+    (await hasPermission(role, "manage_rooms"));
 
   if (!canUpload) {
     return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });

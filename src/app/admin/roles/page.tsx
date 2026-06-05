@@ -20,6 +20,7 @@ const AVAILABLE_PERMISSIONS = [
   { id: "manage_website", label: "ตั้งค่าเว็บไซต์", desc: "แก้ไขหน้า About, รายชื่อที่ปรึกษา" },
   { id: "manage_roles", label: "จัดการตำแหน่ง (Roles)", desc: "สร้าง แก้ไข ลบ ตำแหน่งและสิทธิ์การเข้าถึง" },
   { id: "manage_users", label: "จัดการสมาชิก", desc: "มอบหมายตำแหน่ง (Role) ให้สมาชิก" },
+  { id: "manage_rooms", label: "จัดการห้องและจอง (Rooms)", desc: "เพิ่ม/ลดห้อง, ดูตารางการใช้, และอนุมัติคำขอ" },
 ];
 
 const RANKS = ["Member", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "VIP"];

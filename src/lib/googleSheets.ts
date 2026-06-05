@@ -2070,3 +2070,265 @@ export async function updateUserRoleAndRank(email: string, role: string, rank: s
     return false;
   }
 }
+
+// --- ROOM RESERVATION SYSTEM (MULTI-ROOM CRUD) ---
+export interface RoomData {
+  roomId: string;
+  roomName: string;
+  floor: string;
+  building: string;
+  description: string;
+  coverImage: string;
+  galleryImages: string; // comma-separated
+  maxHours: number;
+  allowedDays: string; // comma-separated days, e.g. "1,2,3,4,5"
+  status: 'active' | 'inactive';
+  rowIndex?: number;
+}
+
+export interface RoomReservation {
+  id: string;
+  roomId: string;
+  email: string;
+  name: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+  isSpecialRequest: string; // "TRUE" | "FALSE"
+  specialReason: string;
+  createdAt: string;
+  rejectReason?: string;
+  rowIndex?: number;
+}
+
+// ==========================================
+// ROOMS CRUD
+// ==========================================
+
+export async function getRooms(): Promise<RoomData[]> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return [];
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "rooms!A2:J1000",
+    });
+
+    const rows = response.data.values || [];
+    return rows.map((row, index) => ({
+      roomId: row[0] || "",
+      roomName: row[1] || "",
+      floor: row[2] || "",
+      building: row[3] || "",
+      description: row[4] || "",
+      coverImage: row[5] || "",
+      galleryImages: row[6] || "",
+      maxHours: parseInt(row[7], 10) || 3,
+      allowedDays: row[8] || "1,2,3,4,5",
+      status: (row[9] as any) || "inactive",
+      rowIndex: index + 2,
+    })).filter(r => r.roomId);
+  } catch (error) {
+    console.error("[ERROR] Failed to fetch rooms:", error);
+    return [];
+  }
+}
+
+export async function createRoom(room: Omit<RoomData, 'rowIndex'>): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: "rooms!A:J",
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [[
+          room.roomId,
+          room.roomName,
+          room.floor,
+          room.building,
+          room.description,
+          room.coverImage,
+          room.galleryImages,
+          room.maxHours.toString(),
+          room.allowedDays,
+          room.status
+        ]],
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to create room:", error);
+    return false;
+  }
+}
+
+export async function updateRoom(room: RoomData): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId || !room.rowIndex) return false;
+
+  try {
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `rooms!A${room.rowIndex}:J${room.rowIndex}`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [[
+          room.roomId,
+          room.roomName,
+          room.floor,
+          room.building,
+          room.description,
+          room.coverImage,
+          room.galleryImages,
+          room.maxHours.toString(),
+          room.allowedDays,
+          room.status
+        ]],
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to update room:", error);
+    return false;
+  }
+}
+
+export async function deleteRoom(roomId: string): Promise<boolean> {
+  // Soft delete by setting status to inactive
+  const rooms = await getRooms();
+  const room = rooms.find(r => r.roomId === roomId);
+  if (!room) return false;
+  
+  room.status = 'inactive';
+  return await updateRoom(room);
+}
+
+// ==========================================
+// ROOM RESERVATIONS CRUD
+// ==========================================
+
+export async function getRoomReservations(): Promise<RoomReservation[]> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return [];
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "room_reservations!A2:L1000",
+    });
+
+    const rows = response.data.values || [];
+    return rows.map((row, index) => ({
+      id: row[0] || "",
+      roomId: row[1] || "",
+      email: row[2] || "",
+      name: row[3] || "",
+      title: row[4] || "",
+      startDate: row[5] || "",
+      endDate: row[6] || "",
+      status: (row[7] as any) || "pending",
+      isSpecialRequest: row[8] || "FALSE",
+      specialReason: row[9] || "",
+      createdAt: row[10] || "",
+      rejectReason: row[11] || "",
+      rowIndex: index + 2, 
+    })).filter(r => r.id);
+  } catch (error) {
+    console.error("[ERROR] Failed to fetch room reservations:", error);
+    return [];
+  }
+}
+
+export async function createRoomReservation(reservation: Omit<RoomReservation, 'rowIndex'>): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: "room_reservations!A:L",
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [[
+          reservation.id,
+          reservation.roomId,
+          reservation.email,
+          reservation.name,
+          reservation.title,
+          reservation.startDate,
+          reservation.endDate,
+          reservation.status,
+          reservation.isSpecialRequest,
+          reservation.specialReason,
+          reservation.createdAt,
+          reservation.rejectReason || ""
+        ]],
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to create room reservation:", error);
+    return false;
+  }
+}
+
+export async function updateRoomReservation(reservation: RoomReservation): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId || !reservation.rowIndex) return false;
+
+  try {
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `room_reservations!A${reservation.rowIndex}:L${reservation.rowIndex}`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [[
+          reservation.id,
+          reservation.roomId,
+          reservation.email,
+          reservation.name,
+          reservation.title,
+          reservation.startDate,
+          reservation.endDate,
+          reservation.status,
+          reservation.isSpecialRequest,
+          reservation.specialReason,
+          reservation.createdAt,
+          reservation.rejectReason || ""
+        ]]
+      }
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to update room reservation:", error);
+    return false;
+  }
+}
+
+export async function updateRoomReservationStatus(id: string, status: string, rejectReason: string = ""): Promise<boolean> {
+  const reservations = await getRoomReservations();
+  const reservation = reservations.find(r => r.id === id);
+  if (!reservation) return false;
+  
+  reservation.status = status as any;
+  reservation.rejectReason = rejectReason;
+  
+  return await updateRoomReservation(reservation);
+}
+
+export async function deleteRoomReservation(id: string): Promise<boolean> {
+  // Soft delete by setting status to cancelled
+  return await updateRoomReservationStatus(id, 'cancelled');
+}
+
