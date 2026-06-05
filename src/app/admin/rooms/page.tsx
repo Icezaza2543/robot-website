@@ -25,6 +25,14 @@ function findConflicts(reservations: any[]): Set<string> {
   return conflicted;
 }
 
+const getThaiDayAbbr = (daysString: string) => {
+  if (!daysString) return '';
+  const map: Record<string, string> = {
+    '1': 'จ.', '2': 'อ.', '3': 'พ.', '4': 'พฤ.', '5': 'ศ.', '6': 'ส.', '7': 'อา.'
+  };
+  return daysString.split(',').map(d => map[d.trim()] || d).join(', ');
+};
+
 
 export default function AdminRoomsPage() {
   const { data: session, status } = useSession();
@@ -402,7 +410,7 @@ export default function AdminRoomsPage() {
                 <p className="text-sm text-gray-500 mb-4">{room.building} ชั้น {room.floor}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   <span className="text-xs font-semibold bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md">สูงสุด {room.maxHours} ชม.</span>
-                  <span className="text-xs font-semibold bg-purple-50 text-purple-600 px-2.5 py-1 rounded-md">วันอนุญาต: {room.allowedDays}</span>
+                  <span className="text-xs font-semibold bg-purple-50 text-purple-600 px-2.5 py-1 rounded-md">วันอนุญาต: {getThaiDayAbbr(room.allowedDays)}</span>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => handleOpenModal(room)} className="flex-1 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition flex items-center justify-center gap-2">

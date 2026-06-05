@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Key, ShieldAlert, Plus, Save, X, Trash2, ShieldCheck, UserCheck, AlertCircle } from "lucide-react";
+import { Key, ShieldAlert, Plus, Save, X, Trash2, ShieldCheck, UserCheck, AlertCircle, Users } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface RoleData {
