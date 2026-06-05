@@ -168,9 +168,19 @@ export default function AdminRoomsPage() {
   };
 
   const handleDeleteRoom = async (roomId: string) => {
-    if (!confirm("Are you sure you want to delete this room?")) return;
+    if (!confirm("คุณแน่ใจหรือไม่ที่จะลบห้องนี้? (Are you sure you want to delete this room?)")) return;
     try {
       const res = await fetch(`/api/admin/rooms?id=${roomId}`, { method: "DELETE" });
+      if (res.ok) fetchData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteReservation = async (resId: string) => {
+    if (!confirm("คุณแน่ใจหรือไม่ที่จะลบรายการจองนี้? (Are you sure you want to delete this reservation?)")) return;
+    try {
+      const res = await fetch(`/api/admin/reservations?id=${resId}`, { method: "DELETE" });
       if (res.ok) fetchData();
     } catch (err) {
       console.error(err);
@@ -335,7 +345,7 @@ export default function AdminRoomsPage() {
                             </>
                           )}
                           <button
-                            onClick={() => handleDeleteRoom(res.id)}
+                            onClick={() => handleDeleteReservation(res.id)}
                             className="p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 rounded-lg transition"
                             title="ลบออก"
                           >
