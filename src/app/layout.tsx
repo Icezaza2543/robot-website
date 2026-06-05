@@ -51,7 +51,7 @@ export default function RootLayout({
 
             <Footer />
             <CookieConsent />
-            <Toaster position="bottom-right" />
+            <Toaster position="top-right" />
           </CartProvider>
         </AuthProvider>
       </body>
