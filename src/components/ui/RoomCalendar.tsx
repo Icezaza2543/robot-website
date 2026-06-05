@@ -82,72 +82,150 @@ export default function RoomCalendar({ rooms, reservations }: RoomCalendarProps)
     const startDate = startOfWeek(startMonth, { weekStartsOn: 0 }); // Sunday
     const endDate = endOfWeek(endMonth, { weekStartsOn: 0 });
 
-    const dateFormat = "d";
-    const rows = [];
-    let days = [];
-    let day = startDate;
-    let formattedDate = "";
-
     const allDays = eachDayOfInterval({ start: startDate, end: endDate });
-
-    // Group items by week to render rows
-    for (let i = 0; i < allDays.length; i++) {
-      const currentDay = allDays[i];
-      const dayReservations = validReservations.filter(res => isSameDay(parseISO(res.startDate), currentDay));
-
-      days.push(
-        <div
-          className={`min-h-[80px] sm:min-h-[120px] p-1 sm:p-2 border-r border-b border-gray-100 ${
-            !isSameMonth(currentDay, startMonth) ? 'bg-gray-50 text-gray-400' : 'bg-white'
-          } ${isToday(currentDay) ? 'bg-orange-50' : ''}`}
-          key={currentDay.toString()}
-        >
-          <div className={`text-right text-xs sm:text-sm font-medium mb-1 ${isToday(currentDay) ? 'text-orange-600 font-bold' : ''}`}>
-            {format(currentDay, dateFormat)}
-          </div>
-          <div className="space-y-1 overflow-y-auto max-h-[60px] sm:max-h-[80px] custom-scrollbar">
-            {dayReservations.map(res => {
-              const room = rooms.find(r => r.roomId === res.roomId);
-              const colorClass = roomColorMap[res.roomId] || 'bg-gray-500 border-gray-600';
-              return (
-                <div
-                  key={res.id}
-                  onClick={() => setSelectedEvent(res)}
-                  className={`text-[9px] sm:text-xs p-1 rounded cursor-pointer text-white shadow-sm hover:opacity-90 transition border-l-2 ${colorClass} flex flex-col leading-tight`}
-                  title={`${room?.roomName || 'Room'} - ${res.title}`}
-                >
-                  <div className="font-bold truncate">
-                    {format(parseISO(res.startDate), 'HH:mm')} {room?.roomName}
-                  </div>
-                  <div className="truncate opacity-90 hidden sm:block">{res.title}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      );
-
-      if ((i + 1) % 7 === 0) {
-        rows.push(
-          <div className="grid grid-cols-7" key={currentDay.toString()}>
-            {days}
-          </div>
-        );
-        days = [];
-      }
+    const weeks: Date[][] = [];
+    for (let i = 0; i < allDays.length; i += 7) {
+      weeks.push(allDays.slice(i, i + 7));
     }
 
     return (
-      <div className="shadow-sm border border-gray-200 rounded-xl bg-white w-full">
-        <div className="w-full">
-          <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
-            {['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'].map((day, i) => (
-              <div key={i} className="py-2 sm:py-3 text-center text-[10px] sm:text-sm font-bold text-gray-500 border-r border-gray-100 truncate">
-                {day}
+      <div className="shadow-sm border border-gray-200 rounded-xl bg-white w-full overflow-hidden">
+        <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+          {['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'].map((day, i) => (
+            <div key={i} className="py-2 sm:py-3 text-center text-[10px] sm:text-sm font-bold text-gray-500 border-r border-gray-100 truncate">
+              {day}
+            </div>
+          ))}
+        </div>
+        
+        <div className="flex flex-col">
+          {weeks.map((week, weekIdx) => {
+            const weekStart = week[0];
+            const weekEnd = week[6];
+
+            // 1. Find overlapping reservations for this week
+            const overlappingEvents = validReservations.filter(res => {
+              const resStart = parseISO(res.startDate);
+              const resEnd = parseISO(res.endDate);
+              // Wait, to properly cover midnight to midnight overlap:
+              // we just need resStart <= endOfDay(weekEnd) and resEnd >= startOfDay(weekStart)
+              // But we can approximate by just using the date boundaries.
+              const wStart = new Date(weekStart); wStart.setHours(0,0,0,0);
+              const wEnd = new Date(weekEnd); wEnd.setHours(23,59,59,999);
+              return resStart <= wEnd && resEnd >= wStart;
+            }).sort((a, b) => {
+              // Sort by duration descending, then start date
+              const aDur = parseISO(a.endDate).getTime() - parseISO(a.startDate).getTime();
+              const bDur = parseISO(b.endDate).getTime() - parseISO(b.startDate).getTime();
+              if (bDur !== aDur) return bDur - aDur;
+              return parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime();
+            });
+
+            // 2. Assign tracks to prevent overlap
+            const tracks: boolean[][] = [];
+            const eventLayouts: { res: Reservation, startCol: number, span: number, trackIndex: number }[] = [];
+
+            overlappingEvents.forEach(res => {
+              const resStart = parseISO(res.startDate);
+              const resEnd = parseISO(res.endDate);
+              
+              // Find start and end columns for this week
+              let startCol = 0;
+              if (resStart >= weekStart) {
+                startCol = resStart.getDay();
+              }
+              
+              let endCol = 6;
+              if (resEnd <= weekEnd) {
+                // If the event ends at exactly 00:00 of the next day, it shouldn't span into that day.
+                // We'll just use getDay() but be mindful of 00:00
+                const isMidnight = resEnd.getHours() === 0 && resEnd.getMinutes() === 0;
+                let adjustedEnd = new Date(resEnd);
+                if (isMidnight && resEnd > resStart) {
+                  adjustedEnd = new Date(resEnd.getTime() - 1);
+                }
+                endCol = adjustedEnd.getDay();
+              }
+
+              const span = endCol - startCol + 1;
+
+              // Find available track
+              let trackIndex = 0;
+              while (true) {
+                if (!tracks[trackIndex]) tracks[trackIndex] = Array(7).fill(false);
+                
+                let isFree = true;
+                for (let c = startCol; c <= endCol; c++) {
+                  if (tracks[trackIndex][c]) {
+                     isFree = false;
+                     break;
+                  }
+                }
+                
+                if (isFree) {
+                  for (let c = startCol; c <= endCol; c++) {
+                    tracks[trackIndex][c] = true;
+                  }
+                  break;
+                }
+                trackIndex++;
+              }
+
+              eventLayouts.push({ res, startCol, span, trackIndex });
+            });
+
+            const minHeight = Math.max(100, (tracks.length + 1) * 28 + 30); // 28px per track + room for dates
+
+            return (
+              <div key={weekIdx} className="relative border-b border-gray-100 flex flex-col" style={{ minHeight: `${minHeight}px` }}>
+                {/* Background grid */}
+                <div className="absolute inset-0 grid grid-cols-7 pointer-events-none">
+                  {week.map((day, idx) => (
+                    <div key={idx} className={`border-r border-gray-100 ${!isSameMonth(day, startMonth) ? 'bg-gray-50' : 'bg-white'} ${isToday(day) ? 'bg-orange-50/50' : ''}`}></div>
+                  ))}
+                </div>
+                
+                {/* Dates */}
+                <div className="grid grid-cols-7 relative z-10 pt-1 pointer-events-none">
+                  {week.map((day, idx) => (
+                    <div key={idx} className={`text-right text-xs sm:text-sm font-medium p-1 pr-2 ${isToday(day) ? 'text-orange-600 font-bold' : 'text-gray-700'}`}>
+                      {format(day, 'd')}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Events container */}
+                <div className="relative z-20 flex-1 w-full pb-2 mt-1">
+                  {eventLayouts.map(({ res, startCol, span, trackIndex }) => {
+                    const room = rooms.find(r => r.roomId === res.roomId);
+                    const colorClass = roomColorMap[res.roomId] || 'bg-gray-500 border-gray-600';
+                    return (
+                      <div
+                        key={`${res.id}-${weekIdx}`}
+                        onClick={() => setSelectedEvent(res)}
+                        className={`absolute h-5 sm:h-6 text-[10px] sm:text-xs rounded cursor-pointer text-white shadow-sm hover:shadow-md hover:-translate-y-[1px] transition-all border-l-2 ${colorClass} flex items-center px-1.5 overflow-hidden whitespace-nowrap`}
+                        style={{
+                          top: `${trackIndex * 26}px`, // 26px spacing per track
+                          left: `calc(${startCol} * (100% / 7) + 3px)`,
+                          width: `calc(${span} * (100% / 7) - 6px)`,
+                        }}
+                        title={`${room?.roomName || 'Room'} - ${res.title}`}
+                      >
+                        {/* Only show time if this is the start of the event week */}
+                        {startCol === parseISO(res.startDate).getDay() && (
+                          <span className="font-bold mr-1.5 hidden sm:inline-block bg-black/10 px-1 rounded">
+                            {format(parseISO(res.startDate), 'HH:mm')}
+                          </span>
+                        )}
+                        <span className="font-bold mr-1 truncate hidden sm:inline-block">{room?.roomName}</span>
+                        <span className="truncate opacity-90">{res.title}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            ))}
-          </div>
-          {rows}
+            );
+          })}
         </div>
       </div>
     );
@@ -164,6 +242,54 @@ export default function RoomCalendar({ rooms, reservations }: RoomCalendarProps)
     const endHour = 22;
     const hours = Array.from({ length: endHour - startHour + 1 }, (_, i) => startHour + i);
 
+    // 1. Separate Multi-day/All-day vs Single-day events
+    const weekStart = days[0];
+    const weekEnd = days[6];
+    
+    const multiDayEvents: Reservation[] = [];
+    const singleDayEvents: Reservation[] = [];
+
+    validReservations.forEach(res => {
+      const start = parseISO(res.startDate);
+      const end = parseISO(res.endDate);
+      
+      // Filter out events completely outside this week
+      if (end < weekStart || start > new Date(weekEnd.getTime() + 86400000)) return;
+
+      if (!isSameDay(start, end)) {
+        multiDayEvents.push(res);
+      } else {
+        singleDayEvents.push(res);
+      }
+    });
+
+    // Layout Multi-day events (similar to month view)
+    const allDayTracks: boolean[][] = [];
+    const allDayLayouts: { res: Reservation, startCol: number, span: number, trackIndex: number }[] = [];
+
+    multiDayEvents.sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime()).forEach(res => {
+      const start = parseISO(res.startDate);
+      const end = parseISO(res.endDate);
+      const startCol = start < weekStart ? 0 : start.getDay();
+      const endCol = end > weekEnd ? 6 : end.getDay();
+      const span = endCol - startCol + 1;
+
+      let trackIndex = 0;
+      while (true) {
+        if (!allDayTracks[trackIndex]) allDayTracks[trackIndex] = Array(7).fill(false);
+        let isFree = true;
+        for (let c = startCol; c <= endCol; c++) {
+          if (allDayTracks[trackIndex][c]) { isFree = false; break; }
+        }
+        if (isFree) {
+          for (let c = startCol; c <= endCol; c++) allDayTracks[trackIndex][c] = true;
+          break;
+        }
+        trackIndex++;
+      }
+      allDayLayouts.push({ res, startCol, span, trackIndex });
+    });
+
     return (
       <div className="flex flex-col overflow-x-auto shadow-sm border border-gray-200 rounded-xl bg-white">
         {/* Header Days */}
@@ -179,8 +305,39 @@ export default function RoomCalendar({ rooms, reservations }: RoomCalendarProps)
           ))}
         </div>
 
+        {/* All-Day Events Section (if any) */}
+        {allDayLayouts.length > 0 && (
+          <div className="flex border-b border-gray-200 bg-gray-50/50 min-w-[800px] relative" style={{ minHeight: `${(allDayTracks.length) * 26 + 10}px` }}>
+            <div className="w-16 shrink-0 border-r border-gray-200 flex items-center justify-center">
+              <span className="text-[10px] font-bold text-gray-400">ตลอดวัน</span>
+            </div>
+            <div className="flex-1 relative mt-1 mb-1">
+              {allDayLayouts.map(({ res, startCol, span, trackIndex }) => {
+                const room = rooms.find(r => r.roomId === res.roomId);
+                const colorClass = roomColorMap[res.roomId] || 'bg-gray-500 border-gray-600';
+                return (
+                  <div
+                    key={res.id}
+                    onClick={() => setSelectedEvent(res)}
+                    className={`absolute h-5 sm:h-6 text-[10px] sm:text-xs rounded cursor-pointer text-white shadow-sm hover:opacity-90 transition border-l-2 ${colorClass} flex items-center px-1.5 overflow-hidden whitespace-nowrap`}
+                    style={{
+                      top: `${trackIndex * 26}px`,
+                      left: `calc(${startCol} * (100% / 7) + 2px)`,
+                      width: `calc(${span} * (100% / 7) - 4px)`,
+                    }}
+                    title={`${room?.roomName || 'Room'} - ${res.title}`}
+                  >
+                    <span className="font-bold mr-1 truncate">{room?.roomName}</span>
+                    <span className="truncate opacity-90">{res.title}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Time Grid */}
-        <div className="flex relative min-w-[800px] h-[800px] overflow-y-auto bg-gray-50/30">
+        <div className="flex relative min-w-[800px] h-[600px] overflow-y-auto bg-gray-50/30">
           {/* Time Labels */}
           <div className="w-16 shrink-0 border-r border-gray-200 bg-white relative z-10">
             {hours.map(hour => (
@@ -200,43 +357,55 @@ export default function RoomCalendar({ rooms, reservations }: RoomCalendarProps)
             </div>
 
             {/* Columns per day */}
-            {days.map(day => {
-              const dayReservations = validReservations.filter(res => isSameDay(parseISO(res.startDate), day));
+            {days.map((day, dayIndex) => {
+              const dayReservations = singleDayEvents.filter(res => isSameDay(parseISO(res.startDate), day));
               
               return (
                 <div key={day.toString()} className="flex-1 relative border-r border-gray-100/50 min-h-full">
-                  {dayReservations.map(res => {
+                  {dayReservations.map((res, i) => {
                     const start = parseISO(res.startDate);
                     const end = parseISO(res.endDate);
                     
-                    // Calculate position and height
                     const startH = getHours(start);
                     const startM = getMinutes(start);
                     const endH = getHours(end);
                     const endM = getMinutes(end);
                     
-                    // Filter out events outside normal hours slightly
-                    if (startH < startHour) return null;
+                    if (endH < startHour || startH > endHour) return null; // out of view
 
-                    const topOffset = ((startH - startHour) * 64) + ((startM / 60) * 64);
-                    const durationMins = ((endH * 60) + endM) - ((startH * 60) + startM);
-                    const height = (durationMins / 60) * 64;
+                    const topOffset = Math.max(0, ((startH - startHour) * 64) + ((startM / 60) * 64));
+                    let durationMins = ((endH * 60) + endM) - ((startH * 60) + startM);
+                    // Cap duration if it goes past endHour
+                    if (endH > endHour) durationMins = ((endHour * 60) + 60) - ((startH * 60) + startM);
+                    
+                    const height = Math.max(20, (durationMins / 60) * 64); // min height 20px
 
                     const room = rooms.find(r => r.roomId === res.roomId);
                     const colorClass = roomColorMap[res.roomId] || 'bg-gray-500 border-gray-600';
+
+                    // Simple overlap offset: if multiple events start at same hour, offset them slightly
+                    const sameHourIndex = dayReservations.filter((r, idx) => idx < i && getHours(parseISO(r.startDate)) === startH).length;
+                    const leftOffset = 4 + (sameHourIndex * 12);
+                    const widthPercent = Math.max(40, 96 - (sameHourIndex * 12));
 
                     return (
                       <div
                         key={res.id}
                         onClick={() => setSelectedEvent(res)}
-                        className={`absolute left-1 right-1 rounded-md p-2 text-white text-xs shadow-md cursor-pointer hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 border-l-4 overflow-hidden ${colorClass}`}
-                        style={{ top: `${topOffset}px`, height: `${height}px` }}
+                        className={`absolute rounded-md p-1.5 sm:p-2 text-white text-xs shadow-md cursor-pointer hover:-translate-y-0.5 hover:shadow-lg hover:z-50 transition-all duration-200 border-l-4 overflow-hidden ${colorClass}`}
+                        style={{ 
+                          top: `${topOffset}px`, 
+                          height: `${height}px`,
+                          left: `${leftOffset}%`,
+                          width: `${widthPercent}%`,
+                          zIndex: 10 + sameHourIndex
+                        }}
                       >
-                        <div className="font-bold text-[10px] sm:text-xs leading-tight mb-0.5 opacity-90">
+                        <div className="font-bold text-[9px] sm:text-[10px] leading-tight mb-0.5 opacity-90">
                           {format(start, 'HH:mm')} - {format(end, 'HH:mm')}
                         </div>
-                        <div className="font-black truncate">{room?.roomName || 'Unknown Room'}</div>
-                        <div className="truncate opacity-80 mt-1">{res.title}</div>
+                        <div className="font-black text-[10px] sm:text-xs truncate">{room?.roomName || 'Unknown Room'}</div>
+                        {height > 40 && <div className="truncate text-[10px] sm:text-xs opacity-80 mt-0.5">{res.title}</div>}
                       </div>
                     );
                   })}
