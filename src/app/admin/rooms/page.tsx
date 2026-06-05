@@ -434,14 +434,42 @@ export default function AdminRoomsPage() {
                 <label className="block text-sm font-bold text-gray-700 mb-1">รายละเอียดห้อง (Description)</label>
                 <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition font-medium min-h-[100px]" placeholder="อุปกรณ์ที่มีในห้อง..." />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="w-full sm:w-1/3">
                   <label className="block text-sm font-bold text-gray-700 mb-1">จำกัดเวลา (ชั่วโมง/ครั้ง)</label>
                   <input type="number" value={formData.maxHours} onChange={e => setFormData({...formData, maxHours: e.target.value})} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition font-medium" min="1" />
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">วันที่อนุญาต (1=จันทร์, 7=อาทิตย์)</label>
-                  <input type="text" value={formData.allowedDays} onChange={e => setFormData({...formData, allowedDays: e.target.value})} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition font-medium" placeholder="1,2,3,4,5" />
+                <div className="w-full sm:w-2/3">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">วันที่อนุญาตให้จองได้</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { value: '1', label: 'จันทร์' },
+                      { value: '2', label: 'อังคาร' },
+                      { value: '3', label: 'พุธ' },
+                      { value: '4', label: 'พฤหัส' },
+                      { value: '5', label: 'ศุกร์' },
+                      { value: '6', label: 'เสาร์' },
+                      { value: '7', label: 'อาทิตย์' }
+                    ].map(day => {
+                      const isSelected = formData.allowedDays ? formData.allowedDays.split(',').map(d=>d.trim()).includes(day.value) : false;
+                      return (
+                        <button
+                          key={day.value}
+                          type="button"
+                          onClick={() => {
+                            const currentDays = formData.allowedDays ? formData.allowedDays.split(',').map(d => d.trim()).filter(Boolean) : [];
+                            const newDays = isSelected 
+                              ? currentDays.filter(d => d !== day.value)
+                              : [...currentDays, day.value];
+                            setFormData({ ...formData, allowedDays: newDays.sort().join(',') });
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-sm font-bold border transition ${isSelected ? 'bg-orange-100 border-orange-200 text-orange-700' : 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-gray-200'}`}
+                        >
+                          {day.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
               <div>
