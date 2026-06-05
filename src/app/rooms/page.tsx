@@ -1,12 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { DoorOpen, MapPin, Clock, CalendarDays, Loader2, Image as ImageIcon } from "lucide-react";
+import { DoorOpen, MapPin, Clock, CalendarDays, Loader2, Image as ImageIcon, Calendar as CalendarIcon } from "lucide-react";
 
 export default function RoomsDirectoryPage() {
   const [rooms, setRooms] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const { status } = useSession();
 
   useEffect(() => {
     fetch("/api/rooms")
@@ -22,11 +26,23 @@ export default function RoomsDirectoryPage() {
     return <div className="min-h-[70vh] flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-orange-500" /></div>;
   }
 
+  const handleRoomClick = (roomId: string) => {
+    if (status !== "authenticated") {
+      // alert("กรุณาเข้าสู่ระบบก่อนทำการจองห้อง");
+      router.push(`/login?callbackUrl=/rooms/${roomId}`);
+    } else {
+      router.push(`/rooms/${roomId}`);
+    }
+  };
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8 min-h-[80vh]">
-      <div className="text-center max-w-3xl mx-auto mb-16">
+      <div className="text-center max-w-3xl mx-auto mb-10">
         <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-4">ระบบจองห้อง</h1>
-        <p className="text-lg text-gray-500 font-medium">เลือกห้องที่คุณต้องการใช้งาน ตรวจสอบตารางเวลา และทำรายการจองล่วงหน้า</p>
+        <p className="text-lg text-gray-500 font-medium mb-8">เลือกห้องที่คุณต้องการใช้งาน ตรวจสอบตารางเวลา และทำรายการจองล่วงหน้า</p>
+        <Link href="/rooms/calendar" className="inline-flex items-center gap-2 px-6 py-3 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-full font-bold transition-colors">
+          <CalendarIcon className="w-5 h-5" /> ดูตารางการจองรวมทั้งหมด
+        </Link>
       </div>
 
       {rooms.length === 0 ? (
@@ -37,7 +53,7 @@ export default function RoomsDirectoryPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {rooms.map(room => (
-            <Link key={room.roomId} href={`/rooms/${room.roomId}`} className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-orange-200 transition-all duration-300 overflow-hidden flex flex-col">
+            <div key={room.roomId} onClick={() => handleRoomClick(room.roomId)} className="cursor-pointer group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-orange-200 transition-all duration-300 overflow-hidden flex flex-col">
               <div className="h-48 bg-gray-100 relative overflow-hidden">
                 {room.coverImage ? (
                   <img src={room.coverImage} alt={room.roomName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -55,7 +71,7 @@ export default function RoomsDirectoryPage() {
                   {room.building} (ชั้น {room.floor})
                 </div>
                 <p className="text-gray-600 text-sm line-clamp-2 mb-6 flex-1">{room.description}</p>
-                
+
                 <div className="flex items-center gap-4 border-t border-gray-100 pt-4">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-gray-500">
                     <Clock className="w-4 h-4 text-blue-500" />
@@ -67,7 +83,7 @@ export default function RoomsDirectoryPage() {
                   </div>
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}

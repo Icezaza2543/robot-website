@@ -23,6 +23,13 @@ export default function RoomDetailPage() {
   const [specialReason, setSpecialReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Enforce Login
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push(`/login?callbackUrl=/rooms/${id}`);
+    }
+  }, [status, router, id]);
+
   useEffect(() => {
     Promise.all([
       fetch("/api/rooms").then(res => res.json()),
@@ -30,7 +37,7 @@ export default function RoomDetailPage() {
     ]).then(([roomsData, resData]) => {
       const foundRoom = roomsData.find((r: any) => r.roomId === id);
       setRoom(foundRoom || null);
-      
+
       // Filter reservations for this room only
       if (resData && !resData.error) {
         setReservations(resData.filter((r: any) => r.roomId === id));
@@ -65,18 +72,18 @@ export default function RoomDetailPage() {
         isSpecialRequest = true;
         limitWarning = `ระยะเวลาจอง (${diffHours} ชม.) เกินขีดจำกัดของห้องนี้ (${room.maxHours} ชม.)`;
       }
-      
+
       // JS getDay() returns 0 for Sun, 1 for Mon. room.allowedDays is string like "1,2,3,4,5"
       // Assuming allowedDays string format: 1=Mon, 7=Sun or 0=Sun. Let's assume standard JS format (0=Sun) but users usually enter 1-7.
       // Let's just check if the JS getDay() string matches the allowed days.
       // We'll normalize it: if getDay() is 0 (Sunday), user might mean 7.
       const jsDay = start.getDay();
-      const userDay = jsDay === 0 ? 7 : jsDay; 
+      const userDay = jsDay === 0 ? 7 : jsDay;
       // check if userDay is in allowedDays
-      const allowed = room.allowedDays.split(",").map((d:string) => parseInt(d.trim()));
+      const allowed = room.allowedDays.split(",").map((d: string) => parseInt(d.trim()));
       if (!allowed.includes(jsDay) && !allowed.includes(userDay)) {
-         isSpecialRequest = true;
-         limitWarning = limitWarning ? limitWarning + " และไม่อนุญาตให้จองในวันนี้" : "ไม่อนุญาตให้จองในวันนี้ (ตามตั้งค่าของห้อง)";
+        isSpecialRequest = true;
+        limitWarning = limitWarning ? limitWarning + " และไม่อนุญาตให้จองในวันนี้" : "ไม่อนุญาตให้จองในวันนี้ (ตามตั้งค่าของห้อง)";
       }
     }
   }
@@ -84,7 +91,7 @@ export default function RoomDetailPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (status !== "authenticated") {
-      alert("กรุณาเข้าสู่ระบบก่อนทำการจอง");
+      // alert("กรุณาเข้าสู่ระบบก่อนทำการจอง");
       router.push("/login");
       return;
     }
@@ -129,7 +136,7 @@ export default function RoomDetailPage() {
 
   // Get reservations for the selected date
   const selectedDateReservations = reservations.filter(res => {
-    if (!date || res.status !== 'approved') return false;
+    if (!date) return false;
     const resDate = new Date(res.startDate).toISOString().split('T')[0];
     return resDate === date;
   }).sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
@@ -157,7 +164,7 @@ export default function RoomDetailPage() {
                 <MapPin className="w-4 h-4 text-orange-500" />
                 {room.building} (ชั้น {room.floor})
               </div>
-              
+
               <div className="bg-orange-50 rounded-2xl p-4 mb-6">
                 <h3 className="text-xs font-bold text-orange-800 uppercase tracking-wider mb-3">เงื่อนไขการจอง</h3>
                 <div className="space-y-2 text-sm font-medium text-orange-900/80">
@@ -184,38 +191,38 @@ export default function RoomDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8">
             <h2 className="text-2xl font-black text-gray-900 mb-6">จองห้องนี้</h2>
-            
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">หัวข้อ/วัตถุประสงค์การจอง *</label>
-                <input 
+                <input
                   required type="text" value={title} onChange={e => setTitle(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition font-medium" 
-                  placeholder="เช่น ประชุมโปรเจกต์รายวิชา..." 
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition font-medium"
+                  placeholder="เช่น ประชุมโปรเจกต์รายวิชา..."
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">วันที่ต้องการจอง *</label>
-                  <input 
+                  <input
                     required type="date" value={date} onChange={e => setDate(e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition font-medium" 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition font-medium"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">เวลาเริ่มต้น *</label>
-                  <input 
+                  <input
                     required type="time" value={startTime} onChange={e => setStartTime(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition font-medium" 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition font-medium"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">เวลาสิ้นสุด *</label>
-                  <input 
+                  <input
                     required type="time" value={endTime} onChange={e => setEndTime(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition font-medium" 
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition font-medium"
                   />
                 </div>
               </div>
@@ -227,19 +234,19 @@ export default function RoomDetailPage() {
                     <div className="flex-1">
                       <h4 className="text-sm font-bold text-red-800 mb-1">จำเป็นต้องขออนุมัติพิเศษ (Special Request)</h4>
                       <p className="text-xs text-red-600 mb-4">{limitWarning}</p>
-                      
+
                       <label className="block text-sm font-bold text-red-800 mb-2">โปรดระบุเหตุผลความจำเป็น *</label>
-                      <textarea 
+                      <textarea
                         required value={specialReason} onChange={e => setSpecialReason(e.target.value)}
-                        className="w-full px-4 py-3 bg-white border border-red-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition font-medium text-sm min-h-[80px]" 
-                        placeholder="อธิบายเหตุผลที่คุณต้องการใช้ห้องเกินขีดจำกัด หรือใช้นอกเวลาทำการ..." 
+                        className="w-full px-4 py-3 bg-white border border-red-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition font-medium text-sm min-h-[80px]"
+                        placeholder="อธิบายเหตุผลที่คุณต้องการใช้ห้องเกินขีดจำกัด หรือใช้นอกเวลาทำการ..."
                       />
                     </div>
                   </div>
                 </div>
               )}
 
-              <button 
+              <button
                 type="submit" disabled={isSubmitting || !date || !startTime || !endTime}
                 className="w-full py-4 bg-gray-900 hover:bg-orange-500 text-white rounded-xl font-bold transition disabled:opacity-50 flex justify-center items-center gap-2"
               >
@@ -254,7 +261,7 @@ export default function RoomDetailPage() {
               <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <CalendarIcon className="w-5 h-5 text-orange-500" /> ตารางการใช้งานวันที่ {new Date(date).toLocaleDateString('th-TH')}
               </h3>
-              
+
               {selectedDateReservations.length === 0 ? (
                 <div className="text-center py-8 text-gray-400 font-medium text-sm bg-gray-50 rounded-2xl">
                   ยังไม่มีคิวการใช้งานในวันนี้
@@ -264,8 +271,8 @@ export default function RoomDetailPage() {
                   {selectedDateReservations.map(res => (
                     <div key={res.id} className="flex flex-col sm:flex-row sm:items-center gap-4 bg-gray-50 p-4 rounded-2xl">
                       <div className="font-bold text-orange-600 bg-orange-100 px-3 py-1.5 rounded-lg text-sm shrink-0">
-                        {new Date(res.startDate).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'})} - 
-                        {new Date(res.endDate).toLocaleTimeString('th-TH', {hour: '2-digit', minute:'2-digit'})}
+                        {new Date(res.startDate).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} -
+                        {new Date(res.endDate).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
                       </div>
                       <div>
                         <div className="font-bold text-gray-900 text-sm">{res.title}</div>
