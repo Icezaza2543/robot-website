@@ -54,6 +54,9 @@ function getSheetsClient() {
   }
 }
 
+
+
+
 /**
  * Fetches user data from the 'users' tab in Google Sheets by email.
  * 
@@ -2111,6 +2114,10 @@ export async function getRooms(): Promise<RoomData[]> {
   const sheetId = process.env.GOOGLE_SHEET_ID;
   if (!sheets || !sheetId) return [];
 
+  await ensureSheetExists(sheets, sheetId, "rooms", [
+    "roomId", "roomName", "floor", "building", "description", "coverImage", "galleryImages", "maxHours", "allowedDays", "status"
+  ]);
+
   try {
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
@@ -2222,6 +2229,10 @@ export async function getRoomReservations(): Promise<RoomReservation[]> {
   const sheetId = process.env.GOOGLE_SHEET_ID;
   if (!sheets || !sheetId) return [];
 
+  await ensureSheetExists(sheets, sheetId, "room_reservations", [
+    "id", "roomId", "email", "name", "title", "startDate", "endDate", "status", "isSpecialRequest", "specialReason", "createdAt", "rejectReason"
+  ]);
+
   try {
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
@@ -2254,6 +2265,10 @@ export async function createRoomReservation(reservation: Omit<RoomReservation, '
   const sheets = getSheetsClient();
   const sheetId = process.env.GOOGLE_SHEET_ID;
   if (!sheets || !sheetId) return false;
+
+  await ensureSheetExists(sheets, sheetId, "room_reservations", [
+    "id", "roomId", "email", "name", "title", "startDate", "endDate", "status", "isSpecialRequest", "specialReason", "createdAt", "rejectReason"
+  ]);
 
   try {
     await sheets.spreadsheets.values.append({
