@@ -2140,7 +2140,7 @@ export async function getRooms(): Promise<RoomData[]> {
 export async function createRoom(room: Omit<RoomData, 'rowIndex'>): Promise<boolean> {
   const sheets = getSheetsClient();
   const sheetId = process.env.GOOGLE_SHEET_ID;
-  if (!sheets || !sheetId) return false;
+  if (!sheets || !sheetId) throw new Error("Google Sheets client not initialised — check GOOGLE_SHEET_ID and credentials");
 
   try {
     await sheets.spreadsheets.values.append({
@@ -2163,9 +2163,11 @@ export async function createRoom(room: Omit<RoomData, 'rowIndex'>): Promise<bool
       },
     });
     return true;
-  } catch (error) {
-    console.error("[ERROR] Failed to create room:", error);
-    return false;
+  } catch (error: any) {
+    // Surface the real reason (e.g. sheet tab doesn't exist, quota, auth)
+    const msg = error?.errors?.[0]?.message || error?.message || String(error);
+    console.error("[ERROR] Failed to create room:", msg);
+    throw new Error(`Google Sheets error: ${msg}`);
   }
 }
 

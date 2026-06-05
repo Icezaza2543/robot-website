@@ -50,6 +50,7 @@ export default function AdminRoomsPage() {
 
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [coverImageUrl, setCoverImageUrl] = useState("");
+  const [coverImageUrlInput, setCoverImageUrlInput] = useState(""); // for URL paste
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
@@ -90,6 +91,7 @@ export default function AdminRoomsPage() {
         allowedDays: room.allowedDays,
       });
       setCoverImageUrl(room.coverImage);
+      setCoverImageUrlInput("");
       setCoverImageFile(null);
     } else {
       setEditingRoom(null);
@@ -103,6 +105,7 @@ export default function AdminRoomsPage() {
         allowedDays: "1,2,3,4,5",
       });
       setCoverImageUrl("");
+      setCoverImageUrlInput("");
       setCoverImageFile(null);
     }
     setIsRoomModalOpen(true);
@@ -110,7 +113,8 @@ export default function AdminRoomsPage() {
 
   const handleSaveRoom = async () => {
     setIsUploading(true);
-    let finalImageUrl = coverImageUrl;
+    // Priority: new file upload > pasted URL > existing URL
+    let finalImageUrl = coverImageUrlInput.trim() || coverImageUrl;
 
     if (coverImageFile) {
       try {
@@ -124,12 +128,12 @@ export default function AdminRoomsPage() {
           const uploadData = await uploadRes.json();
           if (uploadData.url) finalImageUrl = uploadData.url;
         } else {
-          alert("Failed to upload image");
+          alert("ไม่สามารถอัพโหลดรูปภาพได้");
           setIsUploading(false);
           return;
         }
       } catch (err) {
-        alert("Failed to upload image");
+        alert("ไม่สามารถอัพโหลดรูปภาพได้");
         setIsUploading(false);
         return;
       }
@@ -153,7 +157,8 @@ export default function AdminRoomsPage() {
         setIsRoomModalOpen(false);
         fetchData();
       } else {
-        alert("Failed to save room");
+        const data = await res.json();
+        alert(`เกิดข้อผิดพลาด: ${data.error}`);
       }
     } catch (err) {
       console.error(err);
@@ -430,10 +435,43 @@ export default function AdminRoomsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">รูปภาพปก</label>
-                <div className="flex items-center gap-4">
-                  {coverImageUrl && <img src={coverImageUrl} alt="Cover" className="w-16 h-16 rounded-xl object-cover" />}
-                  <input type="file" accept="image/*" onChange={e => setCoverImageFile(e.target.files?.[0] || null)} className="text-sm" />
+                <label className="block text-sm font-bold text-gray-700 mb-2">รูปภาพปก</label>
+                {/* Preview */}
+                {(coverImageUrlInput.trim() || coverImageUrl) && (
+                  <img
+                    src={coverImageUrlInput.trim() || coverImageUrl}
+                    alt="Cover preview"
+                    className="w-full h-36 object-cover rounded-xl mb-3 border border-gray-100"
+                    onError={e => (e.currentTarget.style.display = 'none')}
+                  />
+                )}
+                {/* URL paste */}
+                <div className="mb-2">
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">วาง URL รูปภาพ (paste link)</label>
+                  <input
+                    type="url"
+                    value={coverImageUrlInput}
+                    onChange={e => { setCoverImageUrlInput(e.target.value); setCoverImageFile(null); }}
+                    placeholder="https://example.com/image.jpg"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition"
+                  />
+                </div>
+                {/* OR divider */}
+                <div className="flex items-center gap-3 my-2">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-xs text-gray-400 font-semibold">หรือ</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+                {/* File upload */}
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">อัพโหลดไฟล์</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={e => { setCoverImageFile(e.target.files?.[0] || null); setCoverImageUrlInput(""); }}
+                    className="w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
+                  />
+                  {coverImageFile && <p className="text-xs text-green-600 mt-1">เลือกไฟล์: {coverImageFile.name}</p>}
                 </div>
               </div>
             </div>

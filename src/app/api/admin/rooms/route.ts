@@ -52,9 +52,10 @@ export async function POST(request: Request) {
     } else {
       return NextResponse.json({ error: "Failed to create room" }, { status: 500 });
     }
-  } catch (error) {
-    console.error("[API] POST /api/admin/rooms error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  } catch (error: any) {
+    const msg = error?.message || "Server error";
+    console.error("[API] POST /api/admin/rooms error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 
