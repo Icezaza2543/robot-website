@@ -2348,4 +2348,268 @@ export async function deleteRoomReservation(id: string): Promise<boolean> {
   // Soft delete by setting status to cancelled
   return await updateRoomReservationStatus(id, 'cancelled');
 }
+
+// ──────────────────────────────────────────────
+// EVENT (PROJECT) REGISTRATION SYSTEM
+// ──────────────────────────────────────────────
+
+export interface EventItem {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  description: string;
+  imageUrl: string;
+  maxParticipants: number;
+  status: 'active' | 'closed'; // active = open for registration
+}
+
+export interface EventParticipant {
+  eventId: string;
+  userEmail: string;
+  joinedAt: string;
+}
+
+export async function getEvents(): Promise<EventItem[]> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return [];
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "events!A2:H",
+    });
+
+    const rows = response.data.values || [];
+    return rows.map((row) => ({
+      id: String(row[0] || "").trim(),
+      title: String(row[1] || "").trim(),
+      date: String(row[2] || "").trim(),
+      location: String(row[3] || "").trim(),
+      description: String(row[4] || "").trim(),
+      imageUrl: String(row[5] || "").trim(),
+      maxParticipants: parseInt(row[6] || "0", 10) || 0,
+      status: String(row[7] || "active").trim() as 'active' | 'closed',
+    }));
+  } catch (error) {
+    console.error("[ERROR] Failed to fetch events from Google Sheets:", error);
+    return [];
+  }
+}
+
+export async function addEvent(event: EventItem): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: "events!A2:H",
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [[
+          event.id,
+          event.title,
+          event.date,
+          event.location,
+          event.description,
+          event.imageUrl,
+          event.maxParticipants.toString(),
+          event.status,
+        ]],
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to add event:", error);
+    return false;
+  }
+}
+
+export async function updateEvent(id: string, updates: Partial<EventItem>): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "events!A2:H",
+    });
+    const rows = response.data.values || [];
+    const rowIndex = rows.findIndex(row => String(row[0] || "").trim() === id);
+    if (rowIndex === -1) return false;
+
+    const actualRow = rowIndex + 2;
+    const existing = rows[rowIndex];
+
+    const newValues = [
+      updates.id ?? existing[0],
+      updates.title ?? existing[1],
+      updates.date ?? existing[2],
+      updates.location ?? existing[3],
+      updates.description ?? existing[4],
+      updates.imageUrl ?? (existing[5] || ""),
+      updates.maxParticipants?.toString() ?? existing[6],
+      updates.status ?? existing[7],
+    ];
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `events!A${actualRow}:H${actualRow}`,
+      valueInputOption: "RAW",
+      requestBody: { values: [newValues] },
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to update event:", error);
+    return false;
+  }
+}
+
+export async function deleteEvent(id: string): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "events!A2:H",
+    });
+    const rows = response.data.values || [];
+    const rowIndex = rows.findIndex(row => String(row[0] || "").trim() === id);
+    if (rowIndex === -1) return false;
+
+    const actualRow = rowIndex + 2;
+    // Clear the row
+    await sheets.spreadsheets.values.clear({
+      spreadsheetId: sheetId,
+      range: `events!A${actualRow}:H${actualRow}`,
+    });
+    
+    // Attempt to also clear participants for this event
+    const pRes = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "event_participants!A2:C",
+    }).catch(() => null);
+    
+    if (pRes?.data?.values) {
+       for (let i = pRes.data.values.length - 1; i >= 0; i--) {
+         if (pRes.data.values[i][0] === id) {
+           await sheets.spreadsheets.values.clear({
+             spreadsheetId: sheetId,
+             range: `event_participants!A${i+2}:C${i+2}`
+           }).catch(() => {});
+         }
+       }
+    }
+
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to delete event:", error);
+    return false;
+  }
+}
+
+export async function getEventParticipants(eventId?: string): Promise<EventParticipant[]> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return [];
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "event_participants!A2:C",
+    });
+
+    const rows = response.data.values || [];
+    let participants = rows.map((row) => ({
+      eventId: String(row[0] || "").trim(),
+      userEmail: String(row[1] || "").trim(),
+      joinedAt: String(row[2] || "").trim(),
+    })).filter(p => p.eventId !== "");
+
+    if (eventId) {
+      participants = participants.filter(p => p.eventId === eventId);
+    }
+    return participants;
+  } catch (error) {
+    console.error("[ERROR] Failed to fetch event participants from Google Sheets:", error);
+    return [];
+  }
+}
+
+export async function joinEvent(eventId: string, userEmail: string): Promise<{ success: boolean; message?: string }> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return { success: false, message: "Missing sheets client" };
+
+  try {
+    // 1. Check if event exists and max limit
+    const events = await getEvents();
+    const event = events.find(e => e.id === eventId);
+    if (!event) return { success: false, message: "ไม่พบกิจกรรมนี้ (Event not found)" };
+    if (event.status !== 'active') return { success: false, message: "กิจกรรมนี้ปิดรับสมัครแล้ว (Event is closed)" };
+
+    // 2. Check current participants
+    const allParticipants = await getEventParticipants(eventId);
+    const hasJoined = allParticipants.some(p => p.userEmail.toLowerCase() === userEmail.toLowerCase());
+    
+    if (hasJoined) return { success: false, message: "คุณได้เข้าร่วมกิจกรรมนี้ไปแล้ว (Already joined)" };
+    
+    if (event.maxParticipants > 0 && allParticipants.length >= event.maxParticipants) {
+      return { success: false, message: "ผู้เข้าร่วมเต็มแล้ว (Event is full)" };
+    }
+
+    // 3. Append to participants sheet
+    const joinedAt = new Date().toISOString();
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: "event_participants!A2:C",
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [[eventId, userEmail, joinedAt]],
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("[ERROR] Failed to join event:", error);
+    return { success: false, message: "เกิดข้อผิดพลาดภายในระบบ" };
+  }
+}
+
+export async function leaveEvent(eventId: string, userEmail: string): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+
+  try {
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "event_participants!A2:C",
+    });
+    
+    const rows = response.data.values || [];
+    const rowIndex = rows.findIndex(row => 
+      String(row[0] || "").trim() === eventId && 
+      String(row[1] || "").trim().toLowerCase() === userEmail.toLowerCase()
+    );
+    
+    if (rowIndex === -1) return true; // Already left / not joined
+
+    const actualRow = rowIndex + 2;
+    await sheets.spreadsheets.values.clear({
+      spreadsheetId: sheetId,
+      range: `event_participants!A${actualRow}:C${actualRow}`,
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to leave event:", error);
+    return false;
+  }
+}
 

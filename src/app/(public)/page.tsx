@@ -20,17 +20,28 @@ interface NewsItem {
 export default function HomePage() {
   const [selectedPost, setSelectedPost] = useState<NewsItem | null>(null);
   const [blogPosts, setBlogPosts] = useState<NewsItem[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [participants, setParticipants] = useState<any[]>([]);
   const [isLoadingNews, setIsLoadingNews] = useState(true);
 
   useEffect(() => {
-    fetch("/api/news")
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) setBlogPosts(data);
+    Promise.all([
+      fetch("/api/news").then(res => res.json()),
+      fetch("/api/events").then(res => res.json())
+    ])
+      .then(([newsData, eventsData]) => {
+        if (Array.isArray(newsData)) setBlogPosts(newsData);
+        if (eventsData?.events) {
+          setEvents(eventsData.events);
+          setParticipants(eventsData.participants || []);
+        } else if (Array.isArray(eventsData)) {
+          // Fallback if old format
+          setEvents(eventsData);
+        }
         setIsLoadingNews(false);
       })
       .catch(err => {
-        console.error("Failed to fetch news", err);
+        console.error("Failed to fetch data", err);
         setIsLoadingNews(false);
       });
   }, []);
@@ -73,6 +84,87 @@ export default function HomePage() {
         </div>
 
 
+      </section>
+
+      {/* Events & Projects Section */}
+      <section id="events" className="mx-auto w-full max-w-7xl px-6 md:px-8 scroll-mt-24">
+        <div className="flex flex-col gap-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-gray-100 pb-6 gap-4">
+            <div>
+              <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                <Calendar className="w-8 h-8 text-blue-500" />
+                โครงการและกิจกรรมที่เปิดรับสมัคร
+              </h2>
+              <p className="text-gray-500 text-sm mt-2 font-medium">
+                เข้าร่วมกิจกรรม อบรม และโปรเจกต์ต่างๆ ของชมรม
+              </p>
+            </div>
+            <Link href="/events" className="text-sm font-bold text-blue-500 hover:underline flex items-center gap-1">
+              ดูกิจกรรมทั้งหมด <ExternalLink className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {events.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center flex flex-col items-center">
+              <Calendar className="w-12 h-12 text-gray-300 mb-4" />
+              <h3 className="text-lg font-bold text-gray-700">ขณะนี้ยังไม่มีโครงการ/กิจกรรมที่เปิดรับสมัคร</h3>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {events.slice(0, 4).map((event) => {
+                const eventParticipants = participants.filter(p => p.eventId === event.id);
+                return (
+                  <Link
+                    href={`/events/${event.id}`}
+                    key={event.id}
+                    className="group flex flex-col rounded-2xl border border-gray-200 bg-white overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300"
+                  >
+                    <div className="relative h-48 bg-gray-100 overflow-hidden">
+                      {event.imageUrl ? (
+                        <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-blue-50 text-blue-200">
+                          <Calendar className="w-12 h-12" />
+                        </div>
+                      )}
+                      <div className="absolute top-3 right-3">
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full shadow-sm backdrop-blur-md ${event.status === 'active' ? 'bg-green-500/90 text-white' : 'bg-red-500/90 text-white'}`}>
+                          {event.status === 'active' ? 'เปิดรับสมัคร' : 'ปิดแล้ว'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-5 flex-1 flex flex-col">
+                      <h3 className="font-bold text-gray-900 group-hover:text-blue-600 line-clamp-2 transition-colors">{event.title}</h3>
+                      <div className="mt-4 flex flex-col gap-2 text-xs font-semibold text-gray-500 mt-auto">
+                        <div className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-gray-400" /> {event.date}</div>
+                        
+                        {event.maxParticipants > 0 && (
+                          <div className="mt-2 w-full">
+                            <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+                              <span>สมัครแล้ว {eventParticipants.length} คน</span>
+                              <span>รับ {event.maxParticipants} คน</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-orange-500 rounded-full transition-all duration-500"
+                                style={{ width: `${Math.min((eventParticipants.length / event.maxParticipants) * 100, 100)}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-gray-100 w-full">
+                        <div className="w-full py-2.5 bg-orange-50 text-orange-600 text-xs font-bold rounded-xl text-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                          เข้าร่วม
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </section>
 
       {/* 2. Blog Posts & Announcements Section */}

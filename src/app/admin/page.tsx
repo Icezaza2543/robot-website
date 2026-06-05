@@ -116,6 +116,16 @@ export default function AdminDashboardPage() {
           show: hasPerm("manage_news")
         },
         {
+          title: "จัดการโครงการ/กิจกรรม (Events)",
+          desc: "สร้างโครงการ เปิดรับสมัคร และจัดการโควต้าผู้เข้าร่วม",
+          href: "/admin/events",
+          icon: CalendarDays,
+          color: "text-blue-500",
+          bgColor: "bg-blue-50",
+          borderColor: "border-blue-100",
+          show: hasPerm("manage_news")
+        },
+        {
           title: "หน้าเกี่ยวกับชมรม (About)",
           desc: "แก้ไขประวัติ, วิสัยทัศน์ และข้อมูลติดต่อ",
           href: "/admin/about",
