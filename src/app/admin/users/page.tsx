@@ -12,8 +12,16 @@ interface SheetUser {
   email: string;
   name: string;
   role: string;
+  status?: string;
   rank: string;
   customAvatar: string;
+  nickname?: string;
+  studentId?: string;
+  phone?: string;
+  year?: string;
+  department?: string;
+  faculty?: string;
+  bio?: string;
 }
 
 interface RoleData {
@@ -144,12 +152,20 @@ export default function AdminUsersPage() {
 
   const handleExportUsersCSV = () => {
     const csvContent = [
-      ['Name', 'Email', 'Role', 'Rank'],
+      ['Name', 'Nickname', 'Email', 'Student ID', 'Phone', 'Faculty', 'Department', 'Year', 'Role', 'Rank', 'Status', 'Bio'],
       ...filteredUsers.map(user => [
         `"${user.name || ''}"`,
+        `"${user.nickname || ''}"`,
         `"${user.email || ''}"`,
+        `"${user.studentId || ''}"`,
+        `"${user.phone || ''}"`,
+        `"${user.faculty || ''}"`,
+        `"${user.department || ''}"`,
+        `"${user.year || ''}"`,
         `"${user.role || 'user'}"`,
-        `"${user.rank || 'Member'}"`
+        `"${user.rank || 'Member'}"`,
+        `"${user.status || ''}"`,
+        `"${(user.bio || '').replace(/"/g, '""')}"`
       ])
     ].map(e => e.join(",")).join("\n");
 
@@ -219,6 +235,7 @@ export default function AdminUsersPage() {
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/60 text-xs font-black uppercase text-gray-400">
                 <th className="px-6 py-5">สมาชิก</th>
+                <th className="px-6 py-5">ข้อมูล Profile</th>
                 <th className="px-6 py-5">ตำแหน่ง (Role)</th>
                 <th className="px-6 py-5">Rank</th>
                 <th className="px-6 py-5 text-right">จัดการ</th>
@@ -237,9 +254,18 @@ export default function AdminUsersPage() {
                         </div>
                       )}
                       <div className="flex flex-col">
-                        <span className="font-bold text-gray-800">{user.name}</span>
+                        <span className="font-bold text-gray-800">{user.name} {user.nickname ? <span className="text-gray-500 font-medium">({user.nickname})</span> : ''}</span>
                         <span className="text-xs text-gray-500">{user.email}</span>
+                        {user.studentId && <span className="text-xs text-orange-600 font-bold mt-0.5">รหัสนิสิต: {user.studentId}</span>}
                       </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col gap-0.5">
+                      {user.phone && <span className="text-xs text-gray-600"><span className="font-semibold">โทร:</span> {user.phone}</span>}
+                      {user.faculty && <span className="text-xs text-gray-600"><span className="font-semibold">คณะ:</span> {user.faculty} {user.department ? `(${user.department})` : ''}</span>}
+                      {user.year && <span className="text-xs text-gray-600"><span className="font-semibold">ชั้นปี:</span> {user.year}</span>}
+                      {(!user.phone && !user.faculty && !user.year) && <span className="text-xs text-gray-400">-</span>}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -287,7 +313,7 @@ export default function AdminUsersPage() {
                 </tr>
               ))}
               {filteredUsers.length === 0 && (
-                <tr><td colSpan={4} className="text-center py-10 text-gray-400">ไม่พบสมาชิก</td></tr>
+                <tr><td colSpan={5} className="text-center py-10 text-gray-400">ไม่พบสมาชิก</td></tr>
               )}
             </tbody>
           </table>
