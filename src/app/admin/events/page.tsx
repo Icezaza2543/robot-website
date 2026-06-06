@@ -295,8 +295,8 @@ export default function AdminEventsPage() {
   };
 
   const filteredItems = items.filter((item) =>
-    item.title.toLowerCase().includes(search.toLowerCase()) ||
-    item.location.toLowerCase().includes(search.toLowerCase())
+    (item.title || "").toLowerCase().includes(search.toLowerCase()) ||
+    (item.location || "").toLowerCase().includes(search.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
