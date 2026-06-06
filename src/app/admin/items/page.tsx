@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Settings, X, Plus, Inbox, Save, Search, Package, MapPin, Minus, Trash2, Megaphone, UploadCloud, Image as ImageIcon, Edit2 } from "lucide-react";
-import * as XLSX from "xlsx";
-import Pagination from "@/components/ui/Pagination";
+import { Settings, X, Plus, Search, Trash2, Edit2, UploadCloud, Tag, Package, Image as ImageIcon, MapPin, Loader2, Link2, Download, LogOut, ChevronLeft, ChevronRight, Settings2, Database, ShieldCheck, Megaphone, Inbox, Save, Minus } from "lucide-react";
 import toast from "react-hot-toast";
+import ImageCropperModal from "@/components/ui/ImageCropperModal";
+import Pagination from "@/components/ui/Pagination";
+import ConfirmModal from "@/components/ui/ConfirmModal";
+import * as XLSX from "xlsx";
 
 interface EquipmentItem {
   id: string;
@@ -52,6 +54,10 @@ export default function AdminItemsPage() {
 
   // Edit Item Form State
   const [editingItem, setEditingItem] = useState<EquipmentItem | null>(null);
+
+  const [deleteItemTarget, setDeleteItemTarget] = useState<{ id: string; name: string } | null>(null);
+
+  const [cropperFileSrc, setCropperFileSrc] = useState<string | null>(null);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setUrl: (url: string) => void) => {
     const file = e.target.files?.[0];
@@ -183,13 +189,15 @@ export default function AdminItemsPage() {
   };
 
   // Handle Delete Item
-  const handleDeleteItem = async (id: string, name: string) => {
-    if (!confirm(`คุณแน่ใจหรือไม่ที่จะลบอุปกรณ์ "${name}" ออกจากระบบถาวร?`)) {
-      return;
-    }
+  const handleDeleteItem = (id: string, name: string) => {
+    setDeleteItemTarget({ id, name });
+  };
+
+  const executeDeleteItem = async () => {
+    if (!deleteItemTarget) return;
 
     try {
-      const res = await fetch(`/api/items?id=${id}`, {
+      const res = await fetch(`/api/items?id=${deleteItemTarget.id}`, {
         method: "DELETE",
       });
 
@@ -203,6 +211,8 @@ export default function AdminItemsPage() {
     } catch (err) {
       console.error(err);
       toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    } finally {
+      setDeleteItemTarget(null);
     }
   };
 
@@ -741,6 +751,17 @@ export default function AdminItemsPage() {
           </div>
         </div>
       )}
+      {/* Custom Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteItemTarget !== null}
+        onClose={() => setDeleteItemTarget(null)}
+        onConfirm={executeDeleteItem}
+        title="ยืนยันการลบอุปกรณ์"
+        description={`คุณแน่ใจหรือไม่ที่จะลบอุปกรณ์ "${deleteItemTarget?.name}" ออกจากระบบถาวร? การกระทำนี้ไม่สามารถย้อนกลับได้`}
+        confirmText="ลบข้อมูลถาวร"
+        cancelText="ยกเลิก"
+        isDestructive={true}
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Key, ShieldAlert, Plus, Save, X, Trash2, ShieldCheck, UserCheck, AlertCircle, Users, Edit2 } from "lucide-react";
 import toast from "react-hot-toast";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface RoleData {
   roleName: string;
@@ -39,6 +40,7 @@ export default function AdminRolesPage() {
   const [formRank, setFormRank] = useState("Member");
   const [formPermissions, setFormPermissions] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteRoleTarget, setDeleteRoleTarget] = useState<string | null>(null);
 
   const fetchRoles = async () => {
     try {
@@ -149,10 +151,14 @@ export default function AdminRolesPage() {
     }
   };
 
-  const handleDelete = async (roleName: string) => {
-    if (!confirm(`ยืนยันการลบตำแหน่ง "${roleName}" ออกจากระบบ? สมาชิกที่อยู่ในตำแหน่งนี้จะถูกปรับเป็น User ธรรมดา`)) return;
+  const handleDelete = (roleName: string) => {
+    setDeleteRoleTarget(roleName);
+  };
+
+  const executeDeleteRole = async () => {
+    if (!deleteRoleTarget) return;
     try {
-      const res = await fetch(`/api/admin/roles?roleName=${encodeURIComponent(roleName)}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/roles?roleName=${encodeURIComponent(deleteRoleTarget)}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("ลบตำแหน่งสำเร็จ");
         await fetchRoles();
@@ -163,6 +169,8 @@ export default function AdminRolesPage() {
     } catch (err) {
       console.error(err);
       toast.error("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+    } finally {
+      setDeleteRoleTarget(null);
     }
   };
 
@@ -361,6 +369,17 @@ export default function AdminRolesPage() {
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={deleteRoleTarget !== null}
+        onClose={() => setDeleteRoleTarget(null)}
+        onConfirm={executeDeleteRole}
+        title="ยืนยันการลบตำแหน่ง"
+        description={`คุณแน่ใจหรือไม่ที่จะลบตำแหน่ง "${deleteRoleTarget}" ออกจากระบบ? สมาชิกที่อยู่ในตำแหน่งนี้จะถูกปรับเป็น User ธรรมดา`}
+        confirmText="ลบตำแหน่งถาวร"
+        cancelText="ยกเลิก"
+        isDestructive={true}
+      />
     </div>
   );
 }

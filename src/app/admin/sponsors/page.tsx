@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Lock, Plus, Trash2, Megaphone, CheckCircle2, Image as ImageIcon } from "lucide-react";
 import toast from "react-hot-toast";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import Image from "next/image";
 
 interface Sponsor {
@@ -20,6 +21,7 @@ export default function AdminSponsorsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [newUrl, setNewUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const fetchSponsors = async () => {
     try {
@@ -92,19 +94,25 @@ export default function AdminSponsorsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("คุณต้องการลบโลโก้ผู้สนับสนุนนี้ใช่หรือไม่?")) return;
+  const handleDelete = (id: string) => {
+    setDeleteTarget(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deleteTarget) return;
 
     try {
-      const res = await fetch(`/api/sponsors?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/sponsors?id=${deleteTarget}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("ลบผู้สนับสนุนสำเร็จ");
-        setSponsors((prev) => prev.filter((s) => s.id !== id));
+        setSponsors((prev) => prev.filter((s) => s.id !== deleteTarget));
       } else {
         toast.error("ไม่สามารถลบผู้สนับสนุนได้");
       }
     } catch (err) {
       toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -202,6 +210,17 @@ export default function AdminSponsorsPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={executeDelete}
+        title="ยืนยันการลบผู้สนับสนุน"
+        description="คุณแน่ใจหรือไม่ที่จะลบโลโก้ผู้สนับสนุนนี้ออกจากแถบเลื่อน?"
+        confirmText="ลบข้อมูลถาวร"
+        cancelText="ยกเลิก"
+        isDestructive={true}
+      />
     </div>
   );
 }

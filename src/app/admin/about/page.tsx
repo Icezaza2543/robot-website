@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Settings, Save, Users, Settings2, Trash2, Edit2, UploadCloud, Plus, X, Newspaper } from "lucide-react";
 import ImageCropperModal from "@/components/ui/ImageCropperModal";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import toast from "react-hot-toast";
 
 interface AboutInfo {
@@ -52,6 +53,8 @@ export default function AdminAboutPage() {
   const [editAdvRole, setEditAdvRole] = useState("");
   const [editAdvImage, setEditAdvImage] = useState("");
   const [isUpdatingAdv, setIsUpdatingAdv] = useState(false);
+
+  const [deleteAdvTarget, setDeleteAdvTarget] = useState<string | null>(null);
 
   const [cropperFileSrc, setCropperFileSrc] = useState<string | null>(null);
   const [cropperCallback, setCropperCallback] = useState<((url: string) => void) | null>(null);
@@ -209,13 +212,25 @@ export default function AdminAboutPage() {
     }
   };
 
-  const handleDeleteAdvisor = async (id: string) => {
-    if (!confirm("ยืนยันการลบที่ปรึกษา?")) return;
+  const handleDeleteAdvisor = (id: string) => {
+    setDeleteAdvTarget(id);
+  };
+
+  const executeDeleteAdvisor = async () => {
+    if (!deleteAdvTarget) return;
     try {
-      const res = await fetch(`/api/advisors?id=${id}`, { method: "DELETE" });
-      if (res.ok) fetchData();
+      const res = await fetch(`/api/advisors?id=${deleteAdvTarget}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("ลบที่ปรึกษาสำเร็จ");
+        fetchData();
+      } else {
+        toast.error("ไม่สามารถลบที่ปรึกษาได้");
+      }
     } catch (err) {
       console.error(err);
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    } finally {
+      setDeleteAdvTarget(null);
     }
   };
 
@@ -439,6 +454,17 @@ export default function AdminAboutPage() {
           onCropComplete={handleCropComplete}
         />
       )}
+      {/* Custom Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteAdvTarget !== null}
+        onClose={() => setDeleteAdvTarget(null)}
+        onConfirm={executeDeleteAdvisor}
+        title="ยืนยันการลบที่ปรึกษา"
+        description="คุณแน่ใจหรือไม่ที่จะลบรายชื่ออาจารย์/ที่ปรึกษาท่านนี้? การกระทำนี้ไม่สามารถย้อนกลับได้"
+        confirmText="ลบข้อมูลถาวร"
+        cancelText="ยกเลิก"
+        isDestructive={true}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { CalendarDays, DoorOpen, Plus, Search, Trash2, Edit2, Loader2, Image as ImageIcon, X, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
 import toast from "react-hot-toast";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 // Detect overlapping reservations within a list
 function isOverlapping(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date) {
@@ -40,6 +41,9 @@ export default function AdminRoomsPage() {
 
   const [activeTab, setActiveTab] = useState<'reservations' | 'rooms'>('reservations');
   const [isLoading, setIsLoading] = useState(true);
+
+  const [deleteRoomTarget, setDeleteRoomTarget] = useState<string | null>(null);
+  const [deleteResTarget, setDeleteResTarget] = useState<string | null>(null);
 
   const [rooms, setRooms] = useState<any[]>([]);
   const [reservations, setReservations] = useState<any[]>([]);
@@ -178,10 +182,14 @@ export default function AdminRoomsPage() {
     }
   };
 
-  const handleDeleteRoom = async (roomId: string) => {
-    if (!confirm("คุณแน่ใจหรือไม่ที่จะลบห้องนี้? (Are you sure you want to delete this room?)")) return;
+  const handleDeleteRoom = (roomId: string) => {
+    setDeleteRoomTarget(roomId);
+  };
+
+  const executeDeleteRoom = async () => {
+    if (!deleteRoomTarget) return;
     try {
-      const res = await fetch(`/api/admin/rooms?id=${roomId}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/rooms?id=${deleteRoomTarget}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("ลบห้องสำเร็จ");
         fetchData();
@@ -189,13 +197,19 @@ export default function AdminRoomsPage() {
     } catch (err) {
       console.error(err);
       toast.error("เกิดข้อผิดพลาดในการลบห้อง");
+    } finally {
+      setDeleteRoomTarget(null);
     }
   };
 
-  const handleDeleteReservation = async (resId: string) => {
-    if (!confirm("คุณแน่ใจหรือไม่ที่จะลบรายการจองนี้? (Are you sure you want to delete this reservation?)")) return;
+  const handleDeleteReservation = (resId: string) => {
+    setDeleteResTarget(resId);
+  };
+
+  const executeDeleteReservation = async () => {
+    if (!deleteResTarget) return;
     try {
-      const res = await fetch(`/api/admin/reservations?id=${resId}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/reservations?id=${deleteResTarget}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("ลบรายการจองสำเร็จ");
         fetchData();
@@ -203,6 +217,8 @@ export default function AdminRoomsPage() {
     } catch (err) {
       console.error(err);
       toast.error("เกิดข้อผิดพลาดในการลบรายการจอง");
+    } finally {
+      setDeleteResTarget(null);
     }
   };
 
@@ -543,6 +559,28 @@ export default function AdminRoomsPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Room Confirm Modal */}
+      <ConfirmModal
+        isOpen={deleteRoomTarget !== null}
+        onClose={() => setDeleteRoomTarget(null)}
+        onConfirm={executeDeleteRoom}
+        title="ยืนยันการลบห้อง"
+        description="คุณแน่ใจหรือไม่ที่จะลบห้องนี้? การกระทำนี้ไม่สามารถย้อนกลับได้"
+        confirmText="ลบห้องถาวร"
+        isDestructive={true}
+      />
+
+      {/* Delete Reservation Confirm Modal */}
+      <ConfirmModal
+        isOpen={deleteResTarget !== null}
+        onClose={() => setDeleteResTarget(null)}
+        onConfirm={executeDeleteReservation}
+        title="ยืนยันการลบรายการจอง"
+        description="คุณแน่ใจหรือไม่ที่จะลบรายการจองนี้? การกระทำนี้ไม่สามารถย้อนกลับได้"
+        confirmText="ลบรายการจองถาวร"
+        isDestructive={true}
+      />
     </div>
   );
 }

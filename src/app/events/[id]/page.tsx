@@ -110,7 +110,7 @@ export default function EventDetailsPage() {
     );
   }
 
-  const hasJoined = status === "authenticated" && session?.user?.email && participants.some(p => p.userEmail.toLowerCase() === session.user.email?.toLowerCase());
+  const hasJoined = status === "authenticated" && session?.user?.email && participants.some(p => p.userEmail?.toLowerCase() === session.user.email?.toLowerCase());
   const isFull = event.maxParticipants > 0 && participants.length >= event.maxParticipants;
   const isClosed = event.status === 'closed';
 
