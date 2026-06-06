@@ -43,7 +43,7 @@ export default async function HallOfFamePage() {
           ทำเนียบ<span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">ประธานชมรม</span>
         </h1>
         <p className="text-lg text-gray-500 font-medium leading-relaxed max-w-xl mx-auto">
-          รายนามผู้บริหารและผู้นำที่ร่วมสร้างสรรค์และขับเคลื่อนชมรมโรบอท <br />คณะวิศวกรรมศาสตร์ มหาวิทยาลัยนเรศวร จากอดีตจนถึงปัจจุบัน
+          รายนามผู้บริหารและผู้นำที่ร่วมสร้างสรรค์และขับเคลื่อน ชมรมโรบอท <br />คณะวิศวกรรมศาสตร์ มหาวิทยาลัยนเรศวร จากอดีตจนถึงปัจจุบัน
         </p>
       </div>
 
