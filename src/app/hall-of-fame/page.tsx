@@ -1,6 +1,4 @@
 import { Metadata } from "next";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { Crown, Calendar, Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -30,10 +28,7 @@ export default async function HallOfFamePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-gray-900 selection:bg-orange-500 selection:text-white flex flex-col font-sans">
-      <Navbar />
-
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative">
         {/* Background Decorations */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[400px] bg-gradient-to-b from-orange-400/20 to-transparent blur-[120px] -z-10 rounded-full opacity-60"></div>
         
@@ -105,9 +100,6 @@ export default async function HallOfFamePage() {
             ))}
           </div>
         )}
-      </main>
-
-      <Footer />
     </div>
   );
 }
