@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, Timer, CheckCircle2, RefreshCw, XCircle, Package, AlertTriangle, FileText, Settings, ClipboardList, Search, PartyPopper, Inbox, MapPin, User, Megaphone, Newspaper, Settings2 } from "lucide-react";
+import { Lock, Timer, CheckCircle2, RefreshCw, XCircle, Package, AlertTriangle, FileText, Settings, ClipboardList, Search, PartyPopper, Inbox, MapPin, User, Megaphone, Newspaper, Settings2, Download } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 
 interface RequestItem {
@@ -287,6 +287,44 @@ export default function AdminBorrowPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const handleExportBorrowCSV = () => {
+    const csvContent = [
+      ['Request ID', 'Borrower Name', 'Phone', 'Email', 'Items', 'Borrow Date', 'Due Date', 'Return Date', 'Status', 'User Note', 'Admin Note'],
+      ...filteredRequests.map(request => {
+        let itemsStr = "";
+        try {
+          const parsed = JSON.parse(request.items);
+          itemsStr = parsed.map((item: any) => `${item.name} (${item.quantity})`).join("; ");
+        } catch (e) {
+          itemsStr = request.items;
+        }
+
+        return [
+          `"${request.id}"`,
+          `"${request.borrowerName || ''}"`,
+          `"${request.borrowerPhone || ''}"`,
+          `"${request.userEmail || ''}"`,
+          `"${itemsStr}"`,
+          `"${formatDateString(request.borrowDate) || ''}"`,
+          `"${formatDateString(request.dueDate) || ''}"`,
+          `"${formatDateString(request.returnDate) || ''}"`,
+          `"${request.status}"`,
+          `"${(request.note || '').replace(/"/g, '""')}"`,
+          `"${(request.adminNote || '').replace(/"/g, '""')}"`
+        ];
+      })
+    ].map(e => e.join(",")).join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `borrow_requests_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">

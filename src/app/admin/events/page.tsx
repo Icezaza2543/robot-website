@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Settings, X, Plus, Save, Search, Trash2, Edit2, UploadCloud, Calendar, Settings2, ShieldCheck, List, Users } from "lucide-react";
+import { Settings, X, Plus, Save, Search, Trash2, Edit2, UploadCloud, Calendar, Settings2, ShieldCheck, List, Users, Download } from "lucide-react";
 import toast from "react-hot-toast";
 import ImageCropperModal from "@/components/ui/ImageCropperModal";
 import Pagination from "@/components/ui/Pagination";
@@ -308,6 +308,28 @@ export default function AdminEventsPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
+
+  const handleExportParticipantsCSV = () => {
+    if (!viewingEvent) return;
+    const eventParticipants = participants.filter(p => p.eventId === viewingEvent.id);
+    const csvContent = [
+      ['No.', 'Email', 'Joined At'],
+      ...eventParticipants.map((p, idx) => [
+        `"${idx + 1}"`,
+        `"${p.userEmail}"`,
+        `"${new Date(p.joinedAt).toLocaleString('th-TH')}"`
+      ])
+    ].map(e => e.join(",")).join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `event_${viewingEvent.id}_participants_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -614,7 +636,13 @@ export default function AdminEventsPage() {
               </table>
             </div>
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-between items-center">
+              <button
+                onClick={handleExportParticipantsCSV}
+                className="rounded-xl border border-green-200 bg-green-50 hover:bg-green-100 px-4 py-2.5 text-xs font-bold text-green-600 shadow-sm transition active:scale-95 flex items-center gap-2 cursor-pointer"
+              >
+                <Download className="w-4 h-4" /> Export CSV
+              </button>
               <button onClick={() => setViewingEvent(null)} className="px-5 py-2.5 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl">ปิด</button>
             </div>
           </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { CalendarDays, DoorOpen, Plus, Search, Trash2, Edit2, Loader2, Image as ImageIcon, X, AlertCircle, CheckCircle2, XCircle } from "lucide-react";
+import { CalendarDays, DoorOpen, Plus, Search, Trash2, Edit2, Loader2, Image as ImageIcon, X, AlertCircle, CheckCircle2, XCircle, Download } from "lucide-react";
 import toast from "react-hot-toast";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 
@@ -246,6 +246,35 @@ export default function AdminRoomsPage() {
     }
   };
 
+  const handleExportReservationsCSV = () => {
+    const csvContent = [
+      ['Room', 'Name', 'Email', 'Title', 'Start Date', 'End Date', 'Special Request', 'Status', 'Reject Reason'],
+      ...reservations.map(res => {
+        const room = rooms.find(r => r.roomId === res.roomId);
+        return [
+          `"${room?.roomName || res.roomId}"`,
+          `"${res.name}"`,
+          `"${res.email}"`,
+          `"${res.title}"`,
+          `"${new Date(res.startDate).toLocaleString('th-TH')}"`,
+          `"${new Date(res.endDate).toLocaleString('th-TH')}"`,
+          `"${res.isSpecialRequest === "TRUE" ? res.specialReason : '-'}"`,
+          `"${res.status}"`,
+          `"${res.rejectReason || '-'}"`
+        ];
+      })
+    ].map(e => e.join(",")).join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `reservations_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (status === "loading" || isLoading) {
     return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-orange-500" /></div>;
   }
@@ -281,8 +310,16 @@ export default function AdminRoomsPage() {
         const conflictedIds = findConflicts(reservations);
         return (
         <div className="bg-white rounded-3xl border border-gray-200/80 shadow-sm p-6 overflow-hidden">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-gray-900">รายการจองล่าสุด</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-bold text-gray-900">รายการจองล่าสุด</h2>
+              <button
+                onClick={handleExportReservationsCSV}
+                className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-600 border border-green-200 rounded-lg text-xs font-bold hover:bg-green-100 transition"
+              >
+                <Download className="w-3 h-3" /> Export CSV
+              </button>
+            </div>
             {conflictedIds.size > 0 && (
               <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-full">
                 <AlertCircle className="w-3.5 h-3.5" /> มีคิว Pending ที่เวลาชนกับ Approved อยู่ {conflictedIds.size} รายการ

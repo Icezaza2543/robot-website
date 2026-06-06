@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Users, Search, ShieldAlert, Edit2, ShieldCheck, Key, Save, X } from "lucide-react";
+import { Users, Search, ShieldAlert, Edit2, ShieldCheck, Key, Save, X, Download } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 import toast from "react-hot-toast";
 
@@ -142,6 +142,27 @@ export default function AdminUsersPage() {
     }
   };
 
+  const handleExportUsersCSV = () => {
+    const csvContent = [
+      ['Name', 'Email', 'Role', 'Rank'],
+      ...filteredUsers.map(user => [
+        `"${user.name || ''}"`,
+        `"${user.email || ''}"`,
+        `"${user.role || 'user'}"`,
+        `"${user.rank || 'Member'}"`
+      ])
+    ].map(e => e.join(",")).join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `members_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const validUsers = Array.isArray(users) ? users : [];
   const filteredUsers = validUsers.filter(user => 
     String(user.name || "").toLowerCase().includes(search.toLowerCase()) || 
@@ -171,7 +192,13 @@ export default function AdminUsersPage() {
           </p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={handleExportUsersCSV}
+            className="rounded-2xl border border-green-200 bg-green-50 hover:bg-green-100 px-5 py-3.5 text-sm font-bold text-green-600 shadow-sm transition active:scale-95 flex items-center justify-center gap-2"
+          >
+            <Download className="w-4 h-4" /> Export CSV
+          </button>
           <Link
             href="/admin/roles"
             className="rounded-2xl border border-orange-200 bg-orange-50 hover:bg-orange-100 px-5 py-3.5 text-sm font-bold text-orange-600 shadow-sm transition active:scale-95 flex items-center justify-center gap-2"
