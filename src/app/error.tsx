@@ -51,10 +51,20 @@ export default function GlobalError({
           </Link>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-gray-100">
-          <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">
-            Error Digest: {error.digest || "Unknown"}
+        <div className="mt-8 pt-6 border-t border-gray-100 text-left">
+          <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+            <AlertTriangle className="w-3 h-3" /> รายละเอียดข้อผิดพลาด (Debug Info)
           </p>
+          <div className="bg-red-50 rounded-xl p-3 border border-red-100 overflow-auto max-h-24">
+            <code className="text-xs text-red-600 break-words font-mono">
+              {error.message || "Unknown error occurred"}
+            </code>
+          </div>
+          {error.digest && (
+            <p className="text-[10px] text-gray-400 font-medium uppercase mt-3">
+              Digest: {error.digest}
+            </p>
+          )}
         </div>
       </div>
     </div>
