@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description: "ทำเนียบรายชื่ออดีตประธานชมรมหุ่นยนต์ มหาวิทยาลัยนเรศวร",
 };
 
+export const dynamic = "force-dynamic";
+
 interface President {
   id: string;
   name: string;
