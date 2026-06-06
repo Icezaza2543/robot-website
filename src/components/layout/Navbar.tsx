@@ -11,6 +11,7 @@ import NavbarAuth from "./NavbarAuth";
 const navLinks = [
   { href: "/", label: "หน้าหลัก" },
   { href: "/about", label: "เกี่ยวกับ" },
+  { href: "/hall-of-fame", label: "ทำเนียบประธาน" },
   { href: "/equipment", label: "ยืมอุปกรณ์" },
   { href: "/rooms", label: "จองห้อง" },
 ];

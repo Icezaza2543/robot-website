@@ -2612,4 +2612,114 @@ export async function leaveEvent(eventId: string, userEmail: string): Promise<bo
     return false;
   }
 }
+
+// --------------------------------------------------------------------------------------------------
+// PRESIDENTS (Hall of Fame)
+// --------------------------------------------------------------------------------------------------
+
+export interface PresidentItem {
+  id: string;
+  name: string;
+  year: string;
+  imageUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function getSheetPresidents(): Promise<PresidentItem[]> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return [];
+  try {
+    const headers = ["ID", "Name", "Year", "ImageUrl", "CreatedAt", "UpdatedAt"];
+    await ensureSheetExists(sheets, sheetId, "presidents", headers);
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "presidents!A2:F1000",
+    });
+    const rows = response.data.values || [];
+    return rows.map((row) => ({
+      id: row[0] || "",
+      name: row[1] || "",
+      year: row[2] || "",
+      imageUrl: row[3] || "",
+      createdAt: row[4] || "",
+      updatedAt: row[5] || "",
+    })).filter(p => p.id);
+  } catch (error) {
+    console.error("[ERROR] Failed to fetch presidents:", error);
+    return [];
+  }
+}
+
+export async function addSheetPresident(item: Omit<PresidentItem, "id" | "createdAt" | "updatedAt">): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+  try {
+    const id = Date.now().toString();
+    const now = getShortTimestamp();
+    const headers = ["ID", "Name", "Year", "ImageUrl", "CreatedAt", "UpdatedAt"];
+    await ensureSheetExists(sheets, sheetId, "presidents", headers);
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId,
+      range: "presidents!A2:F",
+      valueInputOption: "RAW",
+      requestBody: { values: [[id, item.name, item.year, item.imageUrl, now, now]] },
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to add president:", error);
+    return false;
+  }
+}
+
+export async function updateSheetPresident(id: string, updates: Partial<PresidentItem>): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+  try {
+    const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: "presidents!A2:F1000" });
+    const rows = response.data.values || [];
+    const rowIndex = rows.findIndex((row) => row[0] === id);
+    if (rowIndex === -1) return false;
+    const actualRow = rowIndex + 2;
+    const existingRow = rows[rowIndex];
+    const now = getShortTimestamp();
+    
+    const newName = updates.name !== undefined ? updates.name : existingRow[1];
+    const newYear = updates.year !== undefined ? updates.year : existingRow[2];
+    const newImg = updates.imageUrl !== undefined ? updates.imageUrl : existingRow[3];
+    const createdAt = existingRow[4] || now;
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId,
+      range: `presidents!A${actualRow}:F${actualRow}`,
+      valueInputOption: "RAW",
+      requestBody: { values: [[id, newName, newYear, newImg, createdAt, now]] },
+    });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to update president:", error);
+    return false;
+  }
+}
+
+export async function deleteSheetPresident(id: string): Promise<boolean> {
+  const sheets = getSheetsClient();
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheets || !sheetId) return false;
+  try {
+    const response = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: "presidents!A2:A1000" });
+    const rows = response.data.values || [];
+    const rowIndex = rows.findIndex((row) => row[0] === id);
+    if (rowIndex === -1) return false;
+    const actualRow = rowIndex + 2;
+    await sheets.spreadsheets.values.clear({ spreadsheetId: sheetId, range: `presidents!A${actualRow}:F${actualRow}` });
+    return true;
+  } catch (error) {
+    console.error("[ERROR] Failed to delete president:", error);
+    return false;
+  }
+}
 

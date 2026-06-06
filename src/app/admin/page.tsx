@@ -17,7 +17,8 @@ import {
   LogOut,
   ChevronRight,
   DoorOpen,
-  CalendarDays
+  CalendarDays,
+  Award
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -145,6 +146,16 @@ export default function AdminDashboardPage() {
         //   borderColor: "border-teal-100",
         //   show: hasPerm("manage_website")
         // },
+        {
+          title: "ทำเนียบประธานชมรม (Hall of Fame)",
+          desc: "จัดการรายชื่อและรูปภาพอดีตประธานชมรม",
+          href: "/admin/presidents",
+          icon: Award,
+          color: "text-red-500",
+          bgColor: "bg-red-50",
+          borderColor: "border-red-100",
+          show: hasPerm("manage_website")
+        },
         {
           title: "ผู้สนับสนุน (Sponsors)",
           desc: "จัดการรายชื่อและโลโก้ผู้สนับสนุนชมรม",
