@@ -74,6 +74,10 @@ export default function AdminNewsPage() {
     }
   }, [status, session]);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
   if (status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -243,10 +247,6 @@ export default function AdminNewsPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search]);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">

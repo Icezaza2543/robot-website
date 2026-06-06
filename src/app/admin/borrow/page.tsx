@@ -79,6 +79,11 @@ export default function AdminBorrowPage() {
     }
   }, [status, session]);
 
+  // Reset page when search or status filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
+
   if (status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -282,11 +287,6 @@ export default function AdminBorrowPage() {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
-
-  // Reset page when search or status filter changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, statusFilter]);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
