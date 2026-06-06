@@ -250,6 +250,7 @@ export default function AdminEventsPage() {
       }
     } catch (err) {
       console.error(err);
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     }
   };
 
@@ -280,6 +281,7 @@ export default function AdminEventsPage() {
       }
     } catch (err) {
       console.error(err);
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     }
   };
 
