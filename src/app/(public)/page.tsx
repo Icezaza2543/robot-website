@@ -138,20 +138,24 @@ export default function HomePage() {
                       <div className="mt-4 flex flex-col gap-2 text-xs font-semibold text-gray-500 mt-auto">
                         <div className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-gray-400" /> {event.date}</div>
                         
-                        {event.maxParticipants > 0 && (
-                          <div className="mt-2 w-full">
-                            <div className="flex justify-between text-[10px] text-gray-400 mb-1">
-                              <span>สมัครแล้ว {eventParticipants.length} คน</span>
+                        <div className="mt-2 w-full">
+                          <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+                            <span>สมัครแล้ว {eventParticipants.length} คน</span>
+                            {event.maxParticipants > 0 ? (
                               <span>รับ {event.maxParticipants} คน</span>
-                            </div>
+                            ) : (
+                              <span>ไม่จำกัดจำนวน</span>
+                            )}
+                          </div>
+                          {event.maxParticipants > 0 && (
                             <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
                               <div 
                                 className="h-full bg-orange-500 rounded-full transition-all duration-500"
                                 style={{ width: `${Math.min((eventParticipants.length / event.maxParticipants) * 100, 100)}%` }}
                               ></div>
                             </div>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                       <div className="mt-4 pt-4 border-t border-gray-100 w-full">
                         <div className="w-full py-2.5 bg-orange-50 text-orange-600 text-xs font-bold rounded-xl text-center group-hover:bg-orange-500 group-hover:text-white transition-colors">

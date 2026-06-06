@@ -82,20 +82,24 @@ export default function AllEventsPage() {
                     <div className="mt-4 flex flex-col gap-2 text-sm font-medium text-gray-500 mt-auto">
                       <div className="flex items-center gap-2"><Calendar className="w-4 h-4 text-gray-400" /> {event.date}</div>
                       
-                      {event.maxParticipants > 0 && (
-                        <div className="mt-3 w-full">
-                          <div className="flex justify-between text-[11px] text-gray-400 mb-1.5 font-bold">
-                            <span>สมัครแล้ว {eventParticipants.length} คน</span>
+                      <div className="mt-3 w-full">
+                        <div className="flex justify-between text-[11px] text-gray-400 mb-1.5 font-bold">
+                          <span>สมัครแล้ว {eventParticipants.length} คน</span>
+                          {event.maxParticipants > 0 ? (
                             <span>รับ {event.maxParticipants} คน</span>
-                          </div>
+                          ) : (
+                            <span>ไม่จำกัดจำนวน</span>
+                          )}
+                        </div>
+                        {event.maxParticipants > 0 && (
                           <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                             <div 
                               className="h-full bg-orange-500 rounded-full transition-all duration-500"
                               style={{ width: `${Math.min((eventParticipants.length / event.maxParticipants) * 100, 100)}%` }}
                             ></div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                     <div className="mt-5 pt-4 border-t border-gray-100 w-full">
                       <div className="w-full py-2.5 bg-orange-50 text-orange-600 text-sm font-bold rounded-xl text-center group-hover:bg-orange-500 group-hover:text-white transition-colors">
