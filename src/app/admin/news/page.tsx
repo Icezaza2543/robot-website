@@ -8,6 +8,7 @@ import { Settings, X, Plus, Inbox, Save, Search, Trash2, Edit2, UploadCloud, New
 import toast from "react-hot-toast";
 import ImageCropperModal from "@/components/ui/ImageCropperModal";
 import Pagination from "@/components/ui/Pagination";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface NewsItem {
   id: string;
@@ -45,6 +46,8 @@ export default function AdminNewsPage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [editingItem, setEditingItem] = useState<NewsItem | null>(null);
+  
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
 
   const [cropperFileSrc, setCropperFileSrc] = useState<string | null>(null);
   const [cropperCallback, setCropperCallback] = useState<((url: string) => void) | null>(null);
@@ -187,10 +190,14 @@ export default function AdminNewsPage() {
     }
   };
 
-  const handleDeleteItem = async (id: string, title: string) => {
-    if (!confirm(`ยืนยันการลบข่าว "${title}" ออกจากระบบ?`)) return;
+  const handleDeleteItem = (id: string, title: string) => {
+    setDeleteTarget({ id, title });
+  };
+
+  const executeDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      const res = await fetch(`/api/news?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/news?id=${deleteTarget.id}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("ลบข่าวสารสำเร็จ");
         await fetchItems();
@@ -199,6 +206,9 @@ export default function AdminNewsPage() {
       }
     } catch (err) {
       console.error(err);
+      toast.error("เกิดข้อผิดพลาดในการลบประกาศ");
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -464,6 +474,18 @@ export default function AdminNewsPage() {
           onCropComplete={handleCropComplete}
         />
       )}
+
+      {/* Custom Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={executeDelete}
+        title="ยืนยันการลบประกาศ/ข่าวสาร"
+        description={`คุณแน่ใจหรือไม่ที่จะลบประกาศ "${deleteTarget?.title}" ออกจากระบบ? การกระทำนี้ไม่สามารถย้อนกลับได้`}
+        confirmText="ลบข้อมูลถาวร"
+        cancelText="ยกเลิก"
+        isDestructive={true}
+      />
     </div>
   );
 }

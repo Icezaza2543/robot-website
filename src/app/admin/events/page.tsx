@@ -8,6 +8,7 @@ import { Settings, X, Plus, Save, Search, Trash2, Edit2, UploadCloud, Calendar, 
 import toast from "react-hot-toast";
 import ImageCropperModal from "@/components/ui/ImageCropperModal";
 import Pagination from "@/components/ui/Pagination";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface EventItem {
   id: string;
@@ -55,6 +56,8 @@ export default function AdminEventsPage() {
   const [editDate, setEditDate] = useState("");
   const [editStartTime, setEditStartTime] = useState("");
   const [editEndTime, setEditEndTime] = useState("");
+
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
 
   const thMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 
@@ -238,10 +241,14 @@ export default function AdminEventsPage() {
     }
   };
 
-  const handleDeleteItem = async (id: string, title: string) => {
-    if (!confirm(`ยืนยันการลบกิจกรรม "${title}" ออกจากระบบ?`)) return;
+  const handleDeleteItem = (id: string, title: string) => {
+    setDeleteTarget({ id, title });
+  };
+
+  const executeDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      const res = await fetch(`/api/admin/events?id=${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/events?id=${deleteTarget.id}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("ลบกิจกรรมสำเร็จ");
         await fetchItems();
@@ -251,6 +258,8 @@ export default function AdminEventsPage() {
     } catch (err) {
       console.error(err);
       toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -621,6 +630,18 @@ export default function AdminEventsPage() {
           onCropComplete={handleCropComplete}
         />
       )}
+
+      {/* Custom Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteTarget !== null}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={executeDelete}
+        title="ยืนยันการลบกิจกรรม"
+        description={`คุณแน่ใจหรือไม่ที่จะลบกิจกรรม "${deleteTarget?.title}" ออกจากระบบ? การกระทำนี้ไม่สามารถย้อนกลับได้`}
+        confirmText="ลบข้อมูลถาวร"
+        cancelText="ยกเลิก"
+        isDestructive={true}
+      />
     </div>
   );
 }
