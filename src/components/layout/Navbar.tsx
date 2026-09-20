@@ -4,7 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import NavbarAuth from "./NavbarAuth";
 
@@ -19,6 +19,7 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileToggleRef = useRef<HTMLButtonElement>(null);
   const { data: session } = useSession();
 
   const dynamicNavLinks = [...navLinks];
@@ -27,7 +28,19 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200/60 bg-white/90 backdrop-blur-md shadow-sm">
+    <header
+      className="sticky top-0 z-50 border-b border-gray-200/60 bg-white/90 backdrop-blur-md shadow-sm"
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && mobileOpen) {
+          event.preventDefault();
+          setMobileOpen(false);
+          mobileToggleRef.current?.focus();
+        }
+      }}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setMobileOpen(false);
+      }}
+    >
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 md:px-8">
 
         {/* Logo + Club Name */}
@@ -84,6 +97,10 @@ export default function Navbar() {
           {/* Hamburger (mobile only) */}
           <button
             id="navbar-hamburger"
+            ref={mobileToggleRef}
+            type="button"
+            aria-expanded={mobileOpen}
+            aria-controls="navbar-mobile-menu"
             onClick={() => setMobileOpen((prev) => !prev)}
             className="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg border border-gray-200 bg-white shadow-sm hover:border-orange-300 transition-all duration-200 gap-1.5 cursor-pointer"
             aria-label="เปิด/ปิดเมนู"
@@ -108,10 +125,10 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Menu */}
+      {mobileOpen && (
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          mobileOpen ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
-        }`}
+        id="navbar-mobile-menu"
+        className="md:hidden max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain"
       >
         <nav className="flex flex-col gap-1 px-4 pb-4 pt-2 border-t border-gray-100">
           {dynamicNavLinks.map(({ href, label }) => {
@@ -134,6 +151,7 @@ export default function Navbar() {
           })}
         </nav>
       </div>
+      )}
     </header>
   );
 }

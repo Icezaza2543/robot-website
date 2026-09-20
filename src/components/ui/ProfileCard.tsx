@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 import { Fingerprint } from "lucide-react";
 import QRCode from "react-qr-code";
 
@@ -39,6 +39,7 @@ function formatDate(dateStr?: string) {
 
 export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const backId = useId();
   const config = rankConfig[user.rank] || rankConfig.Member;
 
   const nameParts = user.name.split(" ");
@@ -54,13 +55,14 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
   })();
 
   return (
+    <div className="flex flex-col items-center gap-3">
     <div
       className={`w-[300px] h-[480px] perspective-[1000px] select-none ${className}`}
       style={{ perspective: "1000px", WebkitPerspective: "1000px" }}
-      onDoubleClick={() => setIsFlipped(!isFlipped)}
+      onDoubleClick={() => setIsFlipped((flipped) => !flipped)}
     >
       <div
-        className="w-full h-full relative transition-transform duration-700 cursor-pointer"
+        className="w-full h-full relative transition-transform duration-700 motion-reduce:transition-none cursor-pointer"
         style={{
           transformStyle: "preserve-3d",
           WebkitTransformStyle: "preserve-3d",
@@ -71,6 +73,7 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
         {/* ================= FRONT SIDE ================= */}
         <div
           ref={frontRef}
+          aria-hidden={isFlipped}
           className="absolute inset-0 bg-white rounded-3xl shadow-xl flex flex-col overflow-hidden border-2 border-gray-100"
           style={{
             backfaceVisibility: "hidden",
@@ -182,6 +185,8 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
 
         {/* ================= BACK SIDE ================= */}
         <div
+          id={backId}
+          aria-hidden={!isFlipped}
           className="absolute inset-0 bg-gray-50 rounded-3xl shadow-xl flex flex-col items-center border-2 border-gray-200 overflow-hidden"
           style={{
             backfaceVisibility: "hidden",
@@ -243,6 +248,17 @@ export function ProfileCard({ user, className = "", frontRef }: ProfileCardProps
         </div>
 
       </div>
+    </div>
+    {/* Outside frontRef so the exported card artwork and dimensions stay unchanged. */}
+    <button
+      type="button"
+      aria-expanded={isFlipped}
+      aria-controls={backId}
+      onClick={() => setIsFlipped((flipped) => !flipped)}
+      className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-900 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
+    >
+      {isFlipped ? "กลับด้านหน้าบัตร" : "ดู QR Code"}
+    </button>
     </div>
   );
 }
