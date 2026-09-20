@@ -3,6 +3,7 @@ name: Isolated frontend UX verification
 on:
   push:
     branches: [verify/frontend-critical-ux]
+    paths: ['.frontend-verification/RUN']
 
 permissions:
   contents: read
@@ -13,6 +14,8 @@ jobs:
     timeout-minutes: 15
     env:
       NEXT_TELEMETRY_DISABLED: '1'
+      NEXTAUTH_URL: http://127.0.0.1:3000
+      NEXTAUTH_SECRET: frontend-verification-fixture-only
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,31 +23,68 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Archive exact source snapshot
-        run: git archive --format=tar.gz -o frontend-source.tar.gz HEAD
+      - name: Decode and apply exact tested patch
+        run: |
+          base64 --decode .frontend-verification/frontend.patch.gz.b64 | gzip -d > /tmp/frontend.patch
+          echo 'b6d20cab73637359ee141d4af5ebd9ca0f99738d7014a1116568eb8347087428  /tmp/frontend.patch' | sha256sum --check
+          git apply --check /tmp/frontend.patch
+          git apply /tmp/frontend.patch
+          git diff --check
+          git diff --stat
       - name: Install locked dependencies
         run: npm ci
-      - name: Capture local verification dependencies
-        run: tar -czf frontend-test-dependencies.tar.gz node_modules/react node_modules/react-dom node_modules/scheduler node_modules/typescript node_modules/tailwindcss node_modules/@tailwindcss node_modules/@types/react node_modules/@types/react-dom
-      - name: Baseline type check
-        id: types
-        continue-on-error: true
+      - name: Install isolated browser test runner
+        run: |
+          npm install --no-save --package-lock=false @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Type check
         run: npx tsc --noEmit
-      - name: Baseline production build
-        id: build
-        continue-on-error: true
+      - name: Production build
         run: npm run build
-      - name: Upload verification files
+      - name: Chromium full-app regression tests
+        run: npx playwright test --config=.frontend-verification/playwright.config.ts
+      - name: Archive source checksums
+        if: always()
+        run: |
+          git diff --name-only -z | xargs -0 sha256sum > frontend-source-checksums.txt
+          git diff > frontend-verified.patch
+      - name: Upload evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-verification-environment
+          name: frontend-critical-ux-results
           path: |
-            frontend-source.tar.gz
-            frontend-test-dependencies.tar.gz
-          retention-days: 3
-      - name: Record baseline results
-        if: always()
+            test-results/
+            playwright-report/
+            frontend-source-checksums.txt
+            frontend-verified.patch
+          retention-days: 7
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: verification
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ecbd80d9dbc263beef0d3c859595970fc5f31856
+          path: publish
+      - name: Publish only the six verified frontend files on a new branch
+        working-directory: publish
         run: |
-          echo 'Type check: ${{ steps.types.outcome }}' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Production build: ${{ steps.build.outcome }}' >> "$GITHUB_STEP_SUMMARY"
+          base64 --decode ../verification/.frontend-verification/frontend.patch.gz.b64 | gzip -d > /tmp/frontend.patch
+          echo 'b6d20cab73637359ee141d4af5ebd9ca0f99738d7014a1116568eb8347087428  /tmp/frontend.patch' | sha256sum --check
+          git apply --check /tmp/frontend.patch
+          git apply /tmp/frontend.patch
+          git diff --check
+          git add -- 'src/app/(public)/page.tsx' 'src/app/events/[id]/page.tsx' 'src/components/layout/Navbar.tsx' 'src/components/layout/NavbarAuth.tsx' 'src/components/ui/ProfileCard.tsx' 'src/components/ui/ProfileCardModal.tsx'
+          test "$(git diff --cached --name-only | wc -l)" -eq 6
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(frontend): restore accessible navigation and reliable content states'
+          git push origin HEAD:refs/heads/fix/frontend-critical-ux
+          echo "Frontend commit: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
