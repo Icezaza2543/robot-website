@@ -9,7 +9,6 @@ import toast from "react-hot-toast";
 import ImageCropperModal from "@/components/ui/ImageCropperModal";
 import Pagination from "@/components/ui/Pagination";
 import ConfirmModal from "@/components/ui/ConfirmModal";
-import * as XLSX from "xlsx";
 
 interface EquipmentItem {
   id: string;
