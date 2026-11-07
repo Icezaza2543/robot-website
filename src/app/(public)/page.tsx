@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Newspaper, Lightbulb, Inbox, Camera, PenLine, Calendar, Zap, ExternalLink } from "lucide-react";
+import { Newspaper, Lightbulb, Inbox, PenLine, Calendar, Zap, ExternalLink, Loader2 } from "lucide-react";
 import SponsorMarquee from "@/components/ui/SponsorMarquee";
 
 interface NewsItem {
@@ -17,34 +17,84 @@ interface NewsItem {
   igLink: string;
 }
 
+function isNewsItem(value: unknown): value is NewsItem {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Record<string, unknown>;
+  return ["id", "title", "date", "summary", "content", "category", "author", "imageUrl", "igLink"]
+    .every((key) => typeof item[key] === "string");
+}
+
 export default function HomePage() {
   const [selectedPost, setSelectedPost] = useState<NewsItem | null>(null);
   const [blogPosts, setBlogPosts] = useState<NewsItem[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [participants, setParticipants] = useState<any[]>([]);
-  const [isLoadingNews, setIsLoadingNews] = useState(true);
+  const [newsState, setNewsState] = useState<"loading" | "success" | "error">("loading");
+  const [eventsState, setEventsState] = useState<"loading" | "success" | "error">("loading");
+  const [newsAttempt, setNewsAttempt] = useState(0);
+  const [eventsAttempt, setEventsAttempt] = useState(0);
+  const articleDialogRef = useRef<HTMLDialogElement>(null);
+  const articleTriggerRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/news").then(res => res.json()),
-      fetch("/api/events").then(res => res.json())
-    ])
-      .then(([newsData, eventsData]) => {
-        if (Array.isArray(newsData)) setBlogPosts(newsData);
-        if (eventsData?.events) {
-          setEvents(eventsData.events);
-          setParticipants(eventsData.participants || []);
-        } else if (Array.isArray(eventsData)) {
-          // Fallback if old format
-          setEvents(eventsData);
-        }
-        setIsLoadingNews(false);
-      })
-      .catch(err => {
-        console.error("Failed to fetch data", err);
-        setIsLoadingNews(false);
-      });
-  }, []);
+    const controller = new AbortController();
+    const load = async () => {
+      setNewsState("loading");
+      try {
+        const response = await fetch("/api/news", { signal: controller.signal });
+        if (!response.ok) throw new Error(`News request failed: ${response.status}`);
+        const data = await response.json();
+        if (!Array.isArray(data) || !data.every(isNewsItem)) throw new Error("Invalid news response");
+        if (controller.signal.aborted) return;
+        setBlogPosts(data);
+        setNewsState("success");
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error("Failed to load news", error);
+        setNewsState("error");
+      }
+    };
+    void load();
+    return () => controller.abort();
+  }, [newsAttempt]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const load = async () => {
+      setEventsState("loading");
+      try {
+        const response = await fetch("/api/events", { signal: controller.signal });
+        if (!response.ok) throw new Error(`Events request failed: ${response.status}`);
+        const data = await response.json();
+        // Preserve both existing API formats.
+        const eventList = Array.isArray(data) ? data : data?.events;
+        if (!Array.isArray(eventList)) throw new Error("Invalid events response");
+        if (controller.signal.aborted) return;
+        setEvents(eventList);
+        setParticipants(Array.isArray(data?.participants) ? data.participants : []);
+        setEventsState("success");
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error("Failed to load events", error);
+        setEventsState("error");
+      }
+    };
+    void load();
+    return () => controller.abort();
+  }, [eventsAttempt]);
+
+  useEffect(() => {
+    const dialog = articleDialogRef.current;
+    if (!selectedPost || !dialog) return;
+    const previousOverflow = document.body.style.overflow;
+    dialog.showModal();
+    document.body.style.overflow = "hidden";
+    return () => {
+      dialog.close();
+      document.body.style.overflow = previousOverflow;
+      articleTriggerRef.current?.focus({ preventScroll: true });
+    };
+  }, [selectedPost]);
 
   return (
     <div className="flex flex-col gap-24 pb-24 relative">
@@ -104,7 +154,18 @@ export default function HomePage() {
             </Link>
           </div>
 
-          {events.length === 0 ? (
+          {eventsState === "loading" ? (
+            <div role="status" className="flex items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white py-16 text-gray-600">
+              <Loader2 aria-hidden="true" className="h-5 w-5 motion-safe:animate-spin" /> กำลังโหลดกิจกรรม...
+            </div>
+          ) : eventsState === "error" ? (
+            <div role="alert" className="rounded-2xl border border-gray-200 bg-white py-16 text-center">
+              <p className="text-gray-700">โหลดกิจกรรมไม่สำเร็จ กรุณาลองอีกครั้ง</p>
+              <button type="button" onClick={() => setEventsAttempt((attempt) => attempt + 1)} className="mt-4 rounded-lg bg-gray-900 px-5 py-3 font-bold text-white hover:bg-orange-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
+                ลองโหลดกิจกรรมใหม่
+              </button>
+            </div>
+          ) : events.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-gray-200 bg-white py-16 text-center flex flex-col items-center">
               <Calendar className="w-12 h-12 text-gray-300 mb-4" />
               <h3 className="text-lg font-bold text-gray-700">ขณะนี้ยังไม่มีโครงการ/กิจกรรมที่เปิดรับสมัคร</h3>
@@ -185,12 +246,23 @@ export default function HomePage() {
               </p>
             </div>
             <span className="text-xs text-gray-400 font-bold self-start sm:self-center bg-gray-100 px-3 py-1 rounded-full">
-              อัปเดตล่าสุด: {blogPosts.length > 0 ? blogPosts[0].date : "ไม่มีบทความใหม่"}
+              อัปเดตล่าสุด: {newsState === "loading" ? "กำลังโหลด..." : newsState === "error" ? "โหลดข้อมูลไม่สำเร็จ" : blogPosts.length > 0 ? blogPosts[0].date : "ไม่มีบทความใหม่"}
             </span>
           </div>
 
           {/* Render Active News Grid dynamically imported from src/constants/news.ts */}
-          {blogPosts.length === 0 ? (
+          {newsState === "loading" ? (
+            <div role="status" className="flex items-center justify-center gap-3 rounded border border-gray-200 bg-white py-20 text-gray-600">
+              <Loader2 aria-hidden="true" className="h-5 w-5 motion-safe:animate-spin" /> กำลังโหลดข่าวสาร...
+            </div>
+          ) : newsState === "error" ? (
+            <div role="alert" className="rounded border border-gray-200 bg-white py-20 text-center">
+              <p className="text-gray-700">โหลดข่าวสารไม่สำเร็จ กรุณาลองอีกครั้ง</p>
+              <button type="button" onClick={() => setNewsAttempt((attempt) => attempt + 1)} className="mt-4 rounded-lg bg-gray-900 px-5 py-3 font-bold text-white hover:bg-orange-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
+                ลองโหลดข่าวสารใหม่
+              </button>
+            </div>
+          ) : blogPosts.length === 0 ? (
             <div className="rounded border border-dashed border-gray-200 bg-white py-20 text-center flex flex-col items-center">
               <Inbox className="w-12 h-12 text-gray-300 mb-4" />
               <h3 className="text-lg font-bold text-gray-700">ขณะนี้ยังไม่มีบทความหรือข่าวสารประชาสัมพันธ์</h3>
@@ -203,8 +275,7 @@ export default function HomePage() {
               {blogPosts.map((post) => (
                 <div
                   key={post.id}
-                  onClick={() => setSelectedPost(post)}
-                  className="flex flex-col justify-between rounded border border-gray-200 bg-white hover:border-gray-300 transition-colors cursor-pointer overflow-hidden"
+                  className="relative flex flex-col justify-between rounded border border-gray-200 bg-white hover:border-gray-300 transition-colors cursor-pointer overflow-hidden"
                 >
                   {/* Post Banner Image */}
                   <div className="relative h-48 w-full overflow-hidden bg-gray-50 border-b border-gray-100">
@@ -232,7 +303,18 @@ export default function HomePage() {
                   <div className="p-6 flex-1 flex flex-col justify-between">
                     <div>
                       <h3 className="text-lg font-black text-gray-800 leading-snug group-hover:text-orange-500 transition-colors duration-200">
-                        {post.title}
+                        <button
+                          type="button"
+                          aria-label={`อ่านบทความ: ${post.title}`}
+                          aria-haspopup="dialog"
+                          onClick={(event) => {
+                            articleTriggerRef.current = event.currentTarget;
+                            setSelectedPost(post);
+                          }}
+                          className="text-left cursor-pointer after:absolute after:inset-0 after:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
+                        >
+                          {post.title}
+                        </button>
                       </h3>
 
                       <p className="text-xs text-gray-500 mt-3 leading-relaxed line-clamp-3 font-semibold">
@@ -257,11 +339,35 @@ export default function HomePage() {
 
       {/* 4. Article Reader Modal Popup */}
       {selectedPost && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 sm:p-6 animate-in fade-in duration-200">
-          <div className="w-full max-w-3xl max-h-[90vh] rounded-lg border border-gray-200 bg-white shadow-xl flex flex-col overflow-hidden relative transition-all duration-200 animate-in zoom-in-95">
+        <dialog
+          ref={articleDialogRef}
+          aria-labelledby="article-reader-title"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") { event.stopPropagation(); return; }
+            if (event.key !== "Tab") return;
+            const controls = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(
+              "button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), iframe, [tabindex]:not([tabindex='-1'])"
+            )).filter((element) => element.getClientRects().length > 0 && !element.closest('[hidden], [inert], [aria-hidden="true"]'));
+            const first = controls[0];
+            const last = controls[controls.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last?.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first?.focus();
+            }
+          }}
+          onCancel={(event) => { event.preventDefault(); setSelectedPost(null); }}
+          className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none border-0 bg-transparent p-4 text-inherit sm:p-6 backdrop:bg-slate-900/50 open:flex open:items-center open:justify-center"
+        >
+          <div className="w-full max-w-3xl max-h-[90dvh] rounded-lg border border-gray-200 bg-white shadow-xl flex flex-col overflow-hidden relative transition-all duration-200 animate-in zoom-in-95">
             
             {/* Close Button */}
             <button
+              type="button"
+              autoFocus
+              aria-label="ปิดหน้าต่างอ่านบทความ"
               onClick={() => setSelectedPost(null)}
               className="absolute top-5 right-5 z-20 flex h-8 w-8 items-center justify-center rounded bg-white/90 border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer text-xl font-bold"
               title="ปิดหน้าต่างอ่านบทความ"
@@ -320,7 +426,7 @@ export default function HomePage() {
 
                 {/* Article Content Layout */}
                 <div className="space-y-5">
-                  <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug tracking-tight">
+                  <h3 id="article-reader-title" className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug tracking-tight">
                     {selectedPost.title}
                   </h3>
 
@@ -370,7 +476,8 @@ export default function HomePage() {
                       <a href={selectedPost.igLink} target="_blank" rel="noreferrer" className="flex items-center gap-2 mb-4 text-xs font-bold text-orange-500 hover:text-orange-600">
                         <ExternalLink className="w-4 h-4" /> ดูโพสต์บน Instagram ต้นฉบับ
                       </a>
-                      <iframe 
+                      <iframe
+                        title={`โพสต์ Instagram: ${selectedPost.title}`}
                         src={(() => {
                           try {
                             const url = new URL(selectedPost.igLink);
@@ -405,7 +512,7 @@ export default function HomePage() {
               </button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
     </div>
   );
