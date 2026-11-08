@@ -188,13 +188,13 @@ export default function NavbarAuth() {
           <button
             ref={accountButtonRef}
             type="button"
-            aria-label={`เมนูบัญชีของ ${displayName || "สมาชิก"}`}
             aria-expanded={isOpen}
             aria-controls="navbar-account-menu"
             onClick={() => setIsOpen((open) => !open)}
             className="flex items-center gap-2.5 rounded-xl border border-gray-200/80 bg-white p-1.5 pr-4 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 cursor-pointer active:scale-98"
           >
-            <div className="relative h-8 w-8 overflow-hidden rounded-lg bg-orange-100 border border-orange-200">
+            <span className="sr-only">เมนูบัญชีของ</span>
+            <div aria-hidden="true" className="relative h-8 w-8 overflow-hidden rounded-lg bg-orange-100 border border-orange-200">
               {displayImage ? (
                 <Image
                   src={displayImage}
@@ -210,7 +210,7 @@ export default function NavbarAuth() {
                 </div>
               )}
             </div>
-            <div className="hidden flex-col items-start text-left sm:flex">
+            <div className="sr-only flex-col items-start text-left sm:not-sr-only sm:flex">
               <span className="text-sm font-bold text-gray-800 line-clamp-1 max-w-[120px]">
                 {displayName || "สมาชิก"}
               </span>
