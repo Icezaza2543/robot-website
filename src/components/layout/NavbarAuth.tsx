@@ -18,6 +18,8 @@ export default function NavbarAuth() {
   const [userProfile, setUserProfile] = useState<{ name: string; image: string } | null>(null);
   const { cartItems, cartCount, removeFromCart } = useCart();
   const cartRef = useRef<HTMLDivElement>(null);
+  const accountRef = useRef<HTMLDivElement>(null);
+  const accountButtonRef = useRef<HTMLButtonElement>(null);
 
   // Fetch real profile on mount to get custom avatar
   useEffect(() => {
@@ -44,6 +46,18 @@ export default function NavbarAuth() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Account disclosure only: the cart's state and handlers remain unchanged.
+  useEffect(() => {
+    if (!isOpen) return;
+    const handlePointerDown = (event: PointerEvent) => {
+      if (accountRef.current && !accountRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [isOpen]);
 
   if (status === "loading") {
     return (
@@ -156,10 +170,28 @@ export default function NavbarAuth() {
         </div>
 
         {/* User Trigger */}
-        <div className="relative">
+        <div
+          ref={accountRef}
+          className="relative"
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Escape" && isOpen) {
+              event.preventDefault();
+              event.stopPropagation();
+              setIsOpen(false);
+              accountButtonRef.current?.focus();
+            }
+          }}
+        >
           <button
-            onClick={() => setIsOpen(!isOpen)}
-            onBlur={() => setTimeout(() => setIsOpen(false), 200)}
+            ref={accountButtonRef}
+            type="button"
+            aria-label={`เมนูบัญชีของ ${displayName || "สมาชิก"}`}
+            aria-expanded={isOpen}
+            aria-controls="navbar-account-menu"
+            onClick={() => setIsOpen((open) => !open)}
             className="flex items-center gap-2.5 rounded-xl border border-gray-200/80 bg-white p-1.5 pr-4 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-300 cursor-pointer active:scale-98"
           >
             <div className="relative h-8 w-8 overflow-hidden rounded-lg bg-orange-100 border border-orange-200">
@@ -201,7 +233,7 @@ export default function NavbarAuth() {
 
           {/* Premium Dropdown Menu */}
           {isOpen && (
-            <div className="absolute right-0 mt-2.5 w-64 origin-top-right rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+            <div id="navbar-account-menu" className="absolute right-0 mt-2.5 w-64 max-w-[calc(100vw-2rem)] max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain origin-top-right rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
               {/* Header Info */}
               <div className="px-3.5 py-3 border-b border-gray-50 flex flex-col">
                 <span className="text-sm font-bold text-gray-800 truncate">
@@ -241,6 +273,7 @@ export default function NavbarAuth() {
                 {hasAdminAccess && (
                   <Link
                     href="/admin"
+                    onClick={() => setIsOpen(false)}
                     className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold text-orange-600 hover:bg-orange-50 transition-colors"
                   >
                     <Settings className="w-4 h-4" />
@@ -250,6 +283,7 @@ export default function NavbarAuth() {
 
                 <Link
                   href="/dashboard"
+                    onClick={() => setIsOpen(false)}
                   className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -260,6 +294,7 @@ export default function NavbarAuth() {
 
                 <Link
                   href="/equipment"
+                    onClick={() => setIsOpen(false)}
                   className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
                 >
                   <MonitorUp className="w-4 h-4" />
@@ -268,6 +303,7 @@ export default function NavbarAuth() {
 
                 <Link
                   href="/borrow/history"
+                    onClick={() => setIsOpen(false)}
                   className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
                 >
                   <History className="w-4 h-4" />
@@ -292,7 +328,8 @@ export default function NavbarAuth() {
 
       <ProfileCardModal 
         isOpen={isCardModalOpen} 
-        onClose={() => setIsCardModalOpen(false)} 
+        onClose={() => setIsCardModalOpen(false)}
+        returnFocusRef={accountButtonRef}
         user={{
           name: name || "",
           email: email || "",

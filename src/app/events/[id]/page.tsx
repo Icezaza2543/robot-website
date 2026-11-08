@@ -33,27 +33,40 @@ export default function EventDetailsPage() {
   const [participants, setParticipants] = useState<EventParticipant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
+    if (!id) return;
+    const controller = new AbortController();
     const fetchEvent = async () => {
+      setIsLoading(true);
+      setLoadError(false);
+      setEvent(null);
+      setParticipants([]);
       try {
-        const res = await fetch(`/api/events/${id}`);
-        if (res.ok) {
-          const data = await res.json();
-          setEvent(data.event);
-          setParticipants(data.participants || []);
-        } else {
-          setEvent(null);
+        const res = await fetch(`/api/events/${id}`, { signal: controller.signal });
+        if (res.status === 404) return;
+        if (!res.ok) throw new Error(`Event request failed: ${res.status}`);
+        const data = await res.json();
+        if (!data?.event || typeof data.event.id !== "string" || typeof data.event.title !== "string") {
+          throw new Error("Invalid event response");
         }
+        if (controller.signal.aborted) return;
+        setEvent(data.event);
+        setParticipants(Array.isArray(data.participants) ? data.participants : []);
       } catch (err) {
+        if (controller.signal.aborted) return;
         console.error(err);
+        setLoadError(true);
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     };
 
-    if (id) fetchEvent();
-  }, [id]);
+    void fetchEvent();
+    return () => controller.abort();
+  }, [id, loadAttempt]);
 
   const handleJoin = async () => {
     if (status === "unauthenticated") {
@@ -92,8 +105,21 @@ export default function EventDetailsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+      <div role="status" className="flex min-h-screen items-center justify-center gap-3 bg-gray-50">
+        <div aria-hidden="true" className="motion-safe:animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+        <span>กำลังโหลดกิจกรรม...</span>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div role="alert" className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 text-center">
+        <h1 className="text-2xl font-black text-gray-900">โหลดกิจกรรมไม่สำเร็จ</h1>
+        <p className="mt-2 text-gray-600">ไม่สามารถเชื่อมต่อข้อมูลกิจกรรมได้ กรุณาลองอีกครั้ง</p>
+        <button type="button" onClick={() => setLoadAttempt((attempt) => attempt + 1)} className="mt-6 rounded-2xl bg-gray-900 px-6 py-3 font-bold text-white hover:bg-orange-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500">
+          ลองโหลดกิจกรรมใหม่
+        </button>
       </div>
     );
   }
