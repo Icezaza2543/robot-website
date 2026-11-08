@@ -55,8 +55,20 @@ export default function NavbarAuth() {
         setIsOpen(false);
       }
     };
+    // Listen on the document because Safari does not focus the button on click. Capture
+    // and preventDefault make this menu close first when the mobile menu is also open.
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setIsOpen(false);
+      accountButtonRef.current?.focus();
+    };
     document.addEventListener("pointerdown", handlePointerDown);
-    return () => document.removeEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown, true);
+    };
   }, [isOpen]);
 
   if (status === "loading") {
@@ -174,15 +186,9 @@ export default function NavbarAuth() {
           ref={accountRef}
           className="relative"
           onBlur={(event) => {
-            if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false);
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Escape" && isOpen) {
-              event.preventDefault();
-              event.stopPropagation();
-              setIsOpen(false);
-              accountButtonRef.current?.focus();
-            }
+            // relatedTarget is null when Safari clicks a link; closing then would lose the click.
+            const next = event.relatedTarget;
+            if (next && !event.currentTarget.contains(next)) setIsOpen(false);
           }}
         >
           <button

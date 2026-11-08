@@ -4,7 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import NavbarAuth from "./NavbarAuth";
 
@@ -19,8 +19,31 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const mobileToggleRef = useRef<HTMLButtonElement>(null);
   const { data: session } = useSession();
+
+  // Listen on the document: Safari does not focus buttons or links on click, so
+  // focus may never enter the header and its own key handlers would not run.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      if (event.target instanceof Element && event.target.closest("dialog")) return;
+      event.preventDefault();
+      setMobileOpen(false);
+      mobileToggleRef.current?.focus();
+    };
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!headerRef.current?.contains(event.target as Node)) setMobileOpen(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [mobileOpen]);
 
   const dynamicNavLinks = [...navLinks];
   if (session?.user) {
@@ -29,16 +52,12 @@ export default function Navbar() {
 
   return (
     <header
+      ref={headerRef}
       className="sticky top-0 z-50 border-b border-gray-200/60 bg-white/90 backdrop-blur-md shadow-sm"
-      onKeyDown={(event) => {
-        if (event.key === "Escape" && mobileOpen) {
-          event.preventDefault();
-          setMobileOpen(false);
-          mobileToggleRef.current?.focus();
-        }
-      }}
       onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setMobileOpen(false);
+        // relatedTarget is null when Safari clicks a link; closing then would lose the click.
+        const next = event.relatedTarget;
+        if (next && !event.currentTarget.contains(next)) setMobileOpen(false);
       }}
     >
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 md:px-8">
